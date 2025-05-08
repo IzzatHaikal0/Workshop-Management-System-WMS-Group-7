@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:workshop_management_system/Screens/ManageForemanSchedule/ListSchedulePage.dart';
 
+
 void main() {
   runApp(const MyApp());
 }
@@ -14,7 +15,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Workshop Management Sytstem App',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Workshop Management System App Home Page'),

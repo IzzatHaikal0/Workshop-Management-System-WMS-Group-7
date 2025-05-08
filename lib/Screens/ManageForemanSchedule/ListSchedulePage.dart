@@ -1,5 +1,6 @@
 // ListSchedulePage.dart
 import 'package:flutter/material.dart';
+import 'package:workshop_management_system/Screens/ManageForemanSchedule/AddSchedulePage.dart';
 
 class SchedulePage extends StatelessWidget {
   const SchedulePage({super.key});
@@ -11,109 +12,205 @@ class SchedulePage extends StatelessWidget {
       body: Container(
         color: Colors.white,
         padding: EdgeInsets.all(10),
-        child: ListView(children: [
-
-          //CURRENT SCHEDULE TITLE
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Current Schedule',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-
-                //ADD SCHEDULE BUTTON (DIRECT TO ADD SCHEDULE PAGE)
-               OutlinedButton(
-                  onPressed: () {
-                    print('Add button tapped');
-                  },
-                  style: OutlinedButton.styleFrom(
-                    padding: EdgeInsets.all(10),
-                    side: BorderSide(color: Color.fromARGB(255, 0, 163, 212), width: 2),
-                    foregroundColor: Color.fromARGB(255, 95, 77, 172),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        child: ListView(
+          children: [
+            //CURRENT SCHEDULE TITLE
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Current Schedule',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                  child: Text(
-                    'Add',
-                    style: TextStyle(fontSize: 16),
+
+                  //ADD SCHEDULE BUTTON (DIRECT TO ADD SCHEDULE PAGE)
+                  FilledButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => AddSchedulePage()),
+                      );
+                      debugPrint('Add button tapped');
+                    },
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.all(5),
+                      foregroundColor: Color.fromARGB(255, 255, 255, 255),
+                    ),
+                    child: Text(
+                      'Add',
+                      style: TextStyle(fontSize: 16),
+                    ),
                   ),
+                ],
+              ),
+            ),
+
+            //START OF SCHEDULE LIST
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ListTile(
+                      title: Text('Schedule 1'),
+                      subtitle: Text('Date Schedule'),
+                      trailing: Icon(Icons.arrow_forward),
+                      leading: Icon(Icons.calendar_today),
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      onTap: () {
+                        debugPrint('Schedule tapped');
+                      },
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            debugPrint('Edit tapped');
+                          },
+                          label: Text('Edit',
+                              style: TextStyle(color: Colors.blue)),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            debugPrint('Delete tapped');
+                          },
+                          label: Text('Delete',
+                              style: TextStyle(color: Colors.red)),
+                        ),
+                      ],
+                    )
+                  ],
                 ),
+              ),
+            ),
 
-              ],
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ListTile(
+                      title: Text('Schedule 1'),
+                      subtitle: Text('Date Schedule'),
+                      trailing: Icon(Icons.arrow_forward),
+                      leading: Icon(Icons.calendar_today),
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      onTap: () {
+                        debugPrint('Schedule tapped');
+                      },
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            debugPrint('Edit tapped');
+                          },
+                          label: Text('Edit',
+                              style: TextStyle(color: Colors.blue)),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            debugPrint('Delete tapped');
+                          },
+                          label: Text('Delete',
+                              style: TextStyle(color: Colors.red)),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
             ),
-          ),
-
-
-          //START OF SCHEDULE LIST 
-          Card(
-            child: ListTile(
-              title: Text('Schedule 1'),
-              subtitle: Text ('Date Schedule'),
-              trailing: Icon(Icons.arrow_forward),
-              leading: Icon(Icons.calendar_today),
-              contentPadding: EdgeInsets.all(10),
-              dense: true,
-              onTap: () {print('schedule  tapped');},
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ListTile(
+                      title: Text('Schedule 1'),
+                      subtitle: Text('Date Schedule'),
+                      trailing: Icon(Icons.arrow_forward),
+                      leading: Icon(Icons.calendar_today),
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      onTap: () {
+                        debugPrint('Schedule tapped');
+                      },
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            debugPrint('Edit tapped');
+                          },
+                          label: Text('Edit',
+                              style: TextStyle(color: Colors.blue)),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            debugPrint('Delete tapped');
+                          },
+                          label: Text('Delete',
+                              style: TextStyle(color: Colors.red)),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
             ),
-          ),
-          Card(
-            child: ListTile(
-              title: Text('Schedule 2'),
-              subtitle: Text ('Date Schedule 2'),
-              trailing: Icon(Icons.arrow_forward),
-              leading: Icon(Icons.calendar_today),
-              contentPadding: EdgeInsets.all(10),
-              dense: true,
-              onTap: () {print('schedule  tapped');},
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ListTile(
+                      title: Text('Schedule 1'),
+                      subtitle: Text('Date Schedule'),
+                      trailing: Icon(Icons.arrow_forward),
+                      leading: Icon(Icons.calendar_today),
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      onTap: () {
+                        debugPrint('Schedule tapped');
+                      },
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            debugPrint('Edit tapped');
+                          },
+                          label: Text('Edit',
+                              style: TextStyle(color: Colors.blue)),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            debugPrint('Delete tapped');
+                          },
+                          label: Text('Delete',
+                              style: TextStyle(color: Colors.red)),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
             ),
-          ),
-          Card(
-            child: ListTile(
-              title: Text('Schedule 2'),
-              subtitle: Text ('Date Schedule 2'),
-              trailing: Icon(Icons.arrow_forward),
-              leading: Icon(Icons.calendar_today),
-              contentPadding: EdgeInsets.all(10),
-              dense: true,
-              onTap: () {print('schedule  tapped');},
-            ),
-          ),
-          Card(
-            child: ListTile(
-              title: Text('Schedule 2'),
-              subtitle: Text ('Date Schedule 2'),
-              trailing: Icon(Icons.arrow_forward),
-              leading: Icon(Icons.calendar_today),
-              contentPadding: EdgeInsets.all(10),
-              dense: true,
-              onTap: () {print('schedule  tapped');},
-            ),
-          ),
-          Card(
-            child: ListTile(
-              title: Text('Schedule 2'),
-              subtitle: Text ('Date Schedule 2'),
-              trailing: Icon(Icons.arrow_forward),
-              leading: Icon(Icons.calendar_today),
-              contentPadding: EdgeInsets.all(10),
-              dense: true,
-              onTap: () {print('schedule  tapped');},
-            ),
-          ),
-          Card(
-            child: ListTile(
-              title: Text('Schedule 2'),
-              subtitle: Text ('Date Schedule 2'),
-              trailing: Icon(Icons.arrow_forward),
-              leading: Icon(Icons.calendar_today),
-              contentPadding: EdgeInsets.all(10),
-              dense: true,
-              onTap: () {print('schedule  tapped');},
-            ),
-          ),
-        ], 
+          ],
         ),
       ),
     );
