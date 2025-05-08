@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:workshop_management_system/Screens/ManageForemanSchedule/ListSchedulePage.dart';
 
-
 void main() {
   runApp(const MyApp());
 }
@@ -15,7 +14,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Workshop Management Sytstem App',
       theme: ThemeData(
-
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
@@ -43,25 +41,23 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
- 
-  int _selectedIndex = 0; 
+  int _selectedIndex = 0;
 
   //navigation pages
   final List<Widget> _pages = [
     const Center(child: Text('Home Page')), // Home page
-    const SchedulePage(),  // Navigate to SchedulePage
+    const SchedulePage(), // Navigate to SchedulePage
     const Center(child: Text('Page 3')), // Placeholder for Page 3
     const Center(child: Text('Page 4')), // Placeholder for Page 4
-    const Center(child: Text('Page 5')), // Placeholder for Page 5  
+    const Center(child: Text('Page 5')), // Placeholder for Page 5
   ];
 
-
-  
-    void _onItemTapped(int index) {
+  void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,7 +71,8 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Colors.blue,
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey, // Unselected item color
-        currentIndex: _selectedIndex, // Set the current tab based on _selectedIndex
+        currentIndex:
+            _selectedIndex, // Set the current tab based on _selectedIndex
         onTap: _onItemTapped, // Handle tab selection
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
@@ -102,7 +99,4 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
-
- 
-  
 }
