@@ -1,8 +1,24 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:workshop_management_system/Screens/ManageForemanSchedule/ListSchedulePage.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  if (kIsWeb) {
+    await Firebase.initializeApp(
+        options: FirebaseOptions(
+            apiKey: "AIzaSyDz7PsfXEAnJXY7Jc1cAq4ueKnbwZ2X9to",
+            authDomain: "workshopmanagementsystem-c80c6.firebaseapp.com",
+            projectId: "workshopmanagementsystem-c80c6",
+            storageBucket: "workshopmanagementsystem-c80c6.firebasestorage.app",
+            messagingSenderId: "189887749916",
+            appId: "1:189887749916:web:d0f9a9d2b4e009472ce4d9",
+            measurementId: "G-JJRY2VHEJX"));
+    runApp(const MyApp());
+  } else {
+    await Firebase.initializeApp();
+  }
 }
 
 class MyApp extends StatelessWidget {
