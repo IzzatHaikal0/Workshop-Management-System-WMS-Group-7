@@ -1,55 +1,115 @@
 import 'package:flutter/material.dart';
-import '../../../widgets/custom_button.dart';
-import '../../../widgets/custom_text_field.dart';
-import '../../../controllers/registration_controller.dart';
-import '../../../utils/validators.dart';
+import '../../main.dart'; // Import to navigate to MyHomePage
 
-class ForemanRegisterPage extends StatelessWidget {
+class ForemanRegisterPage extends StatefulWidget {
+  final String userRole;
+
+  const ForemanRegisterPage({super.key, required this.userRole});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _ForemanRegisterPageState createState() => _ForemanRegisterPageState();
+}
+
+class _ForemanRegisterPageState extends State<ForemanRegisterPage> {
   final _formKey = GlobalKey<FormState>();
-  final _controller = RegistrationController();
 
-  final _nameController = TextEditingController();
+  late TextEditingController _roleController;
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  ForemanRegisterPage({super.key});
+  @override
+  void initState() {
+    super.initState();
+    _roleController = TextEditingController(text: widget.userRole);
+  }
+
+  @override
+  void dispose() {
+    _roleController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _register() {
+    if (_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Foreman registration successful')),
+      );
+
+      // Navigate to main app home page
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const MyHomePage(
+              title: 'Workshop Management System App Home Page'),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Foreman Registration')),
+      appBar: AppBar(
+        title: const Text('Foreman Registration'),
+      ),
       body: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: Column(
+          child: ListView(
             children: [
-              CustomTextField(controller: _nameController, label: 'Name'),
-              CustomTextField(
+              TextFormField(
+                controller: _roleController,
+                readOnly: true,
+                decoration: const InputDecoration(
+                  labelText: 'User Role',
+                ),
+              ),
+              TextFormField(
+                controller: _firstNameController,
+                decoration: const InputDecoration(labelText: 'First Name'),
+                validator: (value) =>
+                    value == null || value.isEmpty ? 'Enter first name' : null,
+              ),
+              TextFormField(
+                controller: _lastNameController,
+                decoration: const InputDecoration(labelText: 'Last Name'),
+                validator: (value) =>
+                    value == null || value.isEmpty ? 'Enter last name' : null,
+              ),
+              TextFormField(
                 controller: _emailController,
-                label: 'Email',
-                validator: Validators.validateEmail,
+                decoration: const InputDecoration(labelText: 'Email'),
+                validator: (value) =>
+                    value == null || value.isEmpty ? 'Enter email' : null,
               ),
-              CustomTextField(
+              TextFormField(
+                controller: _phoneController,
+                decoration: const InputDecoration(labelText: 'Phone Number'),
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Enter phone number'
+                    : null,
+              ),
+              TextFormField(
                 controller: _passwordController,
-                label: 'Password',
+                decoration: const InputDecoration(labelText: 'Password'),
                 obscureText: true,
+                validator: (value) =>
+                    value == null || value.isEmpty ? 'Enter password' : null,
               ),
-              SizedBox(height: 20),
-              CustomButton(
-                label: 'Register',
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _controller.registerForeman(
-                      _nameController.text,
-                      _emailController.text,
-                      _passwordController.text,
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Registered Successfully')),
-                    );
-                  }
-                },
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _register,
+                child: const Text('Register'),
               ),
             ],
           ),

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:workshop_management_system/Screens/registration/role_selection_page.dart';
-import 'package:workshop_management_system/Screens/registration/foreman_register_page.dart';
-import 'package:workshop_management_system/Screens/registration/workshop_owner_register_page.dart';
+import 'screens/registration/role_selection_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,26 +11,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Workshop Management System App',
+      title: 'Workshop Management System',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Workshop Management System App Home Page'),
-
-      // ✅ Add routes here:
-      routes: {
-        '/roleSelection': (context) => const RoleSelectionPage(),
-        '/workshopOwner': (context) => WorkshopOwnerRegisterPage(),
-        '/foreman': (context) => ForemanRegisterPage(),
-      },
+      home: const RoleSelectionPage(), // Start with the Role Selection Page
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
   final String title;
 
   @override
@@ -45,7 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final List<Widget> _pages = [
     const Center(child: Text('Home Page')),
     const Center(child: Text('Page 2')),
-    const RoleSelectionPage(), // ✅ this already navigates to role selection page
+    const RoleSelectionPage(),
     const Center(child: Text('Page 4')),
     const Center(child: Text('Page 5')),
   ];
@@ -81,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.access_alarm),
-            label: 'aina',
+            label: 'Registration',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.account_circle),
