@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:workshop_management_system/Screens/ManageForemanSchedule/ListSchedulePage.dart';
+import 'package:workshop_management_system/Screens/ManageForemanSchedule/SelectSchedulePage.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-
-void main() {
+void main() async {
   runApp(const MyApp());
 }
 
@@ -48,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final List<Widget> _pages = [
     const Center(child: Text('Home Page')), // Home page
     const SchedulePage(), // Navigate to SchedulePage
-    const Center(child: Text('Page 3')), // Placeholder for Page 3
+    const SelectSchedulePage(), // Placeholder for Page 3 //FIX THIS 
     const Center(child: Text('Page 4')), // Placeholder for Page 4
     const Center(child: Text('Page 5')), // Placeholder for Page 5
   ];

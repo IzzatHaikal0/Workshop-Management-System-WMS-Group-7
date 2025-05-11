@@ -1,6 +1,7 @@
 // ListSchedulePage.dart
 import 'package:flutter/material.dart';
 import 'package:workshop_management_system/Screens/ManageForemanSchedule/AddSchedulePage.dart';
+import 'package:workshop_management_system/Screens/ManageForemanSchedule/EditSchedulePage.dart';
 
 class SchedulePage extends StatelessWidget {
   const SchedulePage({super.key});
@@ -71,18 +72,47 @@ class SchedulePage extends StatelessWidget {
                       children: [
                         OutlinedButton.icon(
                           onPressed: () {
-                            debugPrint('Edit tapped');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      EditSchedulePage()), // Navigate to edit page 
+                            );
                           },
                           label: Text('Edit',
                               style: TextStyle(color: Colors.blue)),
                         ),
                         OutlinedButton.icon(
-                          onPressed: () {
-                            debugPrint('Delete tapped');
-                          },
-                          label: Text('Delete',
-                              style: TextStyle(color: Colors.red)),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text('Confirm Delete'),
+                                    content: Text('Are you sure you want to delete this schedule?'),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        child: Text('Cancel'),
+                                        onPressed: () {
+                                          Navigator.of(context).pop(); // Close the dialog
+                                        },
+                                      ),
+                                      TextButton(
+                                        child: Text('Delete', style: TextStyle(color: Colors.red)),
+                                        onPressed: () {
+                                          Navigator.of(context).pop(); // Close the dialog
+                                          debugPrint('Delete confirmed');
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+
+                            label: Text('Delete', style: TextStyle(color: Colors.red)),
                         ),
+
                       ],
                     )
                   ],
