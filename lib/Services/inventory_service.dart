@@ -1,19 +1,18 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:workshop_management_system/Models/ManageInventory/item_model.dart';
 //import 'package:workshop_management_system/Models/ManageInventory/request_model.dart';
 
 
 
-class DatabaseService {
+class InventoryDBService {
   // Singleton pattern
-  static final DatabaseService _instance = DatabaseService._internal();
-  factory DatabaseService() => _instance;
-  DatabaseService._internal();
+  static final InventoryDBService _instance = InventoryDBService._internal();
+  factory InventoryDBService() => _instance;
+  InventoryDBService._internal();
   
   // Firestore collection references
   final CollectionReference _itemsCollection = 
-      FirebaseFirestore.instance.collection('Inventory_Item');
+      FirebaseFirestore.instance.collection('InventoryItem');
   //final CollectionReference _requestsCollection =
       //FirebaseFirestore.instance.collection('Request');
   
