@@ -19,20 +19,22 @@ class _ItemListScreenState extends State<ItemListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Items'),
+        title: Text('List of Items'),
         actions: [
-          /* Request button added to the AppBar
+          
+          //Request button 
           ElevatedButton.icon(
             onPressed: () {
-              Navigator.pushNamed(context, AppRoutes.requestList);
+              //Navigator.pushNamed(context, AppRoutes.requestList);
             },
             icon: Icon(Icons.add_shopping_cart),
             label: Text('Request'),
             style: ElevatedButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              backgroundColor: const Color.fromARGB(255, 4, 0, 252),
             ),
-          ),*/
-          SizedBox(width: 8),
+          ),
+          SizedBox(width: 8, height: 8),
         ],
       ),
       body: StreamBuilder<List<Item>>(
@@ -53,6 +55,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
 
           final items = snapshot.data!;
 
+          //Item detail
           return ListView.builder(
             itemCount: items.length,
             itemBuilder: (context, index) {

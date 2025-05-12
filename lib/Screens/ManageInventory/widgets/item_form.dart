@@ -150,7 +150,8 @@ class _ItemFormState extends State<ItemForm> {
             },
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              backgroundColor: Theme.of(context).primaryColor,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              backgroundColor: const Color.fromARGB(255, 4, 0, 252),
             ),
             child: const Text(
               'Save',

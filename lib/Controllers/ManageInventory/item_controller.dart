@@ -19,7 +19,7 @@ class ItemController {
     return _databaseService.itemsStream;
   }
 
-  // Read one -derail
+  // Read one -detail
   Future<Item?> getItem(String id) async {
     return await _databaseService.getItem(id);
   }
@@ -33,4 +33,13 @@ class ItemController {
   Future<bool> deleteItem(String id) async {
     return await _databaseService.deleteItem(id);
   }
+  
+  /* Get stream of items filtered by category
+  Stream<List<Item>> getItemsByCategoryStream(String category) {
+    return _databaseService.itemsStream.map((items) {
+      return items
+          .where((item) => item.itemCategory.toLowerCase() == category.toLowerCase())
+          .toList();
+    });
+  }*/
 }

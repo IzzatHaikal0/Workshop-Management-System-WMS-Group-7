@@ -44,7 +44,6 @@ class RequestController {
     return await _databaseService.createRequest(itemName, quantity, /*requestBy, requestTo,*/ );
   }
   
-
   // Read all
   /*Future<List<ItemRequest>> getRequests() async {
     return await _databaseService.getRequest();

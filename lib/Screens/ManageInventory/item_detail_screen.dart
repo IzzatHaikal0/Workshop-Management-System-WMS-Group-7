@@ -6,8 +6,6 @@ import '../../Controllers/ManageInventory/item_controller.dart';
 import '../../main.dart';
 import '../../Models/ManageInventory/item_model.dart';
 
-
-
 class ItemDetailScreen extends StatelessWidget {
   final Item item;
   final ItemController _itemController = ItemController();
@@ -16,12 +14,16 @@ class ItemDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Theme.of(context);
+    
     return Scaffold(
       appBar: AppBar(
-        title: Text('Item Detail'),
+        title: const Text('Item Detail'),
+        elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(Icons.edit),
+            icon: const Icon(Icons.edit),
+            tooltip: 'Edit Item',
             onPressed: () {
               Navigator.pushNamed(
                 context,
@@ -31,50 +33,187 @@ class ItemDetailScreen extends StatelessWidget {
             },
           ),
           IconButton(
-            icon: Icon(Icons.delete),
+            icon: const Icon(Icons.delete),
+            tooltip: 'Delete Item',
             onPressed: () {
               _showDeleteConfirmation(context);
             },
           ),
         ],
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildInfoCard(context),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Item ID Section
+            Text(
+              'ID',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 4),
             Text(
               item.id,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleMedium,
             ),
-            SizedBox(height: 16),
+            const Divider(height: 24),
+            
+            // Item Name Section
+            Text(
+              'Name',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 4),
             Text(
               item.itemName,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            SizedBox(height: 16),
+            const Divider(height: 24),
+            
+            // Item Category Section
             Text(
-              item.itemCategory,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              'Category',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: Colors.grey,
+              ),
             ),
-            SizedBox(height: 16),
-            Text(
-              '${item.quantity} pcs',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            const SizedBox(height: 4),
+            Chip(
+              backgroundColor: theme.colorScheme.primaryContainer,
+              label: Text(
+                item.itemCategory,
+                style: TextStyle(
+                  color: theme.colorScheme.onPrimaryContainer,
+                ),
+              ),
             ),
-            SizedBox(height: 16),
-            Text(
-              'RM ${item.unitPrice}',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            const Divider(height: 24),
+            
+            // Item Quantity & Price Section
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Quantity',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.inventory_2,
+                            color: theme.colorScheme.primary,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${item.quantity} pcs',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Unit Price',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.attach_money,
+                            color: theme.colorScheme.primary,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'RM ${item.unitPrice.toStringAsFixed(2)}',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 16),
-            Text(
-              'Created: ${_formatDate(item.createdAt)}',
-              style: TextStyle(color: Colors.grey),
-            ),
-            Text(
-              'Updated: ${_formatDate(item.updatedAt)}',
-              style: TextStyle(color: Colors.grey),
+            const Divider(height: 24),
+            
+            // Simplified Date Information
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Created: ${_formatDate(item.createdAt)}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Updated: ${_formatDate(item.updatedAt)}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -83,23 +222,29 @@ class ItemDetailScreen extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    // Using intl package for better date formatting
-    final DateFormat formatter = DateFormat('MMM dd, yyyy - HH:mm');
+    // Simpler date format
+    final DateFormat formatter = DateFormat('MMM dd, yyyy');
     return formatter.format(date);
   }
 
   void _showDeleteConfirmation(BuildContext context) {
+    Theme.of(context);
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Delete Item'),
-        content: Text('Are you sure you want to delete this item?'),
+        title: const Text('Delete Item'),
+        content: const Text('Are you sure you want to delete this item?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
-          TextButton(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromARGB(217, 255, 2, 2),
+              foregroundColor: Colors.white,
+            ),
             onPressed: () async {
               try {
                 final result = await _itemController.deleteItem(item.id);
@@ -107,7 +252,7 @@ class ItemDetailScreen extends StatelessWidget {
                   Navigator.pop(context); // Close dialog
                   Navigator.pop(context); // Go back to list
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Item deleted successfully')),
+                    const SnackBar(content: Text('Item deleted successfully')),
                   );
                 }
               } catch (e) {
@@ -117,7 +262,7 @@ class ItemDetailScreen extends StatelessWidget {
                 );
               }
             },
-            child: Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Delete'),
           ),
         ],
       ),

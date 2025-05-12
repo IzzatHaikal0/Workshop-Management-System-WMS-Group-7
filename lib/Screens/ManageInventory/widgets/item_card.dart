@@ -38,7 +38,7 @@ class ItemCard extends StatelessWidget {
                     padding: EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Theme.of(context).primaryColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(8), 
                     ),
                     child: Icon(
                       Icons.inventory_2,
@@ -80,7 +80,7 @@ class ItemCard extends StatelessWidget {
                   _buildInfoChip(
                     context,
                     'Quantity',
-                    item.quantity.toStringAsFixed(2),
+                    item.quantity.toInt().toString(),
                     Icons.shopping_cart,
                   ),
                   _buildInfoChip(
@@ -88,6 +88,7 @@ class ItemCard extends StatelessWidget {
                     'Unit Price',
                     currencyFormat.format(item.unitPrice),
                     Icons.attach_money,
+                    
                   ),
               
                 ],
@@ -115,7 +116,7 @@ class ItemCard extends StatelessWidget {
                       child: Text(
                         'Low Stock',
                         style: TextStyle(
-                          color: Colors.red[900],
+                          color: const Color.fromARGB(255, 206, 5, 5),
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                         ),
