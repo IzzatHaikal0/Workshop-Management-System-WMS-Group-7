@@ -1,54 +1,168 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:workshop_management_system/Screens/ManageForemanSchedule/ListSchedulePage.dart';
+// create barrel file so tk byk nak import ====>> import '../Screens/ManageInventory/manage_inventory_barrel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   if (kIsWeb) {
     await Firebase.initializeApp(
-        options: FirebaseOptions(
-            apiKey: "AIzaSyDz7PsfXEAnJXY7Jc1cAq4ueKnbwZ2X9to",
-            authDomain: "workshopmanagementsystem-c80c6.firebaseapp.com",
-            projectId: "workshopmanagementsystem-c80c6",
-            storageBucket: "workshopmanagementsystem-c80c6.firebasestorage.app",
-            messagingSenderId: "189887749916",
-            appId: "1:189887749916:web:d0f9a9d2b4e009472ce4d9",
-            measurementId: "G-JJRY2VHEJX"));
-    runApp(const MyApp());
+      options: const FirebaseOptions(
+        apiKey: "AIzaSyDz7PsfXEAnJXY7Jc1cAq4ueKnbwZ2X9to",
+        authDomain: "workshopmanagementsystem-c80c6.firebaseapp.com",
+        projectId: "workshopmanagementsystem-c80c6",
+        storageBucket: "workshopmanagementsystem-c80c6.appspot.com", 
+        messagingSenderId: "189887749916",
+        appId: "1:189887749916:web:d0f9a9d2b4e009472ce4d9",
+        measurementId: "G-JJRY2VHEJX",
+      ),
+    );
   } else {
     await Firebase.initializeApp();
   }
+
+  runApp(const MyApp());
 }
+
+//======================= MODULE ROUTES TEMPLATE =======================//
+// 1. ADD YOUR MODULE ROUTE CONSTANTS HERE
+class AppRoutes {
+  // Main Route
+  static const String main = '/';
+  
+  // Inventory Module Routes
+  static const String itemList = '/items';
+  static const String itemDetail = '/items/detail';
+  static const String itemCreate = '/items/create';
+  static const String itemEdit = '/items/edit';
+  // Request Inventory
+  static const String requestList = '/requests';
+  static const String requestDetail = '/requests/detail';
+  static const String requestCreate = '/requests/create';
+  static const String requestIncoming = '/requests/incoming';
+  
+  // Schedule Module Routes
+  // static const String scheduleList = '/schedules';
+  // static const String scheduleDetail = '/schedules/detail';
+  // static const String scheduleCreate = '/schedules/create';
+  // static const String scheduleEdit = '/schedules/edit';
+  
+  // Aina Module Routes
+  // static const String ainaList = '/aina';
+  // static const String ainaDetail = '/aina/detail';
+  // static const String ainaCreate = '/aina/create';
+  // static const String ainaEdit = '/aina/edit';
+  
+  // Other module example:
+  // static const String yourModuleName = '/your-module-route';
+  // static const String yourModuleDetail = '/your-module-route/detail';
+  // static const String yourModuleCreate = '/your-module-route/create';
+  // static const String yourModuleEdit = '/your-module-route/edit';
+}
+//====================================================================//
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Workshop Management Sytstem App',
+      title: 'Workshop Management System App',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 13, 13, 224)),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Workshop Management System App Home Page'),
+      
+      initialRoute: '/', // Start at main/home page
+      onGenerateRoute: (settings) {
+        //======================= MODULE ROUTES IMPLEMENTATION =======================//
+        // ADD YOUR MODULE ROUTE HERE
+        switch (settings.name) {
+          // Main Route- Don't Change
+          case AppRoutes.main:
+            return MaterialPageRoute(builder: (_) => const MyHomePage(title: 'WMS App'));
+          
+            
+          // ====Schedule Module Routes====
+          // case AppRoutes.scheduleList:
+          //   return MaterialPageRoute(builder: (_) => const ScheduleListScreen());
+          // 
+          // case AppRoutes.scheduleDetail:
+          //   final schedule = settings.arguments as Schedule;
+          //   return MaterialPageRoute(
+          //     builder: (_) => ScheduleDetailScreen(schedule: schedule),
+          //   );
+          //
+          // case AppRoutes.scheduleCreate:
+          //   return MaterialPageRoute(builder: (_) => ScheduleCreateScreen());
+          //
+          // case AppRoutes.scheduleEdit:
+          //   final schedule = settings.arguments as Schedule;
+          //   return MaterialPageRoute(
+          //     builder: (_) => ScheduleEditScreen(schedule: schedule),
+          //   );
+            
+          // ====Aina Module Routes====
+          // case AppRoutes.ainaList:
+          //   return MaterialPageRoute(builder: (_) => const AinaListScreen());
+          //
+          // case AppRoutes.ainaDetail:
+          //   final aina = settings.arguments as Aina;
+          //   return MaterialPageRoute(
+          //     builder: (_) => AinaDetailScreen(aina: aina),
+          //   );
+          //
+          // case AppRoutes.ainaCreate:
+          //   return MaterialPageRoute(builder: (_) => AinaCreateScreen());
+          //
+          // case AppRoutes.ainaEdit:
+          //   final aina = settings.arguments as Aina;
+          //   return MaterialPageRoute(
+          //     builder: (_) => AinaEditScreen(aina: aina),
+          //   );
+
+          // ====Inventory Module Routes====
+          //case AppRoutes.itemList:
+          // return MaterialPageRoute(builder: (_) => const ItemListScreen());
+
+          //case AppRoutes.itemDetail:
+          // final item = settings.arguments as Item;
+          // return MaterialPageRoute(
+          //    builder: (_) => ItemDetailScreen(item: item),
+          //  );
+
+          //case AppRoutes.itemCreate:
+          //  return MaterialPageRoute(builder: (_) => ItemCreateScreen());
+
+          //case AppRoutes.itemEdit:
+          //  final item = settings.arguments as Item;
+          //  return MaterialPageRoute(
+          //    builder: (_) => ItemEditScreen(item: item),
+          //  );
+
+          // ====More Module Here====   
+          // case AppRoutes.yourModuleName:
+          //   return MaterialPageRoute(builder: (_) => const YourModuleListScreen());
+          // ... and so on for detail, create, edit
+
+          default:
+            return MaterialPageRoute(
+              builder: (_) => Scaffold(
+                body: Center(
+                  child: Text('No route defined for ${settings.name}'),
+                ),
+              ),
+            );
+        }
+        //==========================================================================//
+      },
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
 
   final String title;
 
@@ -59,14 +173,15 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
 
-  //navigation pages
+  //======================= MODULE PAGES TEMPLATE =======================//
+  // ADD YOUR MODULE PAGES HERE
   final List<Widget> _pages = [
-    const Center(child: Text('Home Page')), // Home page
-    const SchedulePage(), // Navigate to SchedulePage
-    const Center(child: Text('Page 3')), // Placeholder for Page 3
-    const Center(child: Text('Page 4')), // Placeholder for Page 4
-    const Center(child: Text('Page 5')), // Placeholder for Page 5
+    const Center(child: Text('Workshop Management System App Home Page')),
+    const Center(child: Text('Schedule Page')), // Schedule page
+    const Center(child: Text('Aina Page')), // Aina page
+    //const ItemListScreen(), // Inventory page
   ];
+  //===================================================================//
 
   void _onItemTapped(int index) {
     setState(() {
@@ -81,37 +196,23 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         title: Text(widget.title),
       ),
-      body: _pages[_selectedIndex], // Display the selected page
-
+      body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.blue,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey, // Unselected item color
-        currentIndex:
-            _selectedIndex, // Set the current tab based on _selectedIndex
-        onTap: _onItemTapped, // Handle tab selection
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.schedule),
-            label: 'Schedule',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.access_alarm),
-            label: 'aina',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle),
-            label: 'aimar',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'resya',
-          ),
+        backgroundColor: const Color.fromARGB(255, 211, 222, 239),
+        selectedItemColor: const Color.fromARGB(255, 17, 24, 218),
+        unselectedItemColor: Colors.grey,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        //======================= NAVIGATION ITEMS TEMPLATE =======================//
+        //ADD YOUR MODULE NAVIGATION ITEMS HERE
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.schedule), label: 'Schedule'),
+          BottomNavigationBarItem(icon: Icon(Icons.access_alarm), label: 'Aina'),
+          BottomNavigationBarItem(icon: Icon(Icons.inventory), label: 'Inventory'),
+          // cth: BottomNavigationBarItem(icon: Icon(Icons.your_icon), label: 'Your Module'),
         ],
+        //======================================================================//
       ),
     );
   }
