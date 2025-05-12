@@ -26,21 +26,21 @@ void main() async {
 }
 
 //======================= MODULE ROUTES TEMPLATE =======================//
-// 1. ADD YOUR MODULE ROUTE CONSTANTS HERE
+// ADD YOUR MODULE ROUTE CONSTANTS HERE
 class AppRoutes {
   // Main Route
   static const String main = '/';
   
   // Inventory Module Routes
-  static const String itemList = '/items';
-  static const String itemDetail = '/items/detail';
-  static const String itemCreate = '/items/create';
-  static const String itemEdit = '/items/edit';
+  // static const String itemList = '/items';
+  // static const String itemDetail = '/items/detail';
+  // static const String itemCreate = '/items/create';
+  // static const String itemEdit = '/items/edit';
   // Request Inventory
-  static const String requestList = '/requests';
-  static const String requestDetail = '/requests/detail';
-  static const String requestCreate = '/requests/create';
-  static const String requestIncoming = '/requests/incoming';
+  // static const String requestList = '/requests';
+  // static const String requestDetail = '/requests/detail';
+  // static const String requestCreate = '/requests/create';
+  // static const String requestIncoming = '/requests/incoming';
   
   // Schedule Module Routes
   // static const String scheduleList = '/schedules';
@@ -77,13 +77,12 @@ class MyApp extends StatelessWidget {
       initialRoute: '/', // Start at main/home page
       onGenerateRoute: (settings) {
         //======================= MODULE ROUTES IMPLEMENTATION =======================//
-        // ADD YOUR MODULE ROUTE HERE
         switch (settings.name) {
           // Main Route- Don't Change
           case AppRoutes.main:
             return MaterialPageRoute(builder: (_) => const MyHomePage(title: 'WMS App'));
           
-            
+          // ADD YOUR MODULE ROUTE HERE
           // ====Schedule Module Routes====
           // case AppRoutes.scheduleList:
           //   return MaterialPageRoute(builder: (_) => const ScheduleListScreen());
