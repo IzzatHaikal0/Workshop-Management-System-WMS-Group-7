@@ -1,11 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-//import 'package:workshop_management_system/Screens/ManageInventory/item_create_screen.dart';
-//import 'package:workshop_management_system/Screens/ManageInventory/item_detail_screen.dart';
-//import 'package:workshop_management_system/Screens/ManageInventory/item_edit_screen.dart';
-//import 'package:workshop_management_system/Screens/ManageInventory/item_list_screen.dart';
-//import 'package:workshop_management_system/Models/ManageInventory/item_model.dart';
 import '../Screens/ManageInventory/manage_inventory_barrel.dart';
 import '../Models/ManageInventory/inventory_barrel.dart';
 

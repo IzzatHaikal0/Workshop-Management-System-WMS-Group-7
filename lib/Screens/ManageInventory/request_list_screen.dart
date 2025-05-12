@@ -1,0 +1,86 @@
+/*import 'package:flutter/material.dart';
+import '../../Controllers/ManageInventory/request_controller.dart';
+import '../../main.dart';
+import '../../Models/ManageInventory/request_model.dart';
+import '../ManageInventory/widgets/request_card.dart';
+
+class ItemListScreen extends StatefulWidget {
+  const ItemListScreen({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _ItemListScreenState createState() => _ItemListScreenState();
+}
+
+class _ItemListScreenState extends State<ItemListScreen> {
+  final RequestController _requestController = RequestController();
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('List of Items'),
+        actions: [
+          
+          //Request button 
+          ElevatedButton.icon(
+            onPressed: () {
+              //Navigator.pushNamed(context, AppRoutes.requestList);
+            },
+            icon: Icon(Icons.add_shopping_cart),
+            label: Text('Request'),
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              backgroundColor: const Color.fromARGB(255, 4, 0, 252),
+            ),
+          ),
+          SizedBox(width: 8, height: 8),
+        ],
+      ),
+      body: StreamBuilder<List<Item>>(
+        // Firebase will automatically deliver real-time updates
+        stream: _itemController.getItemsStream(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No items found. Add one!'));
+          }
+
+          final items = snapshot.data!;
+
+          //Item detail
+          return ListView.builder(
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final item = items[index];
+              return ItemCard(
+                item: item,
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.itemDetail,
+                    arguments: item,
+                  );
+                },
+              );
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, AppRoutes.itemCreate);
+        },
+        child: Icon(Icons.add),
+      ),
+    );
+  }
+}
+*/

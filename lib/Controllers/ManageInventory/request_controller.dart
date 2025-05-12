@@ -71,4 +71,37 @@ class RequestController {
 
   */
 }
+*//*
+import '../../../Models/ManageInventory/request_model.dart';
+
+class RequestController {
+  Future<void> createRequest(
+    String itemName,
+    int quantity,
+    String requestBy,
+    String requestTo,
+  ) async {
+    // Simulated logic – you can connect to Firebase, REST API, or SQLite
+    final newRequest = ItemRequest(
+      itemName: itemName,
+      quantity: quantity,
+      requestBy: requestBy,
+      requestTo: requestTo,
+    );
+
+    // Simulate saving to backend
+    await Future.delayed(const Duration(seconds: 1));
+    print("Request Created: ${newRequest.toJson()}");
+
+    // If using Firebase:
+    // await FirebaseFirestore.instance.collection('requests').add(newRequest.toJson());
+  }
+
+  // Optional: Fetch requests
+  Future<List<WorkshopRequest>> getRequests() async {
+    // Simulated fetch
+    await Future.delayed(const Duration(seconds: 1));
+    return [];
+  }
+}
 */
