@@ -1,10 +1,32 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:workshop_management_system/Screens/ManageForemanSchedule/ListSchedulePage.dart';
 import 'package:workshop_management_system/Screens/ManageForemanSchedule/SelectSchedulePage.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    if (kIsWeb) {
+      await Firebase.initializeApp(
+          options: FirebaseOptions(
+              apiKey: "AIzaSyDz7PsfXEAnJXY7Jc1cAq4ueKnbwZ2X9to",
+              authDomain: "workshopmanagementsystem-c80c6.firebaseapp.com",
+              projectId: "workshopmanagementsystem-c80c6",
+              storageBucket:
+                  "workshopmanagementsystem-c80c6.firebasestorage.app",
+              messagingSenderId: "189887749916",
+              appId: "1:189887749916:web:d0f9a9d2b4e009472ce4d9",
+              measurementId: "G-JJRY2VHEJX"));
+    } else {
+      await Firebase.initializeApp();
+    }
+    runApp(const MyApp());
+  } catch (e) {
+    debugPrint("Firebase initialization error: $e");
+    return;
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -16,7 +38,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Workshop Management Sytstem App',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Workshop Management System App Home Page'),
@@ -49,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final List<Widget> _pages = [
     const Center(child: Text('Home Page')), // Home page
     const SchedulePage(), // Navigate to SchedulePage
-    const SelectSchedulePage(), // Placeholder for Page 3 //FIX THIS 
+    const SelectSchedulePage(), // Placeholder for Page 3
     const Center(child: Text('Page 4')), // Placeholder for Page 4
     const Center(child: Text('Page 5')), // Placeholder for Page 5
   ];

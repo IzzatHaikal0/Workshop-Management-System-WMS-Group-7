@@ -29,8 +29,10 @@ class DatePickerExample extends StatefulWidget {
 
 class _DatePickerExampleState extends State<DatePickerExample> {
   DateTime? selectedDate;
-  TimeOfDay? startTime;
-  TimeOfDay? endTime;
+  // ignore: non_constant_identifier_names
+  TimeOfDay? StartTime;
+  // ignore: non_constant_identifier_names
+  TimeOfDay? EndTime;
   TimeOfDay? breakTime;
 
   Future<void> _selectDate() async {
@@ -56,8 +58,8 @@ class _DatePickerExampleState extends State<DatePickerExample> {
 
     if (picked != null) {
       setState(() {
-        if (type == 'start') startTime = picked;
-        if (type == 'end') endTime = picked;
+        if (type == 'start') StartTime = picked;
+        if (type == 'end') EndTime = picked;
         if (type == 'break') breakTime = picked;
       });
     }
@@ -102,51 +104,52 @@ class _DatePickerExampleState extends State<DatePickerExample> {
           OutlinedButton(
               onPressed: _selectDate, child: const Text('Select Date')),
           const SizedBox(height: 20),
-          Card( //REQUIRED START TIME
+          Card(
+            //REQUIRED START TIME
             child: ListTile(
               title: const Text('Start Time'),
-              subtitle: Text(formatTime(startTime)),
+              subtitle: Text(formatTime(StartTime)),
               trailing: const Icon(Icons.access_time),
               onTap: () => _selectTime('start'),
             ),
           ),
-          Card( //REQUIRED END TIME
+          Card(
+            //REQUIRED END TIME
             child: ListTile(
               title: const Text('End Time'),
-              subtitle: Text(formatTime(endTime)),
+              subtitle: Text(formatTime(EndTime)),
               trailing: const Icon(Icons.access_time),
               onTap: () => _selectTime('end'),
             ),
           ),
-          Card( //CALULATE TOTAL WORKING HOURS (START TIME - END TIME)
+          Card(
+            //CALULATE TOTAL WORKING HOURS (START TIME - END TIME)
             child: ListTile(
               title: const Text('Total Hours'),
-              subtitle: (startTime != null && endTime != null)
+              subtitle: (StartTime != null && EndTime != null)
                   ? Text(
-                    _calculateTotalHours(startTime!, endTime!),
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: const Color.fromARGB(255, 245, 0, 0),
-                    ),
-                  )
-                  
+                      '${_calculateTotalHours(StartTime!, EndTime!).toStringAsFixed(2)} h',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: const Color.fromARGB(255, 245, 0, 0),
+                      ),
+                    )
                   : const Text('Not set'),
               trailing: const Icon(Icons.access_time),
             ),
           ),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               OutlinedButton.icon(
                 onPressed: () {
-                  debugPrint('Delete tapped');
+                  debugPrint('Cancel tapped');
                 },
                 label: Text('Cancel', style: TextStyle(color: Colors.red)),
               ),
               OutlinedButton.icon(
                 onPressed: () {
-                  debugPrint('Edit tapped');
+                  debugPrint('Save tapped');
                 },
                 label: Text('Save', style: TextStyle(color: Colors.blue)),
               ),
@@ -157,22 +160,24 @@ class _DatePickerExampleState extends State<DatePickerExample> {
     );
   }
 
-  //CALCULATE TOTAL HOURS AND RETURN 
-  String _calculateTotalHours(TimeOfDay start, TimeOfDay end) {
-      final now = DateTime.now();
-      final startDateTime = DateTime(now.year, now.month, now.day, start.hour, start.minute);
-      final endDateTime = DateTime(now.year, now.month, now.day, end.hour, end.minute);
+  //CALCULATE TOTAL HOURS AND RETURN
+  double _calculateTotalHours(TimeOfDay start, TimeOfDay end) {
+    final now = DateTime.now();
+    final startDateTime =
+        DateTime(now.year, now.month, now.day, start.hour, start.minute);
+    final endDateTime =
+        DateTime(now.year, now.month, now.day, end.hour, end.minute);
 
-      // Handle overnight shifts (e.g., 10 PM to 6 AM)
-      final duration = endDateTime.isAfter(startDateTime)
-          ? endDateTime.difference(startDateTime)
-          : endDateTime.add(const Duration(days: 1)).difference(startDateTime);
+    // Handle overnight shifts (e.g., 10 PM to 6 AM)
+    final duration = endDateTime.isAfter(startDateTime)
+        ? endDateTime.difference(startDateTime)
+        : endDateTime.add(const Duration(days: 1)).difference(startDateTime);
 
-      final hours = duration.inHours;
-      final minutes = duration.inMinutes.remainder(60);
+    // ignore: non_constant_identifier_names
+    final TotalMinutes = duration.inMinutes;
+    // ignore: non_constant_identifier_names
+    final TotalHours = TotalMinutes / 60;
 
-      return '${hours}h ${minutes}m';
+    return double.parse(TotalHours.toStringAsFixed(2));
   }
-
-
 }
