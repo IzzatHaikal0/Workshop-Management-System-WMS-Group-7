@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.workshop_management_system.app-mergeDebugResources-33:/values-zh-rHK/values-zh-rHK.xml",
+            "outputFile": "com.example.workshop_management_system.app-mergeDebugResources-34:/values-zh-rHK/values-zh-rHK.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\wanh5\\.gradle\\caches\\transforms-3\\59bc706a69107718c565c7dec3aebb49\\transformed\\jetified-play-services-base-18.0.1\\res\\values-zh-rHK\\values.xml",
+                    "source": "C:\\Users\\wanh5\\.gradle\\caches\\transforms-3\\3f47a9c5cccf1d9735b15386c1a4008e\\transformed\\jetified-play-services-base-18.1.0\\res\\values-zh-rHK\\values.xml",
                     "from": {
                         "startLines": "4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20",
                         "startColumns": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",

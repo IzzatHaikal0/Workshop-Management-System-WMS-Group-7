@@ -1,22 +1,39 @@
-class ScheduleModel {
-  final String id;
-  final String title;
-  final String date;
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-  ScheduleModel({required this.id, required this.title, required this.date});
+class Schedule {
+  //final String ScheduleID;
+  final DateTime StartTime;
+  final DateTime EndTime;
+  final DateTime ScheduleDate;
+  final int SalaryRate;
 
-  factory ScheduleModel.fromMap(Map<String, dynamic> map, {required String id}) {
-    return ScheduleModel(
-      id: id,
-      title: map['title'] ?? '',
-      date: map['date'] ?? '',
+  Schedule({
+    //required this.ScheduleID,
+    required this.StartTime,
+    required this.EndTime,
+    required this.ScheduleDate,
+    required this.SalaryRate,
+  });
+
+  // Proper factory method
+  factory Schedule.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = doc.data()!;
+    return Schedule(
+      //id: doc.id,
+      StartTime: (data['StartTime'] as Timestamp).toDate(),
+      EndTime: (data['EndTime'] as Timestamp).toDate(),
+      ScheduleDate: (data['ScheduleDate'] as Timestamp).toDate(),
+      SalaryRate: data['SalaryRate'] ?? 0, // Default to 0 if not present
     );
   }
 
-  Map<String, dynamic> toMap() {
+  // Convert Schedule object to Firestore-compatible map
+  Map<String, dynamic> toJson() {
     return {
-      'title': title,
-      'date': date,
+      'StartTime': Timestamp.fromDate(StartTime),
+      'EndTime': Timestamp.fromDate(EndTime),
+      'ScheduleDate': Timestamp.fromDate(ScheduleDate),
+      'SalaryRate': SalaryRate,
     };
   }
 }

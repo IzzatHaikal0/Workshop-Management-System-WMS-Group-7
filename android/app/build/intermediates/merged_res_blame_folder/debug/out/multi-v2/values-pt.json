@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.workshop_management_system.app-mergeDebugResources-33:/values-pt/values-pt.xml",
+            "outputFile": "com.example.workshop_management_system.app-mergeDebugResources-34:/values-pt/values-pt.xml",
             "map": [
                 {
                     "source": "C:\\Users\\wanh5\\.gradle\\caches\\transforms-3\\d56a5248e94f66bf0c3de81ae919ef2b\\transformed\\jetified-credentials-1.2.0-rc01\\res\\values-pt\\values-pt.xml",
