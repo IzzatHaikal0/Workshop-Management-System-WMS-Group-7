@@ -46,3 +46,9 @@ app.*.map.json
 
 *.apk
 /build/
+
+
+# Ignore auto-generated drawables (common cause of bloat)
+android/app/src/main/res/drawable*
+android/app/src/main/res/mipmap*
+android/app/src/main/res/raw*
