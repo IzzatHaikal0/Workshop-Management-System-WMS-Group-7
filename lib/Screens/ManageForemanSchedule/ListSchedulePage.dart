@@ -73,6 +73,7 @@ class ListSchedulePage extends StatelessWidget {
                                       color: Color.fromARGB(255, 8, 8, 8),
                                     )),
 
+                                //WAN FIX ISSUE WITH OVERNIGHT SCHEDULE (IT PRINTING NEGATIVE HOURS)
                                 subtitle: Text(
                                   'Start Time: ${DateFormat('hh:mm a').format(schedule.StartTime)}\n'
                                   'End Time: ${DateFormat('hh:mm a').format(schedule.EndTime)}\n'
@@ -129,11 +130,12 @@ class ListSchedulePage extends StatelessWidget {
                                                 child: Text('Delete',
                                                     style: TextStyle(
                                                         color: Colors.red)),
-                                                onPressed: () {
+                                                onPressed: () async {
                                                   Navigator.of(context)
                                                       .pop(); // Close the dialog
                                                   debugPrint(
                                                       'Delete confirmed');
+                                                      controller.deleteSchedule(schedule.docId!);
                                                 },
                                               ),
                                             ],
@@ -159,5 +161,8 @@ class ListSchedulePage extends StatelessWidget {
         ),
       ),
     );
+  
   }
+
+
 }

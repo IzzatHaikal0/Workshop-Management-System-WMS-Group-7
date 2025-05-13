@@ -34,6 +34,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
   TimeOfDay? StartTime;
   TimeOfDay? EndTime;
   int? SalaryRate;
+  int? ScheduleID;
 
   Future<void> _selectDate() async {
     final DateTime? pickedDate = await showDatePicker(
@@ -243,6 +244,8 @@ class _DatePickerExampleState extends State<DatePickerExample> {
         StartTime: startDateTime,
         EndTime: endDateTime,
         SalaryRate: SalaryRate ?? 0,
+        TotalHours: _calculateTotalHours(StartTime!, EndTime!),
+        docId: null, // Firestore will generate this
         //TotalHours: _calculateTotalHours(StartTime!, EndTime!),
       );
 

@@ -6,6 +6,8 @@ class Schedule {
   final DateTime EndTime;
   final DateTime ScheduleDate;
   final int SalaryRate;
+  final double TotalHours;
+  final String? docId;
 
   Schedule({
     //required this.ScheduleID,
@@ -13,17 +15,21 @@ class Schedule {
     required this.EndTime,
     required this.ScheduleDate,
     required this.SalaryRate,
+    required this.TotalHours,
+    required this.docId,
   });
 
   // Proper factory method
   factory Schedule.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data()!;
     return Schedule(
-      //id: doc.id,
+      //ScheduleID: doc.ScheduleID,
       StartTime: (data['StartTime'] as Timestamp).toDate(),
       EndTime: (data['EndTime'] as Timestamp).toDate(),
       ScheduleDate: (data['ScheduleDate'] as Timestamp).toDate(),
       SalaryRate: data['SalaryRate'] ?? 0, // Default to 0 if not present
+      TotalHours: (data['TotalHours'] as num?)?.toDouble() ?? 0.0,// Default to 0 if not present
+      docId: doc.id,
     );
   }
 
@@ -34,6 +40,7 @@ class Schedule {
       'EndTime': Timestamp.fromDate(EndTime),
       'ScheduleDate': Timestamp.fromDate(ScheduleDate),
       'SalaryRate': SalaryRate,
+      'TotalHours': TotalHours,
     };
   }
 }
