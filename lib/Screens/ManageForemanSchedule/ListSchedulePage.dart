@@ -67,7 +67,7 @@ class ListSchedulePage extends StatelessWidget {
                             children: [
                               ListTile(
                                 title: Text(
-                                    'Schedule Date: ${DateFormat('yyyy-MM-dd').format(schedule.ScheduleDate)}',
+                                    'Schedule Date: ${DateFormat('yyyy-MM-dd').format(schedule.scheduleDate)}',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: Color.fromARGB(255, 8, 8, 8),
@@ -75,10 +75,10 @@ class ListSchedulePage extends StatelessWidget {
 
                                 //WAN FIX ISSUE WITH OVERNIGHT SCHEDULE (IT PRINTING NEGATIVE HOURS)
                                 subtitle: Text(
-                                  'Start Time: ${DateFormat('hh:mm a').format(schedule.StartTime)}\n'
-                                  'End Time: ${DateFormat('hh:mm a').format(schedule.EndTime)}\n'
-                                  'Total Hours: ${((schedule.EndTime.difference(schedule.StartTime).inMinutes) / 60).toStringAsFixed(2)} h\n'
-                                  'Salary Rate: RM ${schedule.SalaryRate}',
+                                  'Start Time: ${DateFormat('hh:mm a').format(schedule.startTime)}\n'
+                                  'End Time: ${DateFormat('hh:mm a').format(schedule.endTime)}\n'
+                                  'Total Hours: ${((schedule.endTime.difference(schedule.startTime).inMinutes) / 60).toStringAsFixed(2)} h\n'
+                                  'Salary Rate: RM ${schedule.salaryRate}',
                                   style: TextStyle(
                                     fontWeight: FontWeight.normal,
                                     color: Color.fromARGB(255, 8, 8, 8),
@@ -102,7 +102,8 @@ class ListSchedulePage extends StatelessWidget {
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) =>
-                                              EditSchedulePage(),
+                                              EditSchedulePage(
+                                                  docId: schedule.docId!),
                                         ), // Navigate to edit page
                                       );
                                     },
@@ -135,7 +136,8 @@ class ListSchedulePage extends StatelessWidget {
                                                       .pop(); // Close the dialog
                                                   debugPrint(
                                                       'Delete confirmed');
-                                                      controller.deleteSchedule(schedule.docId!);
+                                                  controller.deleteSchedule(
+                                                      schedule.docId!);
                                                 },
                                               ),
                                             ],
@@ -161,8 +163,5 @@ class ListSchedulePage extends StatelessWidget {
         ),
       ),
     );
-  
   }
-
-
 }

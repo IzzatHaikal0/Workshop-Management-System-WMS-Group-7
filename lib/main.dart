@@ -71,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final List<Widget> _pages = [
     const Center(child: Text('Home Page')), // Home page
     ListSchedulePage(), // Navigate to SchedulePage
-    const SelectSchedulePage(), // Placeholder for Page 3
+    SelectSchedulePage(), // Placeholder for Page 3
     const Center(child: Text('Page 4')), // Placeholder for Page 4
     const Center(child: Text('Page 5')), // Placeholder for Page 5
   ];

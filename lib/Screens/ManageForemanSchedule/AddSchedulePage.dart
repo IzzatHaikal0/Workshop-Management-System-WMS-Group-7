@@ -30,11 +30,10 @@ class DatePickerExample extends StatefulWidget {
 }
 
 class _DatePickerExampleState extends State<DatePickerExample> {
-  DateTime? ScheduleDate;
-  TimeOfDay? StartTime;
-  TimeOfDay? EndTime;
-  int? SalaryRate;
-  int? ScheduleID;
+  DateTime? scheduleDate;
+  TimeOfDay? startTime;
+  TimeOfDay? endTime;
+  int? salaryRate;
 
   Future<void> _selectDate() async {
     final DateTime? pickedDate = await showDatePicker(
@@ -46,7 +45,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
 
     if (pickedDate != null) {
       setState(() {
-        ScheduleDate = pickedDate;
+        scheduleDate = pickedDate;
       });
     }
   }
@@ -59,55 +58,13 @@ class _DatePickerExampleState extends State<DatePickerExample> {
 
     if (picked != null) {
       setState(() {
-        if (type == 'start') StartTime = picked;
-        if (type == 'end') EndTime = picked;
+        if (type == 'start') startTime = picked;
+        if (type == 'end') endTime = picked;
       });
     }
   }
-
-    // Function to show dialog for salary input
-  void _selectSalaryRate() {
-    final TextEditingController salaryController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Enter Salary Rate (Per Hour)'),
-          content: TextField(
-            controller: salaryController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Salary Rate',
-             
-            ),
-
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  // Try to parse the entered value as an integer
-                  SalaryRate = int.tryParse(salaryController.text);
-                  if (SalaryRate == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Invalid salary rate')),
-                    );
-                  }
-                });
-                Navigator.of(context).pop();
-              },
-              child: const Text('Save'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  
+  
   String formatTime(TimeOfDay? time) {
     if (time == null) return 'Select Time';
     final hour = time.hourOfPeriod.toString().padLeft(2, '0');
@@ -122,8 +79,8 @@ class _DatePickerExampleState extends State<DatePickerExample> {
       child: Column(
         children: [
           Text(
-            ScheduleDate != null
-                ? 'Selected Date: ${ScheduleDate!.day}/${ScheduleDate!.month}/${ScheduleDate!.year}'
+            scheduleDate != null
+                ? 'Selected Date: ${scheduleDate!.day}/${scheduleDate!.month}/${scheduleDate!.year}'
                 : 'No date selected',
           ),
           const SizedBox(height: 10),
@@ -134,7 +91,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
             //REQUIRED START TIME
             child: ListTile(
               title: const Text('Start Time'),
-              subtitle: Text(formatTime(StartTime)),
+              subtitle: Text(formatTime(startTime)),
               trailing: const Icon(Icons.access_time),
               onTap: () => _selectTime('start'),
             ),
@@ -143,7 +100,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
             //REQUIRED END TIME
             child: ListTile(
               title: const Text('End Time'),
-              subtitle: Text(formatTime(EndTime)),
+              subtitle: Text(formatTime(endTime)),
               trailing: const Icon(Icons.access_time),
               onTap: () => _selectTime('end'),
             ),
@@ -152,9 +109,9 @@ class _DatePickerExampleState extends State<DatePickerExample> {
             //CALULATE TOTAL WORKING HOURS (START TIME - END TIME)
             child: ListTile(
               title: const Text('Total Hours'),
-              subtitle: (StartTime != null && EndTime != null)
+              subtitle: (startTime != null && endTime != null)
                   ? Text(
-                      '${_calculateTotalHours(StartTime!, EndTime!).toStringAsFixed(2)} h',
+                      '${_calculateTotalHours(startTime!, endTime!).toStringAsFixed(2)} h',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: const Color.fromARGB(255, 245, 0, 0),
@@ -165,18 +122,21 @@ class _DatePickerExampleState extends State<DatePickerExample> {
             ),
           ),
           Card(
-            // SALARY RATE
             child: ListTile(
               title: const Text('Salary Rate (Per Hour)'),
-              subtitle: Text(
-                SalaryRate != null
-                    ? 'RM ${SalaryRate.toString()}'
-                    : 'Enter Salary Rate',
+              subtitle: TextField(
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(hintText: 'Enter salary rate'),
+                onChanged: (value) {
+                  setState(() {
+                    salaryRate = int.tryParse(value);
+                  });
+                },
               ),
               trailing: const Icon(Icons.attach_money),
-              onTap: () => _selectSalaryRate(),
             ),
           ),
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -195,6 +155,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
     );
   }
 
+  //I DONT THINK THIS IS MVC
   //CALCULATE TOTAL HOURS AND RETURN
   double _calculateTotalHours(TimeOfDay start, TimeOfDay end) {
     final now = DateTime.now();
@@ -219,32 +180,32 @@ class _DatePickerExampleState extends State<DatePickerExample> {
   //FIX THE BUTTON REDIRECTION
   //SAVE THE SCHEDULE
   void _onSave() {
-    if (ScheduleDate != null && StartTime != null && EndTime != null) {
+    if (scheduleDate != null && startTime != null && endTime != null) {
       //final now = DateTime.now();
 
       // Combine selected date with time of day
       final DateTime startDateTime = DateTime(
-        ScheduleDate!.year,
-        ScheduleDate!.month,
-        ScheduleDate!.day,
-        StartTime!.hour,
-        StartTime!.minute,
+        scheduleDate!.year,
+        scheduleDate!.month,
+        scheduleDate!.day,
+        startTime!.hour,
+        startTime!.minute,
       );
 
       final DateTime endDateTime = DateTime(
-        ScheduleDate!.year,
-        ScheduleDate!.month,
-        ScheduleDate!.day,
-        EndTime!.hour,
-        EndTime!.minute,
+        scheduleDate!.year,
+        scheduleDate!.month,
+        scheduleDate!.day,
+        endTime!.hour,
+        endTime!.minute,
       );
 
       final schedule = Schedule(
-        ScheduleDate: ScheduleDate!,
-        StartTime: startDateTime,
-        EndTime: endDateTime,
-        SalaryRate: SalaryRate ?? 0,
-        TotalHours: _calculateTotalHours(StartTime!, EndTime!),
+        scheduleDate: scheduleDate!,
+        startTime: startDateTime,
+        endTime: endDateTime,
+        salaryRate: salaryRate ?? 0,
+        totalHours: _calculateTotalHours(startTime!, endTime!),
         docId: null, // Firestore will generate this
         //TotalHours: _calculateTotalHours(StartTime!, EndTime!),
       );
@@ -255,7 +216,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
         const SnackBar(content: Text('Schedule saved successfully')),
       );
 
-      Navigator.pushReplacement(
+      Navigator.pop(
         context,
         MaterialPageRoute(builder: (context) => ListSchedulePage()),
       );
@@ -268,7 +229,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
 
   //CANCEL THE PROCESS
   void _onCancel() {
-    Navigator.pushReplacement(
+    Navigator.pop(
       context,
       MaterialPageRoute(builder: (context) => ListSchedulePage()),
     );

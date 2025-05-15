@@ -1,0 +1,2 @@
+C:/Users/wanh5/workshop_management_system/android/app/.cxx/Debug/254ao5x4/x86/CMakeFiles/edit_cache.dir
+C:/Users/wanh5/workshop_management_system/android/app/.cxx/Debug/254ao5x4/x86/CMakeFiles/rebuild_cache.dir

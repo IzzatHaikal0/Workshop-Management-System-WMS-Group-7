@@ -4,7 +4,24 @@
             "outputFile": "com.example.workshop_management_system.app-mergeDebugResources-34:/values-en-rIN/values-en-rIN.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\wanh5\\.gradle\\caches\\transforms-3\\f97e07cd4cca769d2106d93a5adc1b27\\transformed\\core-1.13.1\\res\\values-en-rIN\\values-en-rIN.xml",
+                    "source": "C:\\Users\\wanh5\\.gradle\\caches\\transforms-3\\bd589e9bad6af49935c5ac62cbd9bb29\\transformed\\browser-1.4.0\\res\\values-en-rIN\\values-en-rIN.xml",
+                    "from": {
+                        "startLines": "2,3,4,5",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,153,250,359",
+                        "endColumns": "97,96,108,98",
+                        "endOffsets": "148,245,354,453"
+                    },
+                    "to": {
+                        "startLines": "11,12,13,14",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "1000,1098,1195,1304",
+                        "endColumns": "97,96,108,98",
+                        "endOffsets": "1093,1190,1299,1398"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\wanh5\\.gradle\\caches\\transforms-3\\fd2c55512dde27f276dbfac9b1ec4ce4\\transformed\\core-1.13.1\\res\\values-en-rIN\\values-en-rIN.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",
@@ -21,30 +38,13 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\wanh5\\.gradle\\caches\\transforms-3\\d56a5248e94f66bf0c3de81ae919ef2b\\transformed\\jetified-credentials-1.2.0-rc01\\res\\values-en-rIN\\values-en-rIN.xml",
+                    "source": "C:\\Users\\wanh5\\.gradle\\caches\\transforms-3\\13f0df120020004a0940446ad858e92a\\transformed\\jetified-credentials-1.2.0-rc01\\res\\values-en-rIN\\values-en-rIN.xml",
                     "from": {
                         "startLines": "2,3",
                         "startColumns": "4,4",
                         "startOffsets": "55,167",
                         "endColumns": "111,113",
                         "endOffsets": "162,276"
-                    }
-                },
-                {
-                    "source": "C:\\Users\\wanh5\\.gradle\\caches\\transforms-3\\204cebbb186e2522a6b32832025d8089\\transformed\\browser-1.4.0\\res\\values-en-rIN\\values-en-rIN.xml",
-                    "from": {
-                        "startLines": "2,3,4,5",
-                        "startColumns": "4,4,4,4",
-                        "startOffsets": "55,153,250,359",
-                        "endColumns": "97,96,108,98",
-                        "endOffsets": "148,245,354,453"
-                    },
-                    "to": {
-                        "startLines": "11,12,13,14",
-                        "startColumns": "4,4,4,4",
-                        "startOffsets": "1000,1098,1195,1304",
-                        "endColumns": "97,96,108,98",
-                        "endOffsets": "1093,1190,1299,1398"
                     }
                 }
             ]
