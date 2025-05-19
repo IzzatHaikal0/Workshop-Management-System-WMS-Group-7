@@ -42,12 +42,12 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyDz7PsfXEAnJXY7Jc1cAq4ueKnbwZ2X9to',
-    appId: '1:189887749916:web:d0f9a9d2b4e009472ce4d9',
+    appId: '1:189887749916:web:6935ce59d0534d9b2ce4d9',
     messagingSenderId: '189887749916',
     projectId: 'workshopmanagementsystem-c80c6',
     authDomain: 'workshopmanagementsystem-c80c6.firebaseapp.com',
     storageBucket: 'workshopmanagementsystem-c80c6.firebasestorage.app',
-    measurementId: 'G-JJRY2VHEJX',
+    measurementId: 'G-CJKFH83W00',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
@@ -85,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'workshopmanagementsystem-c80c6.firebasestorage.app',
     measurementId: 'G-CJKFH83W00',
   );
+
 }

@@ -1,39 +1,41 @@
 class UserModel {
-  final String uid;
-  final String role;
+  final String userRole;
   final String firstName;
   final String lastName;
   final String email;
-  final String phone;
+  final String phoneNumber;
+  final String password;
 
   UserModel({
-    required this.uid,
-    required this.role,
+    required this.userRole,
     required this.firstName,
     required this.lastName,
     required this.email,
-    required this.phone,
+    required this.phoneNumber,
+    required this.password,
   });
 
+  // Optional: Convert UserModel to Map for saving/sending to backend
   Map<String, dynamic> toMap() {
     return {
-      'uid': uid,
-      'user_role': role,
+      'user_role': userRole,
       'first_name': firstName,
       'last_name': lastName,
       'email': email,
-      'phone_number': phone,
+      'phone_number': phoneNumber,
+      'password': password, // ideally hashed before sending/storing
     };
   }
 
+  // Optional: Create UserModel from Map (e.g., from backend response)
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
-      uid: map['uid'] ?? '',
-      role: map['user_role'] ?? '',
+      userRole: map['user_role'] ?? '',
       firstName: map['first_name'] ?? '',
       lastName: map['last_name'] ?? '',
       email: map['email'] ?? '',
-      phone: map['phone_number'] ?? '',
+      phoneNumber: map['phone_number'] ?? '',
+      password: map['password'] ?? '',
     );
   }
 }
