@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "189887749916",
+    "project_id": "workshopmanagementsystem-c80c6",
+    "storage_bucket": "workshopmanagementsystem-c80c6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:189887749916:android:45e47da3edbf5e552ce4d9",
+        "android_client_info": {
+          "package_name": "com.example.workshop_management_system"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAeJLpjLX_t6Tr7L-R6kAsFJTBBaUyiLSc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

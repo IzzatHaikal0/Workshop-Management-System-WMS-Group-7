@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/registration/role_selection_page.dart';
+import 'screens/ManageRegistration/widgets/register_type.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const RoleSelectionPage(), // Start with the Role Selection Page
+      home: const RegisterType(), // Start with the Role Selection Page
     );
   }
 }
@@ -61,10 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
             icon: Icon(Icons.schedule),
             label: 'Schedule',
@@ -77,10 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: Icon(Icons.account_circle),
             label: 'aimar',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'resya',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'resya'),
         ],
       ),
     );
