@@ -27,6 +27,7 @@ class ScheduleController {
     }
   }
 
+  // ASSIGN WORKSHOP OWNER ID TO SCHEDULE
   // Delete a schedule by its document ID in Firestore
   Future<void> deleteSchedule(String docId) async {
     try {
@@ -59,5 +60,31 @@ class ScheduleController {
           .doc(schedule.docId)
           .update(schedule.toJson());
     }
+  }
+
+  // WAIT FOR FOREMEN USE CASE 
+  // TUNGGU AINA BUAT FUNCTION NI
+  // LATER ASSIGN THE SCHEDULE TO FOREMAN
+  Future<void> acceptSchedule(String docId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('WorkshopSchedule')
+          .doc(docId)
+          .update({'status': 'accepted'});
+      debugPrint('Schedule accepted successfully');
+    } catch (e) {
+      debugPrint('Failed to accept schedule: $e');
+      rethrow;
+    }
+  }
+
+  Stream<List<Schedule>> getAcceptedSchedules() {
+    return _firestore.collection('WorkshopSchedule').snapshots().map(
+      (snapshot) {
+        return snapshot.docs.map((doc) {
+          return Schedule.fromFirestore(doc);
+        }).toList();
+      },
+    );
   }
 }

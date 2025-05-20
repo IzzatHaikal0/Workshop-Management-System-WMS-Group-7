@@ -23,42 +23,68 @@ class SelectSchedulePage extends StatelessWidget {
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
+            
+            //LIST OF ACCEPTED SCHEDULE
+            StreamBuilder<List<Schedule>>(
+              stream: controller.getAcceptedSchedules(), // You must implement this method
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(child: Text('No active schedules.'));
+                } else {
+                  List<Schedule> schedules = snapshot.data!;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: schedules.map((schedule) {
+                      String day = DateFormat('EEEE').format(schedule.scheduleDate); // e.g., Tuesday
+                      String date = DateFormat('d MMMM yyyy').format(schedule.scheduleDate); // e.g., 1st January 2025
+                      String startTime = DateFormat('HH:mm').format(schedule.startTime);
+                      String endTime = DateFormat('HH:mm').format(schedule.endTime);
 
-            Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.teal.shade400,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Column(
-                //CHANGE THIS WITH DATABASE DATA
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Tuesday, 12:30 - 16:30",
-                      style: TextStyle(color: Colors.white, fontSize: 16)),
-                  SizedBox(height: 4),
-                  Text("1st January 2025",
-                      style: TextStyle(color: Colors.white70, fontSize: 14)),
-                ],
-              ),
+                      return Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.teal.shade400,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "$day, $startTime - $endTime",
+                              style: TextStyle(color: Colors.white, fontSize: 16),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              date,
+                              style: TextStyle(color: Colors.white70, fontSize: 14),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  );
+                }
+              },
             ),
-            Container(
-              margin: const EdgeInsets.only(bottom: 20),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.teal.shade400,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Wednesday, 08:30 - 12:30",
-                      style: TextStyle(color: Colors.white, fontSize: 16)),
-                  SizedBox(height: 4),
-                  Text("2nd January 2025",
-                      style: TextStyle(color: Colors.white70, fontSize: 14)),
-                ],
+            //FIX THIS --> ONLY SHOW ACCEPTED SCHEDULE BASED ON FOREMAN ID
+            //GOTTA WAIT FOR MANAGE PROFILE
+
+
+
+
+
+            //START OF SELECT SCHEDULE
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                'Select Working Schedule',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
 
@@ -132,7 +158,9 @@ class SelectSchedulePage extends StatelessWidget {
                                                 'Are you sure you want to accept this schedule?'),
                                             actions: <Widget>[
                                               TextButton(
-                                                child: Text('Cancel'),
+                                                child: Text('Cancel',
+                                                    style: TextStyle(
+                                                        color: Colors.red)),
                                                 onPressed: () {
                                                   Navigator.of(context).pop();
                                                 },
@@ -145,6 +173,8 @@ class SelectSchedulePage extends StatelessWidget {
                                                   Navigator.of(context).pop();
                                                   debugPrint(
                                                       'Accept confirmed');
+                                                  controller.acceptSchedule(
+                                                      schedule.docId!);
                                                   // You can add your accept logic here
                                                 },
                                               ),

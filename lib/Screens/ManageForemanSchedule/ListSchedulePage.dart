@@ -136,8 +136,7 @@ class ListSchedulePage extends StatelessWidget {
                                                       .pop(); // Close the dialog
                                                   debugPrint(
                                                       'Delete confirmed');
-                                                  controller.deleteSchedule(
-                                                      schedule.docId!);
+                                                  controller.deleteSchedule(schedule.docId!);
                                                 },
                                               ),
                                             ],

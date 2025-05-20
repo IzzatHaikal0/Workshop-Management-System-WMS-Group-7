@@ -154,9 +154,11 @@ class _DatePickerExampleState extends State<DatePickerExample> {
               Card(
                 child: ListTile(
                   title: const Text('Salary Rate (Per Hour)'),
-                  subtitle: TextField(
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(hintText: 'Enter salary rate'),
+                  subtitle: TextFormField(
+                    decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'Enter salary rate',
+                    ),
                     onChanged: (value) {
                       setState(() {
                         salaryRate = int.tryParse(value);

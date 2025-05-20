@@ -3,14 +3,14 @@ import 'package:workshop_management_system/Controllers/RatingController.dart';
 import 'package:workshop_management_system/Models/RatingModel.dart';
 import 'package:workshop_management_system/Screens/ManageRating/RatingPage.dart';
 
-class EditRatingPage extends StatefulWidget {
-  const EditRatingPage({super.key});
+class AddRatingPage extends StatefulWidget {
+  const AddRatingPage({super.key});
 
   @override
-  State<EditRatingPage> createState() => _EditRatingPageState();
+  State<AddRatingPage> createState() => _AddRatingPageState();
 }
 
-class _EditRatingPageState extends State<EditRatingPage> {
+class _AddRatingPageState extends State<AddRatingPage> {
   final Ratingcontroller controller = Ratingcontroller();
   int ratingScore = 0;
   String reviewComment = '';
@@ -19,13 +19,14 @@ class _EditRatingPageState extends State<EditRatingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Rating')),
+      appBar: AppBar(title: const Text('Add Rating')),
       body: Container(
         color: Colors.white,
         padding: EdgeInsets.all(10),
         child: Column(
           children: [
-            // Rating Score
+            // Rating Score 
+            //FIX THIS WITH THE USER 
             Card(
               child: Padding(
                 padding: EdgeInsets.all(10),
