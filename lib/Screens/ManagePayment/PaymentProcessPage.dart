@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:workshop_management_system/Controllers/PaymentController.dart';
 
 class PaymentProcessPage extends StatelessWidget {
   final String name;
@@ -14,7 +15,8 @@ class PaymentProcessPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double totalPayment = workingHours * ratePerHour;
+    final PaymentController controller = PaymentController();
+    final double totalPayment = controller.calculateTotalPayment(workingHours, ratePerHour);
 
     return Scaffold(
       appBar: AppBar(
@@ -71,10 +73,7 @@ class PaymentProcessPage extends StatelessWidget {
           const SizedBox(height: 30),
           ElevatedButton(
             onPressed: () {
-              // Payment confirmation logic here
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Payment confirmed!')),
-              );
+              controller.confirmPayment(context);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue,

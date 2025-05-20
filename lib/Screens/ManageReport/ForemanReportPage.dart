@@ -1,56 +1,20 @@
-import 'package:flutter/material.dart';
+// lib/Screens/ManageReport/ForemanReportPage.dart
 
-class ForemanReportPage extends StatefulWidget {
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'package:workshop_management_system/controllers/ReportController.dart';
+
+class ForemanReportPage extends StatelessWidget {
   const ForemanReportPage({super.key});
 
   @override
-  State<ForemanReportPage> createState() => _ForemanReportPageState();
-}
-
-class _ForemanReportPageState extends State<ForemanReportPage> {
-  final List<Map<String, String>> _allForemen = [
-    {
-      'name': 'Ahmad Bin Ali',
-      'ic': '900123-01-1234',
-      'phone': '012-3456789',
-      'email': 'ahmad@example.com',
-      'experience': '5 years',
-      'specialization': 'Engine Repair',
-      'status': 'Available',
-    },
-    {
-      'name': 'Siti Nur Haliza',
-      'ic': '880321-05-5678',
-      'phone': '011-2223344',
-      'email': 'siti@example.com',
-      'experience': '3 years',
-      'specialization': 'Brake & Tire Service',
-      'status': 'Not Available',
-    },
-    {
-      'name': 'John Lim',
-      'ic': '910202-07-8888',
-      'phone': '016-8887777',
-      'email': 'john.lim@example.com',
-      'experience': '8 years',
-      'specialization': 'Transmission Systems',
-      'status': 'Available',
-    },
-  ];
-
-  String _searchText = '';
-
-  @override
   Widget build(BuildContext context) {
-    final List<Map<String, String>> _filteredForemen = _allForemen.where((foreman) {
-      return foreman['name']!.toLowerCase().contains(_searchText.toLowerCase()) ||
-             foreman['specialization']!.toLowerCase().contains(_searchText.toLowerCase());
-    }).toList();
+    final controller = Provider.of<ReportController>(context);
+    final filteredForemen = controller.filteredForemen;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Foreman Report'),
-      ),
+      appBar: AppBar(title: const Text('Foreman Report')),
       body: Column(
         children: [
           Padding(
@@ -61,18 +25,14 @@ class _ForemanReportPageState extends State<ForemanReportPage> {
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.search),
               ),
-              onChanged: (text) {
-                setState(() {
-                  _searchText = text;
-                });
-              },
+              onChanged: (text) => controller.searchText = text,
             ),
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: _filteredForemen.length,
+              itemCount: filteredForemen.length,
               itemBuilder: (context, index) {
-                final f = _filteredForemen[index];
+                final f = filteredForemen[index];
                 return Card(
                   margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   elevation: 3,
@@ -82,13 +42,10 @@ class _ForemanReportPageState extends State<ForemanReportPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Name: ${f['name']}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                        Text('IC Number: ${f['ic']}'),
-                        Text('Phone: ${f['phone']}'),
-                        Text('Email: ${f['email']}'),
-                        Text('Experience: ${f['experience']}'),
-                        Text('Specialization: ${f['specialization']}'),
-                        Text('Status: ${f['status']}'),
+                        Text('Name: ${f.id}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                        Text('IC Number: ${f.customer}'),
+                        Text('Phone: ${f.method}'),
+                        Text('Status: ${f.status}'),
                       ],
                     ),
                   ),
