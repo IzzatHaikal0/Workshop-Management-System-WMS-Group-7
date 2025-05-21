@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:workshop_management_system/main.dart';
 
 class RegistrationSuccessPage extends StatelessWidget {
   @override
@@ -22,7 +23,7 @@ class RegistrationSuccessPage extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   // Navigate to Login page directly
-                  Navigator.pushReplacementNamed(context, '/login');
+                  Navigator.pushReplacementNamed(context, AppRoutes.login);
                 },
                 child: Text('Go to Login'),
               ),

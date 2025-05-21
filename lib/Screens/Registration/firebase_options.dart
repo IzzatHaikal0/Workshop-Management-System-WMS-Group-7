@@ -85,5 +85,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'workshopmanagementsystem-c80c6.firebasestorage.app',
     measurementId: 'G-CJKFH83W00',
   );
-
 }
