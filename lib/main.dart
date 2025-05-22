@@ -1,29 +1,55 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:workshop_management_system/Screens/ManageForemanSchedule/ListSchedulePage.dart';
+import 'package:workshop_management_system/Screens/ManageForemanSchedule/SelectSchedulePage.dart';
+import 'package:workshop_management_system/Screens/ManageRating/RatingPage.dart';
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-void main() {
-  runApp(const MyApp());
+  try {
+    if (kIsWeb) {
+      await Firebase.initializeApp(
+          options: FirebaseOptions(
+              apiKey: "AIzaSyDz7PsfXEAnJXY7Jc1cAq4ueKnbwZ2X9to",
+              authDomain: "workshopmanagementsystem-c80c6.firebaseapp.com",
+              projectId: "workshopmanagementsystem-c80c6",
+              storageBucket:
+                  "workshopmanagementsystem-c80c6.firebasestorage.app",
+              messagingSenderId: "189887749916",
+              appId: "1:189887749916:web:d0f9a9d2b4e009472ce4d9",
+              measurementId: "G-JJRY2VHEJX"));
+    } else {
+      await Firebase.initializeApp();
+    }
+    runApp(const MyApp());
+  } catch (e) {
+    debugPrint("Firebase initialization error: $e");
+    return;
+  }
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+  
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Workshop Management Sytstem App',
+      title: 'Pomen.IO',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 23, 80, 202)),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Workshop Management System App Home Page'),
+      home: const MyHomePage(
+        title: 'Pomen.IO', icon: Icon(Icons.bike_scooter)),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  const MyHomePage({super.key, required this.title, required this.icon});
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -35,6 +61,8 @@ class MyHomePage extends StatefulWidget {
   // always marked "final".
 
   final String title;
+  final Icon icon;
+ 
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -46,9 +74,9 @@ class _MyHomePageState extends State<MyHomePage> {
   //navigation pages
   final List<Widget> _pages = [
     const Center(child: Text('Home Page')), // Home page
-    const SchedulePage(), // Navigate to SchedulePage
-    const Center(child: Text('Page 3')), // Placeholder for Page 3
-    const Center(child: Text('Page 4')), // Placeholder for Page 4
+    ListSchedulePage(), // Navigate to SchedulePage
+    SelectSchedulePage(), // Placeholder for Page 3
+    RatingPage(), // Placeholder for Page 4
     const Center(child: Text('Page 5')), // Placeholder for Page 5
   ];
 

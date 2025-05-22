@@ -43,3 +43,12 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+*.apk
+/build/
+
+
+# Ignore auto-generated drawables (common cause of bloat)
+android/app/src/main/res/drawable*
+android/app/src/main/res/mipmap*
+android/app/src/main/res/raw*
