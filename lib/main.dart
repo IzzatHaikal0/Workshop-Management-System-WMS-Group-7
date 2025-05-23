@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:workshop_management_system/Screens/ManageForemanSchedule/ListSchedulePage.dart';
 import 'package:workshop_management_system/Screens/ManageForemanSchedule/SelectSchedulePage.dart';
 import 'package:workshop_management_system/Screens/ManageRating/RatingPage.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -31,7 +32,6 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-  
 
   // This widget is the root of your application.
   @override
@@ -39,11 +39,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Pomen.IO',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 23, 80, 202)),
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color.fromARGB(255, 23, 80, 202)),
         useMaterial3: true,
       ),
-      home: const MyHomePage(
-        title: 'Pomen.IO', icon: Icon(Icons.bike_scooter)),
+      home: const MyHomePage(title: 'Pomen.IO', icon: Icon(Icons.bike_scooter)),
     );
   }
 }
@@ -62,7 +62,6 @@ class MyHomePage extends StatefulWidget {
 
   final String title;
   final Icon icon;
- 
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
