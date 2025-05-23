@@ -28,7 +28,8 @@ class Schedule {
       endTime: (data['endTime'] as Timestamp).toDate(),
       scheduleDate: (data['scheduleDate'] as Timestamp).toDate(),
       salaryRate: data['salaryRate'] ?? 0, // Default to 0 if not present
-      totalHours: (data['totalHours'] as num?)?.toDouble() ??
+      totalHours:
+          (data['totalHours'] as num?)?.toDouble() ??
           0.0, // Default to 0 if not present
       docId: doc.id,
     );

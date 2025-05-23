@@ -1,19 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:workshop_management_system/Models/ScheduleModel.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ScheduleController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  final _auth = FirebaseAuth.instance;
+  final _db = FirebaseFirestore.instance;
+
   // Function to fetch schedules from Firestore
   Stream<List<Schedule>> getSchedules() {
-    return _firestore.collection('WorkshopSchedule').snapshots().map(
-      (snapshot) {
-        return snapshot.docs.map((doc) {
-          return Schedule.fromFirestore(doc);
-        }).toList();
-      },
-    );
+    return _firestore.collection('WorkshopSchedule').snapshots().map((
+      snapshot,
+    ) {
+      return snapshot.docs.map((doc) {
+        return Schedule.fromFirestore(doc);
+      }).toList();
+    });
   }
 
   // Add new schedule to Firestore
@@ -40,12 +44,14 @@ class ScheduleController {
     }
   }
 
-  //function to get the schedule based on the id
+ 
+  //function to get the schedule based on the workshop owner id
   Future<Schedule?> getScheduleById(String docId) async {
-    final doc = await FirebaseFirestore.instance
-        .collection('WorkshopSchedule')
-        .doc(docId)
-        .get();
+    final doc =
+        await FirebaseFirestore.instance
+            .collection('WorkshopSchedule')
+            .doc(docId)
+            .get();
     if (doc.exists) {
       return Schedule.fromMap(doc.data()!, doc.id);
     }
@@ -62,29 +68,33 @@ class ScheduleController {
     }
   }
 
-  // WAIT FOR FOREMEN USE CASE 
+  // WAIT FOR FOREMEN USE CASE
   // TUNGGU AINA BUAT FUNCTION NI
   // LATER ASSIGN THE SCHEDULE TO FOREMAN
-  Future<void> acceptSchedule(String docId) async {
+  Future<void> acceptSchedule(String scheduleDocId) async {
+    final String uid =
+        FirebaseAuth.instance.currentUser!.uid; // get logged in foreman UID
+
     try {
       await FirebaseFirestore.instance
           .collection('WorkshopSchedule')
-          .doc(docId)
-          .update({'status': 'accepted'});
-      debugPrint('Schedule accepted successfully');
+          .doc(scheduleDocId)
+          .update({'status': 'accepted', 'foremanId': uid});
     } catch (e) {
       debugPrint('Failed to accept schedule: $e');
-      rethrow;
     }
   }
 
-  Stream<List<Schedule>> getAcceptedSchedules() {
-    return _firestore.collection('WorkshopSchedule').snapshots().map(
-      (snapshot) {
-        return snapshot.docs.map((doc) {
-          return Schedule.fromFirestore(doc);
-        }).toList();
-      },
-    );
+  // Example method in ScheduleController
+  Stream<List<Schedule>> getAcceptedSchedules(String foremanId) {
+    return _firestore
+        .collection('WorkshopSchedule')
+        .where('status', isEqualTo: 'accepted')
+        .where('foremanId', isEqualTo: foremanId)
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => Schedule.fromFirestore(doc)).toList(),
+        );
   }
 }
