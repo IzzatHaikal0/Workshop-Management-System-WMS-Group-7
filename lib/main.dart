@@ -16,7 +16,7 @@ void main() async {
 
 class AppRoutes {
   static const String welcome = '/welcome';
-  static const String main = '/';
+  static const String main = '/MyApp';
   static const String registerType = '/register/type';
   static const String registerForm = '/register/form';
   static const String registrationSuccess = '/register/success';

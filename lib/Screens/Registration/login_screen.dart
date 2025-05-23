@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:workshop_management_system/Screens/Profile/foreman_profile_loader.dart';
-import 'package:workshop_management_system/Screens/Profile/workshop_owner_profile_loader.dart';
 import 'package:workshop_management_system/main.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -43,16 +41,14 @@ class _LoginScreenState extends State<LoginScreen> {
           Navigator.pushReplacement(
             // ignore: use_build_context_synchronously
             context,
-            MaterialPageRoute(builder: (_) => const ForemanProfileLoader()),
+            MaterialPageRoute(builder: (_) => const MyApp()),
           );
         } else if (ownerDoc.exists) {
           // Step 3B: Navigate to Workshop Owner loader
           Navigator.pushReplacement(
             // ignore: use_build_context_synchronously
             context,
-            MaterialPageRoute(
-              builder: (_) => const WorkshopOwnerProfileLoader(),
-            ),
+            MaterialPageRoute(builder: (_) => const MyApp()),
           );
         } else {
           // Not found in either collection
