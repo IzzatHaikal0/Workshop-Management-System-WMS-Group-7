@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:workshop_management_system/main.dart';
 
 class RegistrationSuccessPage extends StatelessWidget {
+  const RegistrationSuccessPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

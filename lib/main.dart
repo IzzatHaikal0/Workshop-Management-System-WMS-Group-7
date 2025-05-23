@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'Screens/Registration/firebase_options.dart';
+import '../Screens/firebase_options.dart';
+
+// Registration and profile barrel imports
 import 'Screens/Registration/manage_registration_barrel.dart';
 import 'Screens/welcome_screen.dart';
+import 'Screens/Profile/manage_profile_barrel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +21,13 @@ class AppRoutes {
   static const String registerForm = '/register/form';
   static const String registrationSuccess = '/register/success';
   static const String login = '/login';
+
+  static const String profileViewForeman = '/profile/view/foreman';
+  static const String profileViewWorkshopOwner = '/profile/view/workshop_owner';
+  static const String profileAddForeman = '/profile/add/foreman';
+  static const String profileAddWorkshopOwner = '/profile/add/workshop_owner';
+  static const String profileEditForeman = '/profile/edit/foreman';
+  static const String profileEditWorkshopOwner = '/profile/edit/workshop_owner';
 }
 
 class MyApp extends StatelessWidget {
@@ -36,6 +46,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: const AuthGate(),
       onGenerateRoute: (settings) {
+        final args = settings.arguments as Map<String, dynamic>? ?? {};
         switch (settings.name) {
           case AppRoutes.welcome:
             return MaterialPageRoute(builder: (_) => const WelcomeScreen());
@@ -49,17 +60,52 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(builder: (_) => const RegisterType());
 
           case AppRoutes.registerForm:
-            final args = settings.arguments as Map<String, dynamic>;
-            final userRole = args['userRole'] as String;
+            final userRole = args['userRole'] as String? ?? '';
             return MaterialPageRoute(
               builder: (_) => RegisterForm(userRole: userRole),
             );
 
           case AppRoutes.registrationSuccess:
-            return MaterialPageRoute(builder: (_) => RegistrationSuccessPage());
+            return MaterialPageRoute(
+              builder: (_) => const RegistrationSuccessPage(),
+            );
 
           case AppRoutes.login:
             return MaterialPageRoute(builder: (_) => const LoginScreen());
+
+          case AppRoutes.profileViewForeman:
+            return MaterialPageRoute(
+              builder:
+                  (_) => ViewProfilePageForeman(
+                    foremanId: args['foremanId'] ?? '',
+                  ),
+            );
+
+          case AppRoutes.profileViewWorkshopOwner:
+            return MaterialPageRoute(
+              builder:
+                  (_) => ViewProfilePageWorkshopOwner(
+                    workshopOwnerId: args['workshopOwnerId'] ?? '',
+                  ),
+            );
+
+          case AppRoutes.profileEditForeman:
+            return MaterialPageRoute(
+              builder:
+                  (_) => EditProfilePageForeman(
+                    existingProfile: args['existingProfile'] ?? {},
+                    foremanId: args['foremanId'] ?? '',
+                  ),
+            );
+
+          case AppRoutes.profileEditWorkshopOwner:
+            return MaterialPageRoute(
+              builder:
+                  (_) => EditProfilePageWorkshopOwner(
+                    existingProfile: args['existingProfile'] ?? {},
+                    workshopOwnerId: args['workshopOwnerId'] ?? '',
+                  ),
+            );
 
           default:
             return MaterialPageRoute(
@@ -76,7 +122,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// AuthGate to automatically route user based on authentication state
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
@@ -111,10 +156,16 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = [
+  String get currentUserRole => 'foreman'; // Replace with real logic
+  String get currentUserId => FirebaseAuth.instance.currentUser?.uid ?? '';
+  Map<String, dynamic> get currentUserData => {}; // Fetch from Firestore
+
+  List<Widget> get _pages => [
     const Center(child: Text('Workshop Management System App Home Page')),
     const Center(child: Text('Schedule Page')),
-    const RegisterType(),
+    currentUserRole == 'foreman'
+        ? ViewProfilePageForeman(foremanId: currentUserId)
+        : ViewProfilePageWorkshopOwner(workshopOwnerId: currentUserId),
     const Center(child: Text('Inventory Page')),
   ];
 
@@ -124,7 +175,6 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  // Logout function with confirmation dialog
   Future<void> _confirmLogout() async {
     final shouldLogout = await showDialog<bool>(
       context: context,
@@ -144,10 +194,8 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
     );
-
     if (shouldLogout == true) {
       await FirebaseAuth.instance.signOut();
-      // After logout, the AuthGate will detect and show WelcomeScreen
     }
   }
 

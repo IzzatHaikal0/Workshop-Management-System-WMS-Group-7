@@ -1,5 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import '../../main.dart'; // For AppRoutes or navigation
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:workshop_management_system/Screens/Profile/foreman_profile_loader.dart';
+import 'package:workshop_management_system/Screens/Profile/workshop_owner_profile_loader.dart';
+import 'package:workshop_management_system/main.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,10 +19,54 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
 
-  void _loginUser() {
+  void _loginUser() async {
     if (_formKey.currentState!.validate()) {
-      // TODO: Authenticate user with Firebase or backend
-      Navigator.pushReplacementNamed(context, AppRoutes.main);
+      try {
+        // Step 1: Authenticate the user
+        final userCredential = await FirebaseAuth.instance
+            .signInWithEmailAndPassword(
+              email: _emailController.text.trim(),
+              password: _passwordController.text.trim(),
+            );
+
+        final uid = userCredential.user?.uid;
+
+        // Step 2: Check the role
+        final firestore = FirebaseFirestore.instance;
+
+        final foremanDoc = await firestore.collection('foremen').doc(uid).get();
+        final ownerDoc =
+            await firestore.collection('workshop_owner').doc(uid).get();
+
+        if (foremanDoc.exists) {
+          // Step 3A: Navigate to Foreman loader
+          Navigator.pushReplacement(
+            // ignore: use_build_context_synchronously
+            context,
+            MaterialPageRoute(builder: (_) => const ForemanProfileLoader()),
+          );
+        } else if (ownerDoc.exists) {
+          // Step 3B: Navigate to Workshop Owner loader
+          Navigator.pushReplacement(
+            // ignore: use_build_context_synchronously
+            context,
+            MaterialPageRoute(
+              builder: (_) => const WorkshopOwnerProfileLoader(),
+            ),
+          );
+        } else {
+          // Not found in either collection
+          ScaffoldMessenger.of(
+            // ignore: use_build_context_synchronously
+            context,
+          ).showSnackBar(const SnackBar(content: Text("Profile not found.")));
+        }
+      } catch (e) {
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Login failed: ${e.toString()}")),
+        );
+      }
     }
   }
 

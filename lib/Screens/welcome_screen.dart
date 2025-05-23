@@ -16,6 +16,7 @@ class WelcomeScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(height: 40),
+
                 const Text(
                   'Workshop Management\nSystem',
                   textAlign: TextAlign.center,
@@ -25,13 +26,21 @@ class WelcomeScreen extends StatelessWidget {
                     color: Colors.black87,
                   ),
                 ),
+
                 const SizedBox(height: 30),
-                Image.asset(
-                  'assets/images/workshop_logo.webp',
-                  width: 200,
-                  height: 200,
+
+                Hero(
+                  tag: 'logo',
+                  child: Image.asset(
+                    'assets/images/workshop_logo.webp',
+                    width: 200,
+                    height: 200,
+                    semanticLabel: 'Workshop logo',
+                  ),
                 ),
+
                 const SizedBox(height: 30),
+
                 const Text(
                   'Welcome!',
                   style: TextStyle(
@@ -40,7 +49,9 @@ class WelcomeScreen extends StatelessWidget {
                     color: Colors.black54,
                   ),
                 ),
+
                 const SizedBox(height: 40),
+
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pushReplacementNamed(context, AppRoutes.login);
@@ -57,12 +68,16 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                   child: const Text("Login", style: TextStyle(fontSize: 16)),
                 ),
+
                 const SizedBox(height: 20),
+
                 const Text(
                   "Don't have an account?",
                   style: TextStyle(fontSize: 16, color: Colors.black54),
                 ),
+
                 const SizedBox(height: 10),
+
                 OutlinedButton(
                   onPressed: () {
                     Navigator.pushNamed(context, AppRoutes.registerType);
@@ -82,6 +97,8 @@ class WelcomeScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 16, color: Colors.blue),
                   ),
                 ),
+
+                const SizedBox(height: 40), // Extra bottom padding
               ],
             ),
           ),

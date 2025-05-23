@@ -39,6 +39,9 @@ dependencies:
   cloud_firestore: ^5.6.7
   firebase_auth: ^5.5.3
   intl: ^0.20.2
+  image_picker: ^1.0.4
+  firebase_storage: ^12.4.5
+
 
 
 dev_dependencies:
@@ -65,7 +68,8 @@ flutter:
   assets:
   - assets/images/workshop_logo.webp
   - assets/images/foreman.png
-  
+
+
 
   # To add assets to your application, add an assets section, like this:
   # assets:
