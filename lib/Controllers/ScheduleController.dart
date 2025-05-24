@@ -6,8 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 class ScheduleController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  final _auth = FirebaseAuth.instance;
-  final _db = FirebaseFirestore.instance;
+  //final _auth = FirebaseAuth.instance;
+  //final _db = FirebaseFirestore.instance;
 
   // Function to fetch schedules from Firestore
   Stream<List<Schedule>> getSchedules() {

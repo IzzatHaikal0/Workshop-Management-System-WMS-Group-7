@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import '../Screens/firebase_options.dart';
+//import '../Screens/firebase_options.dart';
 
 // Registration and profile barrel imports
 import 'Screens/Registration/manage_registration_barrel.dart';

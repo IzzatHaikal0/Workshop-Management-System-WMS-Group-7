@@ -12,7 +12,7 @@ class ProfileService {
     String ownerId,
   ) async {
     final doc =
-        await _firestore.collection('workshop_owners').doc(ownerId).get();
+        await _firestore.collection('workshop_owner').doc(ownerId).get();
     return doc.exists ? doc.data() : null;
   }
 }

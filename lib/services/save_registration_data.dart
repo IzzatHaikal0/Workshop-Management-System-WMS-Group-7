@@ -17,6 +17,14 @@ class SaveRegistrationData {
           );
 
       String uid = userCredential.user!.uid;
+      await _firestore.collection('foremen').doc(uid).set({
+        'firstName': user.firstName,
+        'lastName': user.lastName,
+        'email': user.email,
+        'phoneNumber': user.phoneNumber,
+        'role': user.userRole.toLowerCase().replaceAll(' ', '_'),
+        'createdAt': FieldValue.serverTimestamp(),
+      });
 
       // 2. Save basic user data to 'users' collection
       await _firestore.collection('workshop_owner').doc(uid).set({
