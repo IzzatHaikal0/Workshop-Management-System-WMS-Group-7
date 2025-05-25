@@ -19,15 +19,16 @@ void main() async {
   try {
     if (kIsWeb) {
       await Firebase.initializeApp(
-          options: FirebaseOptions(
-              apiKey: "AIzaSyDz7PsfXEAnJXY7Jc1cAq4ueKnbwZ2X9to",
-              authDomain: "workshopmanagementsystem-c80c6.firebaseapp.com",
-              projectId: "workshopmanagementsystem-c80c6",
-              storageBucket:
-                  "workshopmanagementsystem-c80c6.firebasestorage.app",
-              messagingSenderId: "189887749916",
-              appId: "1:189887749916:web:d0f9a9d2b4e009472ce4d9",
-              measurementId: "G-JJRY2VHEJX"));
+        options: FirebaseOptions(
+          apiKey: "AIzaSyDz7PsfXEAnJXY7Jc1cAq4ueKnbwZ2X9to",
+          authDomain: "workshopmanagementsystem-c80c6.firebaseapp.com",
+          projectId: "workshopmanagementsystem-c80c6",
+          storageBucket: "workshopmanagementsystem-c80c6.firebasestorage.app",
+          messagingSenderId: "189887749916",
+          appId: "1:189887749916:web:d0f9a9d2b4e009472ce4d9",
+          measurementId: "G-JJRY2VHEJX",
+        ),
+      );
     } else {
       await Firebase.initializeApp();
     }
@@ -63,7 +64,8 @@ class MyApp extends StatelessWidget {
       title: 'Pomen.IO',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color.fromARGB(255, 23, 80, 202)),
+          seedColor: const Color.fromARGB(255, 23, 80, 202),
+        ),
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
@@ -190,15 +192,15 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
 
-  String get currentUserRole => 'foremen'; // Replace with real logic
+  String get currentUserRole => 'workshop_owner'; // Replace with real logic
   String get currentUserId => FirebaseAuth.instance.currentUser?.uid ?? '';
   Map<String, dynamic> get currentUserData => {}; // Fetch from Firestore
 
   List<Widget> get _pages => [
     const Center(child: Text('Workshop Management System App Home Page')),
-    SelectSchedulePage(),
-    //ListSchedulePage(),
-    currentUserRole == 'foremen'
+    //SelectSchedulePage(),
+    ListSchedulePage(),
+    currentUserRole == 'workshop_owner'
         ? ViewProfilePageForeman(foremanId: currentUserId)
         : ViewProfilePageWorkshopOwner(workshopOwnerId: currentUserId),
     const Center(child: Text('Inventory Page')),

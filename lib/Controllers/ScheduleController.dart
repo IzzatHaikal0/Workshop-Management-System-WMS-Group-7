@@ -11,19 +11,28 @@ class ScheduleController {
 
   // Function to fetch schedules from Firestore
   Stream<List<Schedule>> getSchedules() {
-    return _firestore.collection('WorkshopSchedule').snapshots().map((
-      snapshot,
-    ) {
-      return snapshot.docs.map((doc) {
-        return Schedule.fromFirestore(doc);
-      }).toList();
-    });
+    return _firestore
+        .collection('WorkshopSchedule')
+        .where('status', isNotEqualTo: 'accepted')
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs.map((doc) {
+            return Schedule.fromFirestore(doc);
+          }).toList();
+        });
   }
 
   // Add new schedule to Firestore
+  // Add new schedule to Firestore
   Future<void> addSchedule(Schedule schedule) async {
+    final String uid =
+        FirebaseAuth.instance.currentUser!.uid; // Get logged-in foreman UID
+
     try {
-      await _firestore.collection('WorkshopSchedule').add(schedule.toJson());
+      // Convert Schedule to JSON and add workshopOwnerId
+      final scheduleData = schedule.toJson()..['workshopOwnerId'] = uid;
+
+      await _firestore.collection('WorkshopSchedule').add(scheduleData);
       debugPrint('Schedule added successfully');
     } catch (e) {
       debugPrint('Failed to add schedule: $e');
@@ -44,7 +53,6 @@ class ScheduleController {
     }
   }
 
- 
   //function to get the schedule based on the workshop owner id
   Future<Schedule?> getScheduleById(String docId) async {
     final doc =
@@ -96,5 +104,19 @@ class ScheduleController {
           (snapshot) =>
               snapshot.docs.map((doc) => Schedule.fromFirestore(doc)).toList(),
         );
+  }
+
+  Stream<List<Schedule>> getSchedulesByOwnerId() {
+    final String uid = FirebaseAuth.instance.currentUser!.uid;
+
+    return FirebaseFirestore.instance
+        .collection('WorkshopSchedule')
+        .where('workshopOwnerId', isEqualTo: uid)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => Schedule.fromFirestore(doc))
+              .toList();
+        });
   }
 }

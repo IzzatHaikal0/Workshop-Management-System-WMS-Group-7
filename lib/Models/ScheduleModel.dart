@@ -8,6 +8,7 @@ class Schedule {
   final int salaryRate;
   final double totalHours;
   final String? docId;
+  final String status; // Default status
 
   Schedule({
     //required this.ScheduleID,
@@ -17,6 +18,7 @@ class Schedule {
     required this.salaryRate,
     required this.totalHours,
     required this.docId,
+    this.status = 'pending', // Default to 'pending'
   });
 
   // Proper factory method
@@ -32,6 +34,7 @@ class Schedule {
           (data['totalHours'] as num?)?.toDouble() ??
           0.0, // Default to 0 if not present
       docId: doc.id,
+      status:data['status'] ?? 'pending', // Default to 'pending' if not present
     );
   }
 
@@ -43,6 +46,7 @@ class Schedule {
       salaryRate: map['salaryRate'] ?? 0,
       totalHours: (map['totalHours'] ?? 0).toDouble(),
       docId: docId,
+       status: map['status'] ?? 'pending',
     );
   }
 
@@ -54,6 +58,7 @@ class Schedule {
       'scheduleDate': Timestamp.fromDate(scheduleDate),
       'salaryRate': salaryRate,
       'totalHours': totalHours,
+      'status': status, // Include status in the map
     };
   }
 }
