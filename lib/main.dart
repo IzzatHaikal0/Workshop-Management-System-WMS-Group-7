@@ -8,6 +8,7 @@ import '../Screens/firebase_options.dart';
 import 'Screens/Registration/manage_registration_barrel.dart';
 import 'Screens/welcome_screen.dart';
 import 'Screens/Profile/manage_profile_barrel.dart';
+import 'Screens/workshop_homepage.dart'; // <-- NEW IMPORT
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -157,15 +158,16 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
   String? currentUserRole;
+  String userName = '';
   final String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
   @override
   void initState() {
     super.initState();
-    fetchUserRole();
+    fetchUserRoleAndName();
   }
 
-  Future<void> fetchUserRole() async {
+  Future<void> fetchUserRoleAndName() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
 
@@ -180,10 +182,12 @@ class _MyHomePageState extends State<MyHomePage> {
     if (foremanDoc.exists) {
       setState(() {
         currentUserRole = 'foreman';
+        userName = foremanDoc.data()?['first_name'] ?? 'Foreman';
       });
     } else if (workshopOwnerDoc.exists) {
       setState(() {
         currentUserRole = 'workshop_owner';
+        userName = workshopOwnerDoc.data()?['firstName'] ?? 'Workshop Owner';
       });
     }
   }
@@ -194,13 +198,24 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  Widget roleIcon(String? role) {
+    switch (role) {
+      case 'foreman':
+        return const Icon(Icons.engineering, color: Colors.white);
+      case 'workshop_owner':
+        return const Icon(Icons.business, color: Colors.white);
+      default:
+        return const Icon(Icons.person, color: Colors.white);
+    }
+  }
+
   List<Widget> get _pages {
     if (currentUserRole == null) {
       return [const Center(child: CircularProgressIndicator())];
     }
 
     return [
-      const Center(child: Text('Workshop Management System App Home Page')),
+      const WorkshopHomePage(),
       const Center(child: Text('Schedule Page')),
       currentUserRole == 'foreman'
           ? ViewProfilePageForeman(foremanId: currentUserId)
@@ -237,7 +252,13 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Row(
+          children: [
+            Text('Hi, $userName'),
+            const SizedBox(width: 8),
+            roleIcon(currentUserRole),
+          ],
+        ),
         backgroundColor: Theme.of(context).colorScheme.primary,
         actions: [
           IconButton(
