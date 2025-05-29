@@ -1,7 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
 import 'package:firebase_auth/firebase_auth.dart';
 //import '../Screens/firebase_options.dart';
 
@@ -9,8 +8,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'Screens/Registration/manage_registration_barrel.dart';
 import 'Screens/welcome_screen.dart';
 import 'Screens/Profile/manage_profile_barrel.dart';
-import 'package:workshop_management_system/Screens/ManageForemanSchedule/ListSchedulePage.dart';
-import 'package:workshop_management_system/Screens/ManageForemanSchedule/SelectSchedulePage.dart';
+import 'Screens/ManageForemanSchedule/manage_foreman_schedule_barrel.dart';
+//import 'package:workshop_management_system/Screens/ManageForemanSchedule/ListSchedulePage.dart';
+//import 'package:workshop_management_system/Screens/ManageForemanSchedule/SelectSchedulePage.dart';
+//import 'package:workshop_management_system/Screens/ManageForemanSchedule/AddSchedulePage.dart';
+//import 'package:workshop_management_system/Screens/ManageForemanSchedule/EditSchedulePage.dart';
 //import 'package:workshop_management_system/Screens/ManageRating/RatingPage.dart';
 
 void main() async {
@@ -53,6 +55,11 @@ class AppRoutes {
   static const String profileAddWorkshopOwner = '/profile/add/workshop_owner';
   static const String profileEditForeman = '/profile/edit/foreman';
   static const String profileEditWorkshopOwner = '/profile/edit/workshop_owner';
+
+  static const String scheduleList = '/schedule/list';
+  static const String scheduleSelect = '/schedule/select';
+  static const String scheduleAdd = '/schedule/add';
+  static const String scheduleEdit = '/schedule/edit';
 }
 
 class MyApp extends StatelessWidget {
@@ -131,7 +138,28 @@ class MyApp extends StatelessWidget {
                     workshopOwnerId: args['workshopOwnerId'] ?? '',
                   ),
             );
+          /*
+          case AppRoutes.scheduleList:
+            return MaterialPageRoute(
+              builder: (_) => ListSchedulePage(),
+            );
 
+          case AppRoutes.scheduleSelect:
+            return MaterialPageRoute(
+              builder: (_) => SelectSchedulePage(),
+            );
+
+          case AppRoutes.scheduleAdd:
+            return MaterialPageRoute(
+              builder: (_) => AddSchedulePage(),
+            );
+
+          case AppRoutes.scheduleEdit:
+            final scheduleId = args['scheduleId'] as String? ?? '';
+            return MaterialPageRoute(
+              builder: (_) => EditSchedulePage(docId: scheduleId),
+            );
+            */
           default:
             return MaterialPageRoute(
               builder:
@@ -172,15 +200,6 @@ class AuthGate extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
 
   final String title;
   //final Icon icon;
