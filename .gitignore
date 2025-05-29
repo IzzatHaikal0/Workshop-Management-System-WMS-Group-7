@@ -43,3 +43,21 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+*.apk
+/build/
+
+
+# Ignore auto-generated drawables (common cause of bloat)
+android/app/src/main/res/drawable*
+android/app/src/main/res/mipmap*
+android/app/src/main/res/raw*
+
+# Android generated/temporary files
+android/app/**/android_gradle_build.json
+android/app/**/android_gradle_build_mini.json
+android/app/**/configure_fingerprint.bin
+android/app/**/metadata_generation_command.json
+android/app/**/prefab_config.json
+android/app/**/index-*.json
+android/app/**/hash_key.txt
