@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -92,7 +93,7 @@ class MyApp extends StatelessWidget {
           case AppRoutes.profileEditForeman:
             return MaterialPageRoute(
               builder:
-                  (_) => EditProfilePageForeman(
+                  (_) => AddProfilePageForeman(
                     existingProfile: args['existingProfile'] ?? {},
                     foremanId: args['foremanId'] ?? '',
                   ),
@@ -101,7 +102,7 @@ class MyApp extends StatelessWidget {
           case AppRoutes.profileEditWorkshopOwner:
             return MaterialPageRoute(
               builder:
-                  (_) => EditProfilePageWorkshopOwner(
+                  (_) => AddProfilePageWorkshopOwner(
                     existingProfile: args['existingProfile'] ?? {},
                     workshopOwnerId: args['workshopOwnerId'] ?? '',
                   ),
@@ -155,24 +156,57 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
+  String? currentUserRole;
+  final String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
-  String get currentUserRole => 'foreman'; // Replace with real logic
-  String get currentUserId => FirebaseAuth.instance.currentUser?.uid ?? '';
-  Map<String, dynamic> get currentUserData => {}; // Fetch from Firestore
+  @override
+  void initState() {
+    super.initState();
+    fetchUserRole();
+  }
 
-  List<Widget> get _pages => [
-    const Center(child: Text('Workshop Management System App Home Page')),
-    const Center(child: Text('Schedule Page')),
-    currentUserRole == 'foreman'
-        ? ViewProfilePageForeman(foremanId: currentUserId)
-        : ViewProfilePageWorkshopOwner(workshopOwnerId: currentUserId),
-    const Center(child: Text('Inventory Page')),
-  ];
+  Future<void> fetchUserRole() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final foremanDoc =
+        await FirebaseFirestore.instance.collection('foremen').doc(uid).get();
+    final workshopOwnerDoc =
+        await FirebaseFirestore.instance
+            .collection('workshop_owner')
+            .doc(uid)
+            .get();
+
+    if (foremanDoc.exists) {
+      setState(() {
+        currentUserRole = 'foreman';
+      });
+    } else if (workshopOwnerDoc.exists) {
+      setState(() {
+        currentUserRole = 'workshop_owner';
+      });
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  List<Widget> get _pages {
+    if (currentUserRole == null) {
+      return [const Center(child: CircularProgressIndicator())];
+    }
+
+    return [
+      const Center(child: Text('Workshop Management System App Home Page')),
+      const Center(child: Text('Schedule Page')),
+      currentUserRole == 'foreman'
+          ? ViewProfilePageForeman(foremanId: currentUserId)
+          : ViewProfilePageWorkshopOwner(workshopOwnerId: currentUserId),
+      const Center(child: Text('Inventory Page')),
+    ];
   }
 
   Future<void> _confirmLogout() async {

@@ -7,23 +7,23 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-class EditProfilePageWorkshopOwner extends StatefulWidget {
+class AddProfilePageWorkshopOwner extends StatefulWidget {
   final String workshopOwnerId;
   final Map<String, dynamic> existingProfile;
 
-  const EditProfilePageWorkshopOwner({
+  const AddProfilePageWorkshopOwner({
     super.key,
     required this.workshopOwnerId,
     required this.existingProfile,
   });
 
   @override
-  State<EditProfilePageWorkshopOwner> createState() =>
-      _EditProfilePageWorkshopOwnerState();
+  State<AddProfilePageWorkshopOwner> createState() =>
+      _AddProfilePageWorkshopOwnerState();
 }
 
-class _EditProfilePageWorkshopOwnerState
-    extends State<EditProfilePageWorkshopOwner> {
+class _AddProfilePageWorkshopOwnerState
+    extends State<AddProfilePageWorkshopOwner> {
   final _formKey = GlobalKey<FormState>();
 
   late final TextEditingController _firstNameController;
@@ -155,7 +155,7 @@ class _EditProfilePageWorkshopOwnerState
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully')),
+        const SnackBar(content: Text('Profile has been successfully added')),
       );
       Navigator.pop(context, true);
     } catch (e) {
@@ -173,10 +173,8 @@ class _EditProfilePageWorkshopOwnerState
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('Confirm Update'),
-            content: const Text(
-              'Are you sure you want to update this profile?',
-            ),
+            title: const Text('Confirm Add'),
+            content: const Text('Are you sure you want to add this profile?'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
@@ -229,7 +227,13 @@ class _EditProfilePageWorkshopOwnerState
         _pickedImage != null || _webImageBytes != null;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Workshop Owner Profile')),
+      appBar: AppBar(
+        title: Text(
+          widget.existingProfile.isEmpty
+              ? 'Add Workshop Owner Profile'
+              : 'Add Workshop Owner Profile',
+        ),
+      ),
       body:
           _isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -300,7 +304,7 @@ class _EditProfilePageWorkshopOwnerState
                               child: Text(
                                 isNewImageSelected
                                     ? 'New image selected. Will be uploaded when you save.'
-                                    : 'Tap pencil icon to change profile picture',
+                                    : 'Tap pencil icon to add profile picture',
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontSize: 14,
@@ -313,133 +317,182 @@ class _EditProfilePageWorkshopOwnerState
                               controller: _firstNameController,
                               decoration: const InputDecoration(
                                 labelText: 'First Name',
+                                border: OutlineInputBorder(),
                                 prefixIcon: Icon(Icons.person),
                               ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Please enter first name';
-                                }
-                                return null;
-                              },
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
+
                             TextFormField(
                               controller: _lastNameController,
                               decoration: const InputDecoration(
                                 labelText: 'Last Name',
+                                border: OutlineInputBorder(),
                                 prefixIcon: Icon(Icons.person_outline),
                               ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Please enter last name';
-                                }
-                                return null;
-                              },
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
+
                             TextFormField(
                               controller: _emailController,
-                              keyboardType: TextInputType.emailAddress,
                               decoration: const InputDecoration(
                                 labelText: 'Email',
+                                border: OutlineInputBorder(),
                                 prefixIcon: Icon(Icons.email),
                               ),
+                              keyboardType: TextInputType.emailAddress,
                               validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Please enter email';
+                                if (value == null || value.isEmpty) {
+                                  return 'Required';
                                 }
-                                if (!RegExp(
-                                  r'^[\w-\.]+@([\w-]+\.)+[\w]{2,4}$',
-                                ).hasMatch(value.trim())) {
-                                  return 'Please enter a valid email';
+                                final emailRegex = RegExp(
+                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                );
+                                if (!emailRegex.hasMatch(value)) {
+                                  return 'Invalid email format';
                                 }
                                 return null;
                               },
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
+
                             TextFormField(
                               controller: _phoneNumberController,
-                              keyboardType: TextInputType.phone,
                               decoration: const InputDecoration(
                                 labelText: 'Phone Number',
+                                border: OutlineInputBorder(),
                                 prefixIcon: Icon(Icons.phone),
                               ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Please enter phone number';
-                                }
-                                return null;
-                              },
+                              keyboardType: TextInputType.phone,
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
+
                             TextFormField(
                               controller: _workshopNameController,
                               decoration: const InputDecoration(
                                 labelText: 'Workshop Name',
-                                prefixIcon: Icon(Icons.work),
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.business),
                               ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Please enter workshop name';
-                                }
-                                return null;
-                              },
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
+
                             TextFormField(
                               controller: _workshopAddressController,
-                              maxLines: 2,
                               decoration: const InputDecoration(
                                 labelText: 'Workshop Address',
+                                border: OutlineInputBorder(),
                                 prefixIcon: Icon(Icons.location_on),
                               ),
+                              maxLines: 2,
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
+                            ),
+                            const SizedBox(height: 16),
+
+                            TextFormField(
+                              controller: _workshopPhoneController,
+                              decoration: const InputDecoration(
+                                labelText: 'Workshop Phone',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.phone_android),
+                              ),
+                              keyboardType: TextInputType.phone,
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
+                            ),
+                            const SizedBox(height: 16),
+
+                            TextFormField(
+                              controller: _workshopEmailController,
+                              decoration: const InputDecoration(
+                                labelText: 'Workshop Email',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.email_outlined),
+                              ),
+                              keyboardType: TextInputType.emailAddress,
                               validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Please enter workshop address';
+                                if (value == null || value.isEmpty) {
+                                  return 'Required';
+                                }
+                                final emailRegex = RegExp(
+                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                );
+                                if (!emailRegex.hasMatch(value)) {
+                                  return 'Invalid email format';
                                 }
                                 return null;
                               },
                             ),
-                            const SizedBox(height: 12),
-                            TextFormField(
-                              controller: _workshopPhoneController,
-                              keyboardType: TextInputType.phone,
-                              decoration: const InputDecoration(
-                                labelText: 'Workshop Phone',
-                                prefixIcon: Icon(Icons.phone_android),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            TextFormField(
-                              controller: _workshopEmailController,
-                              keyboardType: TextInputType.emailAddress,
-                              decoration: const InputDecoration(
-                                labelText: 'Workshop Email',
-                                prefixIcon: Icon(Icons.email_outlined),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
+
                             TextFormField(
                               controller: _workshopOperationHourController,
                               decoration: const InputDecoration(
                                 labelText: 'Workshop Operation Hour',
+                                border: OutlineInputBorder(),
                                 prefixIcon: Icon(Icons.access_time),
                               ),
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
+
                             TextFormField(
                               controller: _workshopDetailController,
-                              maxLines: 3,
                               decoration: const InputDecoration(
                                 labelText: 'Workshop Detail',
-                                prefixIcon: Icon(Icons.details),
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.description),
                               ),
+                              maxLines: 3,
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 30),
+
                             ElevatedButton.icon(
-                              onPressed: _confirmAndSaveProfile,
+                              onPressed:
+                                  _isLoading ? null : _confirmAndSaveProfile,
                               icon: const Icon(Icons.save),
-                              label: const Text('Update Profile'),
+                              label: const Text('Add Profile'),
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                              ),
                             ),
                           ],
                         ),

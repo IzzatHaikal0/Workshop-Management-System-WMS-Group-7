@@ -7,40 +7,35 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-class EditProfilePageWorkshopOwner extends StatefulWidget {
-  final String workshopOwnerId;
+class AddProfilePageForeman extends StatefulWidget {
+  final String foremanId;
   final Map<String, dynamic> existingProfile;
 
-  const EditProfilePageWorkshopOwner({
+  const AddProfilePageForeman({
     super.key,
-    required this.workshopOwnerId,
+    required this.foremanId,
     required this.existingProfile,
   });
 
   @override
-  State<EditProfilePageWorkshopOwner> createState() =>
-      _EditProfilePageWorkshopOwnerState();
+  State<AddProfilePageForeman> createState() => _AddProfilePageForemanState();
 }
 
-class _EditProfilePageWorkshopOwnerState
-    extends State<EditProfilePageWorkshopOwner> {
+class _AddProfilePageForemanState extends State<AddProfilePageForeman> {
   final _formKey = GlobalKey<FormState>();
 
   late final TextEditingController _firstNameController;
   late final TextEditingController _lastNameController;
   late final TextEditingController _emailController;
   late final TextEditingController _phoneNumberController;
-  late final TextEditingController _workshopNameController;
-  late final TextEditingController _workshopAddressController;
-  late final TextEditingController _workshopPhoneController;
-  late final TextEditingController _workshopEmailController;
-  late final TextEditingController _workshopOperationHourController;
-  late final TextEditingController _workshopDetailController;
+  late final TextEditingController _foremanAddressController;
+  late final TextEditingController _foremanSkillsController;
+  late final TextEditingController _foremanWorkExperienceController;
 
   String? _profileImageUrl;
 
-  File? _pickedImage;
-  Uint8List? _webImageBytes;
+  File? _pickedImage; // For mobile
+  Uint8List? _webImageBytes; // For web
 
   bool _isLoading = false;
 
@@ -49,32 +44,24 @@ class _EditProfilePageWorkshopOwnerState
     super.initState();
     final data = widget.existingProfile;
 
-    _firstNameController = TextEditingController(text: data['firstName'] ?? '');
-    _lastNameController = TextEditingController(text: data['lastName'] ?? '');
+    _firstNameController = TextEditingController(
+      text: data['first_name'] ?? '',
+    );
+    _lastNameController = TextEditingController(text: data['last_name'] ?? '');
     _emailController = TextEditingController(text: data['email'] ?? '');
     _phoneNumberController = TextEditingController(
-      text: data['phoneNumber'] ?? '',
+      text: data['phone_number'] ?? '',
     );
-    _workshopNameController = TextEditingController(
-      text: data['workshopName'] ?? '',
+    _foremanAddressController = TextEditingController(
+      text: data['foremanAddress'] ?? '',
     );
-    _workshopAddressController = TextEditingController(
-      text: data['workshopAddress'] ?? '',
+    _foremanSkillsController = TextEditingController(
+      text: data['foremanSkills'] ?? '',
     );
-    _workshopPhoneController = TextEditingController(
-      text: data['workshopPhone'] ?? '',
+    _foremanWorkExperienceController = TextEditingController(
+      text: data['foremanWorkExperience'] ?? '',
     );
-    _workshopEmailController = TextEditingController(
-      text: data['workshopEmail'] ?? '',
-    );
-    _workshopOperationHourController = TextEditingController(
-      text: data['workshopOperationHour'] ?? '',
-    );
-    _workshopDetailController = TextEditingController(
-      text: data['workshopDetail'] ?? '',
-    );
-
-    _profileImageUrl = data['workshopProfilePicture'];
+    _profileImageUrl = data['foremanProfilePicture'];
   }
 
   Future<void> _pickImage() async {
@@ -109,7 +96,7 @@ class _EditProfilePageWorkshopOwnerState
     if (_pickedImage == null && _webImageBytes == null) return _profileImageUrl;
 
     final ref = FirebaseStorage.instance.ref().child(
-      'workshop_owners/$userId/profile.jpg',
+      'foremen/$userId/profile.jpg',
     );
 
     UploadTask uploadTask;
@@ -134,28 +121,25 @@ class _EditProfilePageWorkshopOwnerState
     setState(() => _isLoading = true);
 
     try {
-      final imageUrl = await _uploadProfileImage(widget.workshopOwnerId);
+      final imageUrl = await _uploadProfileImage(widget.foremanId);
       await FirebaseFirestore.instance
-          .collection('workshop_owner')
-          .doc(widget.workshopOwnerId)
+          .collection('foremen')
+          .doc(widget.foremanId)
           .update({
-            'firstName': _firstNameController.text.trim(),
-            'lastName': _lastNameController.text.trim(),
+            'first_name': _firstNameController.text.trim(),
+            'last_name': _lastNameController.text.trim(),
             'email': _emailController.text.trim(),
-            'phoneNumber': _phoneNumberController.text.trim(),
-            'workshopName': _workshopNameController.text.trim(),
-            'workshopAddress': _workshopAddressController.text.trim(),
-            'workshopPhone': _workshopPhoneController.text.trim(),
-            'workshopEmail': _workshopEmailController.text.trim(),
-            'workshopOperationHour':
-                _workshopOperationHourController.text.trim(),
-            'workshopDetail': _workshopDetailController.text.trim(),
-            'workshopProfilePicture': imageUrl,
+            'phone_number': _phoneNumberController.text.trim(),
+            'foremanAddress': _foremanAddressController.text.trim(),
+            'foremanSkills': _foremanSkillsController.text.trim(),
+            'foremanWorkExperience':
+                _foremanWorkExperienceController.text.trim(),
+            'foremanProfilePicture': imageUrl,
           });
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully')),
+        const SnackBar(content: Text('Profile has been successfully added')),
       );
       Navigator.pop(context, true);
     } catch (e) {
@@ -168,31 +152,29 @@ class _EditProfilePageWorkshopOwnerState
     }
   }
 
-  Future<void> _confirmAndSaveProfile() async {
-    final shouldSave = await showDialog<bool>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Confirm Update'),
-            content: const Text(
-              'Are you sure you want to update this profile?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
+  // Confirmation dialog method:
+  Future<bool> _showConfirmationDialog() async {
+    return await showDialog<bool>(
+          context: context,
+          builder:
+              (context) => AlertDialog(
+                title: const Text('Confirm Add Profile'),
+                content: const Text(
+                  'Are you sure you want to add this profile?',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('Cancel'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: const Text('Confirm'),
+                  ),
+                ],
               ),
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Confirm'),
-              ),
-            ],
-          ),
-    );
-
-    if (shouldSave == true) {
-      await _saveProfile();
-    }
+        ) ??
+        false;
   }
 
   @override
@@ -201,12 +183,9 @@ class _EditProfilePageWorkshopOwnerState
     _lastNameController.dispose();
     _emailController.dispose();
     _phoneNumberController.dispose();
-    _workshopNameController.dispose();
-    _workshopAddressController.dispose();
-    _workshopPhoneController.dispose();
-    _workshopEmailController.dispose();
-    _workshopOperationHourController.dispose();
-    _workshopDetailController.dispose();
+    _foremanAddressController.dispose();
+    _foremanSkillsController.dispose();
+    _foremanWorkExperienceController.dispose();
     super.dispose();
   }
 
@@ -229,7 +208,13 @@ class _EditProfilePageWorkshopOwnerState
         _pickedImage != null || _webImageBytes != null;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Workshop Owner Profile')),
+      appBar: AppBar(
+        title: Text(
+          widget.existingProfile.isEmpty
+              ? 'Add Foreman Profile'
+              : 'Add Foreman Profile',
+        ),
+      ),
       body:
           _isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -300,7 +285,7 @@ class _EditProfilePageWorkshopOwnerState
                               child: Text(
                                 isNewImageSelected
                                     ? 'New image selected. Will be uploaded when you save.'
-                                    : 'Tap pencil icon to change profile picture',
+                                    : 'Tap pencil icon to add profile picture',
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontSize: 14,
@@ -309,137 +294,152 @@ class _EditProfilePageWorkshopOwnerState
                             ),
                             const SizedBox(height: 24),
 
+                            // First Name
                             TextFormField(
                               controller: _firstNameController,
                               decoration: const InputDecoration(
                                 labelText: 'First Name',
+                                border: OutlineInputBorder(),
                                 prefixIcon: Icon(Icons.person),
                               ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Please enter first name';
-                                }
-                                return null;
-                              },
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
+
+                            // Last Name
                             TextFormField(
                               controller: _lastNameController,
                               decoration: const InputDecoration(
                                 labelText: 'Last Name',
+                                border: OutlineInputBorder(),
                                 prefixIcon: Icon(Icons.person_outline),
                               ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Please enter last name';
-                                }
-                                return null;
-                              },
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
+
+                            // Email
                             TextFormField(
                               controller: _emailController,
                               keyboardType: TextInputType.emailAddress,
                               decoration: const InputDecoration(
                                 labelText: 'Email',
+                                border: OutlineInputBorder(),
                                 prefixIcon: Icon(Icons.email),
                               ),
                               validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Please enter email';
+                                if (value == null || value.isEmpty) {
+                                  return 'Required';
                                 }
-                                if (!RegExp(
-                                  r'^[\w-\.]+@([\w-]+\.)+[\w]{2,4}$',
-                                ).hasMatch(value.trim())) {
-                                  return 'Please enter a valid email';
+                                final emailRegex = RegExp(
+                                  r'^[^@]+@[^@]+\.[^@]+',
+                                );
+                                if (!emailRegex.hasMatch(value)) {
+                                  return 'Invalid email';
                                 }
                                 return null;
                               },
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
+
+                            // Phone Number
                             TextFormField(
                               controller: _phoneNumberController,
                               keyboardType: TextInputType.phone,
                               decoration: const InputDecoration(
                                 labelText: 'Phone Number',
+                                border: OutlineInputBorder(),
                                 prefixIcon: Icon(Icons.phone),
                               ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Please enter phone number';
-                                }
-                                return null;
-                              },
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
+
+                            // Foreman Address
                             TextFormField(
-                              controller: _workshopNameController,
+                              controller: _foremanAddressController,
                               decoration: const InputDecoration(
-                                labelText: 'Workshop Name',
-                                prefixIcon: Icon(Icons.work),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Please enter workshop name';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 12),
-                            TextFormField(
-                              controller: _workshopAddressController,
-                              maxLines: 2,
-                              decoration: const InputDecoration(
-                                labelText: 'Workshop Address',
+                                labelText: 'Address',
+                                border: OutlineInputBorder(),
                                 prefixIcon: Icon(Icons.location_on),
                               ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Please enter workshop address';
-                                }
-                                return null;
-                              },
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
+
+                            // Foreman Skills
                             TextFormField(
-                              controller: _workshopPhoneController,
-                              keyboardType: TextInputType.phone,
+                              controller: _foremanSkillsController,
                               decoration: const InputDecoration(
-                                labelText: 'Workshop Phone',
-                                prefixIcon: Icon(Icons.phone_android),
+                                labelText: 'Skills',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.build),
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
+
+                            // Foreman Work Experience
                             TextFormField(
-                              controller: _workshopEmailController,
-                              keyboardType: TextInputType.emailAddress,
+                              controller: _foremanWorkExperienceController,
                               decoration: const InputDecoration(
-                                labelText: 'Workshop Email',
-                                prefixIcon: Icon(Icons.email_outlined),
+                                labelText: 'Work Experience',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.work),
                               ),
                             ),
-                            const SizedBox(height: 12),
-                            TextFormField(
-                              controller: _workshopOperationHourController,
-                              decoration: const InputDecoration(
-                                labelText: 'Workshop Operation Hour',
-                                prefixIcon: Icon(Icons.access_time),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            TextFormField(
-                              controller: _workshopDetailController,
-                              maxLines: 3,
-                              decoration: const InputDecoration(
-                                labelText: 'Workshop Detail',
-                                prefixIcon: Icon(Icons.details),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 32),
+
                             ElevatedButton.icon(
-                              onPressed: _confirmAndSaveProfile,
-                              icon: const Icon(Icons.save),
-                              label: const Text('Update Profile'),
+                              onPressed:
+                                  _isLoading
+                                      ? null
+                                      : () async {
+                                        final confirmed =
+                                            await _showConfirmationDialog();
+                                        if (confirmed) {
+                                          await _saveProfile();
+                                        }
+                                      },
+                              icon:
+                                  _isLoading
+                                      ? const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                      : const Icon(Icons.save),
+                              label: const Text('Add Profile'),
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                textStyle: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                           ],
                         ),
