@@ -5,7 +5,7 @@ import 'package:workshop_management_system/Screens/ManageRating/AddRatingPage.da
 import 'package:workshop_management_system/Screens/ManageRating/EditRatingPage.dart';
 
 class RatingPage extends StatefulWidget {
-  RatingPage({super.key});
+  const RatingPage({super.key});
 
   @override
   State<RatingPage> createState() => _RatingPageState();
@@ -18,8 +18,12 @@ class Rating {
   final String? comment;
   final int score;
 
-  Rating(
-      {this.foremanName, this.workshopName, this.comment, required this.score});
+  Rating({
+    this.foremanName,
+    this.workshopName,
+    this.comment,
+    required this.score,
+  });
 }
 
 class _RatingPageState extends State<RatingPage> {
@@ -30,43 +34,50 @@ class _RatingPageState extends State<RatingPage> {
   //DUMMY DELETE LATER
   final List<Rating> ratedRatings = [
     Rating(
-        foremanName: "Ahmad Albab bin Mahmud",
-        workshopName: "Jeng Jeng Jeng Workshop",
-        comment: "Very good",
-        score: 5),
+      foremanName: "Ahmad Albab bin Mahmud",
+      workshopName: "Jeng Jeng Jeng Workshop",
+      comment: "Very good",
+      score: 5,
+    ),
     Rating(
-        foremanName: "Ali Haidar bin Ali Baba",
-        workshopName: "Brother Motorworks",
-        comment: "Average service",
-        score: 3),
+      foremanName: "Ali Haidar bin Ali Baba",
+      workshopName: "Brother Motorworks",
+      comment: "Average service",
+      score: 3,
+    ),
     Rating(
-        foremanName: "Wong Sing Kio",
-        workshopName: "Brother Motorworks",
-        comment: "",
-        score: 4),
+      foremanName: "Wong Sing Kio",
+      workshopName: "Brother Motorworks",
+      comment: "",
+      score: 4,
+    ),
   ];
 
   final List<Rating> unratedRatings = [
     Rating(
-        foremanName: "Ahmad Albab bin Mahmud",
-        workshopName: "Foreman",
-        score: 0,
-        comment: ""),
+      foremanName: "Ahmad Albab bin Mahmud",
+      workshopName: "Foreman",
+      score: 0,
+      comment: "",
+    ),
     Rating(
-        foremanName: "ali haidar bin ali baba",
-        workshopName: "Foreman",
-        score: 0,
-        comment: ""),
+      foremanName: "ali haidar bin ali baba",
+      workshopName: "Foreman",
+      score: 0,
+      comment: "",
+    ),
     Rating(
-        foremanName: "Jeng Jeng Jeng Workshop Sdn Bhd",
-        workshopName: "Workshop",
-        score: 0,
-        comment: ""),
+      foremanName: "Jeng Jeng Jeng Workshop Sdn Bhd",
+      workshopName: "Workshop",
+      score: 0,
+      comment: "",
+    ),
     Rating(
-        foremanName: "Brother Motorworks Sdn Bhd",
-        workshopName: "Workshop",
-        score: 0,
-        comment: ""),
+      foremanName: "Brother Motorworks Sdn Bhd",
+      workshopName: "Workshop",
+      score: 0,
+      comment: "",
+    ),
   ];
 
   @override
@@ -142,13 +153,14 @@ class _RatingPageState extends State<RatingPage> {
                   // Then apply your search filter
                   List<Rating> filteredRatings =
                       selectedRatings.where((rating) {
-                    final foreman = rating.foremanName?.toLowerCase() ?? '';
-                    final workshop = rating.workshopName?.toLowerCase() ?? '';
-                    final comment = rating.comment?.toLowerCase() ?? '';
-                    return foreman.contains(searchQuery) ||
-                        workshop.contains(searchQuery) ||
-                        comment.contains(searchQuery);
-                  }).toList();
+                        final foreman = rating.foremanName?.toLowerCase() ?? '';
+                        final workshop =
+                            rating.workshopName?.toLowerCase() ?? '';
+                        final comment = rating.comment?.toLowerCase() ?? '';
+                        return foreman.contains(searchQuery) ||
+                            workshop.contains(searchQuery) ||
+                            comment.contains(searchQuery);
+                      }).toList();
 
                   if (filteredRatings.isEmpty) {
                     return Center(child: Text('No matching ratings found.'));
@@ -171,45 +183,47 @@ class _RatingPageState extends State<RatingPage> {
                           ),
                           title: Text(r.foremanName!),
                           subtitle: Text(r.workshopName!),
-                          trailing: isNewSelected
-                              // “New” tab shows the rate button
-                              ? FilledButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => AddRatingPage(),
+                          trailing:
+                              isNewSelected
+                                  // “New” tab shows the rate button
+                                  ? FilledButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => AddRatingPage(),
+                                        ),
+                                      );
+                                    },
+                                    child: Text('rate'),
+                                  )
+                                  // “History” tab shows the score
+                                  : Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        '${r.score} ★',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
                                       ),
-                                    );
-                                  },
-                                  child: Text('rate'),
-                                )
-                              // “History” tab shows the score
-                              : Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      '${r.score} ★',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
+                                      SizedBox(width: 8),
+                                      FilledButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder:
+                                                  (_) =>
+                                                      EditRatingPage(), // Reuse or create edit version
+                                            ),
+                                          );
+                                        },
+                                        child: Text('Edit'),
                                       ),
-                                    ),
-                                    SizedBox(width: 8),
-                                    FilledButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) =>
-                                                EditRatingPage(), // Reuse or create edit version
-                                          ),
-                                        );
-                                      },
-                                      child: Text('Edit'),
-                                    ),
-                                  ],
-                                ),
+                                    ],
+                                  ),
                           isThreeLine: true,
                         ),
                       );

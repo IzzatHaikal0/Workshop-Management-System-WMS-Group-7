@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:workshop_management_system/Controllers/ScheduleController.dart';
 import 'package:workshop_management_system/Models/ScheduleModel.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SelectSchedulePage extends StatelessWidget {
   SelectSchedulePage({super.key});
@@ -23,10 +24,12 @@ class SelectSchedulePage extends StatelessWidget {
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
-            
+
             //LIST OF ACCEPTED SCHEDULE
             StreamBuilder<List<Schedule>>(
-              stream: controller.getAcceptedSchedules(), // You must implement this method
+              stream: controller.getAcceptedSchedules(
+                FirebaseAuth.instance.currentUser!.uid,
+              ), // You must implement this method
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
@@ -39,10 +42,18 @@ class SelectSchedulePage extends StatelessWidget {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: schedules.map((schedule) {
-                      String day = DateFormat('EEEE').format(schedule.scheduleDate); // e.g., Tuesday
-                      String date = DateFormat('d MMMM yyyy').format(schedule.scheduleDate); // e.g., 1st January 2025
-                      String startTime = DateFormat('HH:mm').format(schedule.startTime);
-                      String endTime = DateFormat('HH:mm').format(schedule.endTime);
+                      String day = DateFormat(
+                        'EEEE',
+                      ).format(schedule.scheduleDate); // e.g., Tuesday
+                      String date = DateFormat('d MMMM yyyy').format(
+                        schedule.scheduleDate,
+                      ); // e.g., 1st January 2025
+                      String startTime = DateFormat(
+                        'HH:mm',
+                      ).format(schedule.startTime);
+                      String endTime = DateFormat(
+                        'HH:mm',
+                      ).format(schedule.endTime);
 
                       return Container(
                         width: double.infinity,
@@ -57,12 +68,18 @@ class SelectSchedulePage extends StatelessWidget {
                           children: [
                             Text(
                               "$day, $startTime - $endTime",
-                              style: TextStyle(color: Colors.white, fontSize: 16),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
                             ),
                             SizedBox(height: 4),
                             Text(
                               date,
-                              style: TextStyle(color: Colors.white70, fontSize: 14),
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
                             ),
                           ],
                         ),
@@ -74,10 +91,6 @@ class SelectSchedulePage extends StatelessWidget {
             ),
             //FIX THIS --> ONLY SHOW ACCEPTED SCHEDULE BASED ON FOREMAN ID
             //GOTTA WAIT FOR MANAGE PROFILE
-
-
-
-
 
             //START OF SELECT SCHEDULE
             Padding(
@@ -102,13 +115,15 @@ class SelectSchedulePage extends StatelessWidget {
 
                   return Column(
                     children: schedules.map((schedule) {
-                      final duration =
-                          schedule.endTime.difference(schedule.startTime);
+                      final duration = schedule.endTime.difference(
+                        schedule.startTime,
+                      );
                       final totalHours = duration.isNegative
                           ? ((schedule.endTime
-                                      .add(Duration(days: 1))
-                                      .difference(schedule.startTime))
-                                  .inMinutes /
+                                  .add(Duration(days: 1))
+                                  .difference(
+                                    schedule.startTime,
+                                  )).inMinutes /
                               60)
                           : (duration.inMinutes / 60);
 
@@ -155,26 +170,39 @@ class SelectSchedulePage extends StatelessWidget {
                                           return AlertDialog(
                                             title: Text('Confirm Accept'),
                                             content: Text(
-                                                'Are you sure you want to accept this schedule?'),
+                                              'Are you sure you want to accept this schedule?',
+                                            ),
                                             actions: <Widget>[
                                               TextButton(
-                                                child: Text('Cancel',
-                                                    style: TextStyle(
-                                                        color: Colors.red)),
+                                                child: Text(
+                                                  'Cancel',
+                                                  style: TextStyle(
+                                                    color: Colors.red,
+                                                  ),
+                                                ),
                                                 onPressed: () {
-                                                  Navigator.of(context).pop();
+                                                  Navigator.of(
+                                                    context,
+                                                  ).pop();
                                                 },
                                               ),
                                               TextButton(
-                                                child: Text('Accept',
-                                                    style: TextStyle(
-                                                        color: Colors.blue)),
+                                                child: Text(
+                                                  'Accept',
+                                                  style: TextStyle(
+                                                    color: Colors.blue,
+                                                  ),
+                                                ),
                                                 onPressed: () {
-                                                  Navigator.of(context).pop();
+                                                  Navigator.of(
+                                                    context,
+                                                  ).pop();
                                                   debugPrint(
-                                                      'Accept confirmed');
+                                                    'Accept confirmed',
+                                                  );
                                                   controller.acceptSchedule(
-                                                      schedule.docId!);
+                                                    schedule.docId!,
+                                                  );
                                                   // You can add your accept logic here
                                                 },
                                               ),
@@ -183,12 +211,17 @@ class SelectSchedulePage extends StatelessWidget {
                                         },
                                       );
                                     },
-                                    icon: Icon(Icons.check, color: Colors.blue),
-                                    label: Text('Accept',
-                                        style: TextStyle(color: Colors.blue)),
+                                    icon: Icon(
+                                      Icons.check,
+                                      color: Colors.blue,
+                                    ),
+                                    label: Text(
+                                      'Accept',
+                                      style: TextStyle(color: Colors.blue),
+                                    ),
                                   ),
                                 ],
-                              )
+                              ),
                             ],
                           ),
                         ),
@@ -197,7 +230,7 @@ class SelectSchedulePage extends StatelessWidget {
                   );
                 }
               },
-            )
+            ),
           ],
         ),
       ),

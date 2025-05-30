@@ -4,6 +4,8 @@ import 'package:workshop_management_system/Models/ScheduleModel.dart';
 import 'package:workshop_management_system/Screens/ManageForemanSchedule/AddSchedulePage.dart';
 import 'package:workshop_management_system/Screens/ManageForemanSchedule/EditSchedulePage.dart';
 import 'package:intl/intl.dart';
+//import 'package:firebase_auth/firebase_auth.dart';
+
 
 class ListSchedulePage extends StatelessWidget {
   ListSchedulePage({super.key});
@@ -46,7 +48,7 @@ class ListSchedulePage extends StatelessWidget {
               ),
             ),
             StreamBuilder<List<Schedule>>(
-              stream: controller.getSchedules(),
+              stream: controller.getSchedulesByOwnerId(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
