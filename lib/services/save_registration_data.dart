@@ -9,7 +9,7 @@ class SaveRegistrationData {
 
   Future<bool> saveUser(UserModel user) async {
     try {
-      // 1. Register user with Firebase Authentication
+      // Register user with Firebase Auth
       UserCredential userCredential = await _auth
           .createUserWithEmailAndPassword(
             email: user.email,
@@ -17,27 +17,16 @@ class SaveRegistrationData {
           );
 
       String uid = userCredential.user!.uid;
-      await _firestore.collection('foremen').doc(uid).set({
-        'firstName': user.firstName,
-        'lastName': user.lastName,
-        'email': user.email,
-        'phoneNumber': user.phoneNumber,
-        'role': user.userRole.toLowerCase().replaceAll(' ', '_'),
-        'createdAt': FieldValue.serverTimestamp(),
-      });
 
-      // 2. Save basic user data to 'users' collection
-      await _firestore.collection('workshop_owner').doc(uid).set({
-        'firstName': user.firstName,
-        'lastName': user.lastName,
-        'email': user.email,
-        'phoneNumber': user.phoneNumber,
-        'role': user.userRole.toLowerCase().replaceAll(' ', '_'),
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+      // Normalize role string
+      String role = user.userRole.trim().toLowerCase().replaceAll(' ', '_');
 
-      // 3. Save profile to role-specific collection
-      if (user.userRole.toLowerCase() == 'foreman') {
+      if (kDebugMode) {
+        print('Saving user with normalized role: $role');
+      }
+
+      // Save profile data to correct collection based on role
+      if (role == 'foreman') {
         await _firestore.collection('foremen').doc(uid).set({
           'first_name': user.firstName,
           'last_name': user.lastName,
@@ -47,13 +36,15 @@ class SaveRegistrationData {
           'foremanProfilePicture': '',
           'foremanSkills': '',
           'foremanWorkExperience': '',
+          'role': 'foreman',
+          'createdAt': FieldValue.serverTimestamp(),
         });
-      } else if (user.userRole.toLowerCase() == 'workshop_owner') {
-        await _firestore.collection('workshop_owners').doc(uid).set({
-          'first_name': user.firstName,
-          'last_name': user.lastName,
+      } else if (role == 'workshop_owner') {
+        await _firestore.collection('workshop_owner').doc(uid).set({
+          'firstName': user.firstName,
+          'lastName': user.lastName,
           'email': user.email,
-          'phone_number': user.phoneNumber,
+          'phoneNumber': user.phoneNumber,
           'workshopName': '',
           'workshopAddress': '',
           'workshopPhone': '',
@@ -61,13 +52,20 @@ class SaveRegistrationData {
           'workshopProfilePicture': '',
           'workshopOperationHour': '',
           'workshopDetail': '',
+          'role': 'workshop owner',
+          'createdAt': FieldValue.serverTimestamp(),
         });
+      } else {
+        if (kDebugMode) {
+          print('❌ Unknown role: $role');
+        }
+        return false;
       }
 
       return true;
     } catch (e) {
       if (kDebugMode) {
-        print('Error saving user data: $e');
+        print('🔥 Error saving user data: $e');
       }
       return false;
     }

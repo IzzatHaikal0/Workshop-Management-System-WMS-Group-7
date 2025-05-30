@@ -4,13 +4,35 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EditProfilePage extends StatelessWidget {
   final Map<String, dynamic>? existingProfile;
+  final String? role;
 
-  const EditProfilePage({super.key, this.existingProfile});
+  const EditProfilePage({super.key, this.existingProfile, this.role});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Edit Profile")),
+      body: Center(
+        child: ElevatedButton(
+          child: const Text("Simulate Save & Go Back"),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class AddProfilePage extends StatelessWidget {
+  final String? role;
+
+  const AddProfilePage({super.key, this.role});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Add Profile")),
       body: Center(
         child: ElevatedButton(
           child: const Text("Simulate Save & Go Back"),
@@ -84,6 +106,59 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
     }
   }
 
+  Future<void> _deleteProfile() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || _role == null) return;
+
+    final collectionName = _role == 'foreman' ? 'foremen' : 'workshop_owner';
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Confirm Delete'),
+            content: const Text(
+              'Are you sure you want to delete your profile?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Delete'),
+              ),
+            ],
+          ),
+    );
+
+    if (confirmed == true) {
+      setState(() => isLoading = true);
+      try {
+        await FirebaseFirestore.instance
+            .collection(collectionName)
+            .doc(user.uid)
+            .delete();
+        setState(() {
+          profileData = null;
+          isLoading = false;
+        });
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile deleted successfully')),
+        );
+      } catch (e) {
+        setState(() => isLoading = false);
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(
+          // ignore: use_build_context_synchronously
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error deleting profile: $e')));
+      }
+    }
+  }
+
   Widget _buildProfileCard(String title, List<Widget> children) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -150,15 +225,15 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
     return _buildProfileCard("Workshop Owner Details", [
       _buildInfoTile(
         "First Name",
-        profileData?['firstName'] ?? '',
+        profileData?['first_name'] ?? '',
         Icons.person,
       ),
       _buildInfoTile(
         "Last Name",
-        profileData?['lastName'] ?? '',
+        profileData?['last_name'] ?? '',
         Icons.person_outline,
       ),
-      _buildInfoTile("Phone", profileData?['phoneNumber'] ?? '', Icons.phone),
+      _buildInfoTile("Phone", profileData?['phone_number'] ?? '', Icons.phone),
       _buildInfoTile(
         "Workshop Name",
         profileData?['workshopName'] ?? '',
@@ -193,39 +268,61 @@ class _ViewProfilePageState extends State<ViewProfilePage> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    if (profileData == null || _role == null) {
-      return const Scaffold(
-        body: Center(child: Text('Profile data not found or role missing.')),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("My Profile"),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            tooltip: 'Edit Profile',
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => EditProfilePage(existingProfile: profileData),
-                ),
-              );
-              _loadProfileAndRole();
-            },
-          ),
+          if (profileData == null)
+            IconButton(
+              icon: const Icon(Icons.add),
+              tooltip: 'Add Profile',
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => AddProfilePage(role: _role),
+                  ),
+                );
+                _loadProfileAndRole();
+              },
+            ),
+          if (profileData != null) ...[
+            IconButton(
+              icon: const Icon(Icons.edit),
+              tooltip: 'Edit Profile',
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (_) => EditProfilePage(
+                          existingProfile: profileData,
+                          role: _role,
+                        ),
+                  ),
+                );
+                _loadProfileAndRole();
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete),
+              tooltip: 'Delete Profile',
+              onPressed: _deleteProfile,
+            ),
+          ],
         ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: ListView(
-          children: [
-            if (_role == 'foreman') _buildForemanProfile(),
-            if (_role == 'workshop_owner') _buildWorkshopOwnerProfile(),
-          ],
-        ),
+        child:
+            profileData == null || _role == null
+                ? const Center(child: Text('No profile data available.'))
+                : ListView(
+                  children: [
+                    if (_role == 'foreman') _buildForemanProfile(),
+                    if (_role == 'workshop_owner') _buildWorkshopOwnerProfile(),
+                  ],
+                ),
       ),
     );
   }

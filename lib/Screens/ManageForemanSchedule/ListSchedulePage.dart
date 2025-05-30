@@ -8,7 +8,7 @@ import 'package:intl/intl.dart';
 
 
 class ListSchedulePage extends StatelessWidget {
-  ListSchedulePage({super.key});
+  ListSchedulePage({super.key, required String workshopOwnerId});
   final ScheduleController controller = ScheduleController();
 
   @override
