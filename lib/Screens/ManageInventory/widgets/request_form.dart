@@ -1,18 +1,14 @@
-/*import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class RequestForm extends StatefulWidget {
-  final String initialItemName;
-  final int initialQuantity;
-  final String initialrequestBy; // workshop ID of logged-in user
-  final Function(String itemName, int quantity, String requestBy, String requestTo) onSubmit;
+  final Function(String itemName, int quantity, String? notes) onSubmit;
+  final String submitButtonText;
 
   const RequestForm({
     super.key,
-    required this.initialItemName,
-    required this.initialQuantity,
-    required this.initialrequestBy,
     required this.onSubmit,
+    required this.submitButtonText,
   });
 
   @override
@@ -21,137 +17,202 @@ class RequestForm extends StatefulWidget {
 
 class _RequestFormState extends State<RequestForm> {
   final _formKey = GlobalKey<FormState>();
-
-  late TextEditingController _itemNameController;
-  late TextEditingController _quantityController;
-
-  String? _selectedRequestTo;
-
-  // Example workshops list: Name => ID (excluding the logged-in user's workshop)
-  final Map<String, String> _workshops = {
-    'Mechanical Workshop': 'WS001',
-    'Electrical Workshop': 'WS002',
-    'Carpentry Workshop': 'WS003',
-  };
-
-  @override
-  void initState() {
-    super.initState();
-    _itemNameController = TextEditingController(text: widget.initialItemName);
-    _quantityController = TextEditingController(
-        text: widget.initialQuantity == 0 ? '' : widget.initialQuantity.toString());
-  }
+  final _itemNameController = TextEditingController();
+  final _quantityController = TextEditingController();
+  final _notesController = TextEditingController();
 
   @override
   void dispose() {
     _itemNameController.dispose();
     _quantityController.dispose();
+    _notesController.dispose();
     super.dispose();
+  }
+
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      final itemName = _itemNameController.text.trim();
+      final quantity = int.parse(_quantityController.text);
+      final notes = _notesController.text.trim().isEmpty ? null : _notesController.text.trim();
+      
+      widget.onSubmit(itemName, quantity, notes);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Filter out the logged-in user's workshop
-    final filteredWorkshops = _workshops..removeWhere((_, id) => id == widget.initialrequestBy);
-
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Item Name Field
-          TextFormField(
-            controller: _itemNameController,
-            decoration: const InputDecoration(
-              labelText: 'Item Name',
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.inventory),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter an item name';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-
-          // Quantity Field
-          TextFormField(
-            controller: _quantityController,
-            decoration: const InputDecoration(
-              labelText: 'Quantity',
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.numbers),
-            ),
-            keyboardType: TextInputType.number,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-            ],
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter a quantity';
-              }
-              if (int.tryParse(value) == null) {
-                return 'Please enter a valid number';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-
-          // Dropdown for requestTo (Other workshops)
-          DropdownButtonFormField<String>(
-            decoration: const InputDecoration(
-              labelText: 'Request To',
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.work),
-            ),
-            items: filteredWorkshops.entries.map((entry) {
-              return DropdownMenuItem<String>(
-                value: entry.value,
-                child: Text(entry.key),
-              );
-            }).toList(),
-            value: _selectedRequestTo,
-            onChanged: (value) {
-              setState(() {
-                _selectedRequestTo = value;
-              });
-            },
-            validator: (value) =>
-                value == null ? 'Please select a workshop to send the request to' : null,
-          ),
-          const SizedBox(height: 16),
-
-          // Submit Button
-          ElevatedButton(
-            onPressed: () {
-              if (_formKey.currentState!.validate()) {
-                final itemName = _itemNameController.text;
-                final quantity = int.parse(_quantityController.text);
-                final requestBy = widget.initialrequestBy;
-                final requestTo = _selectedRequestTo!;
-                widget.onSubmit(itemName, quantity, requestBy, requestTo);
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-              backgroundColor: const Color.fromARGB(255, 4, 0, 252),
-            ),
-            child: const Text(
-              'Save',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // request details
+            Card(
+              elevation: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Request Details',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    // item name
+                    TextFormField(
+                      controller: _itemNameController,
+                      decoration: InputDecoration(
+                        labelText: 'Item Name *',
+                        hintText: 'Enter the item you need',
+                        prefixIcon: const Icon(Icons.inventory_2_outlined),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[50],
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Please enter an item name';
+                        }
+                        if (value.trim().length < 2) {
+                          return 'Item name must be at least 2 characters';
+                        }
+                        return null;
+                      },
+                      textInputAction: TextInputAction.next,
+                      textCapitalization: TextCapitalization.words,
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    // quantity
+                    TextFormField(
+                      controller: _quantityController,
+                      decoration: InputDecoration(
+                        labelText: 'Quantity *',
+                        hintText: 'Enter quantity needed',
+                        prefixIcon: const Icon(Icons.numbers),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[50],
+                      ),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(6), // Max 999,999
+                      ],
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Please enter a quantity';
+                        }
+                        final quantity = int.tryParse(value);
+                        if (quantity == null || quantity <= 0) {
+                          return 'Please enter a valid quantity greater than 0';
+                        }
+                        if (quantity > 999999) {
+                          return 'Quantity cannot exceed 999,999';
+                        }
+                        return null;
+                      },
+                      textInputAction: TextInputAction.next,
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    // notes
+                    TextFormField(
+                      controller: _notesController,
+                      decoration: InputDecoration(
+                        labelText: 'Notes (Optional)',
+                        hintText: 'Additional details or specifications',
+                        prefixIcon: const Icon(Icons.note_outlined),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[50],
+                      ),
+                      maxLines: 3,
+                      maxLength: 500,
+                      textInputAction: TextInputAction.done,
+                      textCapitalization: TextCapitalization.sentences,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+            
+            const SizedBox(height: 24),
+            
+            // submit button
+            SizedBox(
+              height: 50,
+              child: ElevatedButton(
+                onPressed: _submitForm,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 2,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.send),
+                    const SizedBox(width: 8),
+                    Text(
+                      widget.submitButtonText,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // details
+            Card(
+              color: Colors.blue[50],
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: Colors.blue[700],
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Your request will be submitted to other workshop.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.blue[700],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
-*/

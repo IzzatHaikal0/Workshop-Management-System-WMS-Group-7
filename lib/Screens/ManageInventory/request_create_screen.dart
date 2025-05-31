@@ -1,127 +1,58 @@
-// ignore_for_file: use_build_context_synchronously
-/*
 import 'package:flutter/material.dart';
-import '../../Controllers/ManageInventory/request_controller.dart';
-import '../ManageInventory/widgets/request_form.dart';
+import 'package:workshop_management_system/Controllers/ManageInventory/request_controller.dart';
+import 'package:workshop_management_system/Screens/ManageInventory/widgets/request_form.dart';
 
-class RequestCreateScreen extends StatelessWidget {
+class RequestCreateScreen extends StatefulWidget {
+  const RequestCreateScreen({super.key});
+
+  @override
+  State<RequestCreateScreen> createState() => _RequestCreateScreenState();
+}
+
+class _RequestCreateScreenState extends State<RequestCreateScreen> {
   final RequestController _requestController = RequestController();
+  bool _isLoading = false;
 
-  RequestCreateScreen({super.key});
-  
+  Future<void> _createRequest(String itemName, int quantity, String? notes) async {
+    setState(() => _isLoading = true);
+
+    try {
+      final newRequest = await _requestController.createRequest(
+        itemName: itemName,
+        quantity: quantity,
+        notes: notes,
+      );
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Request created successfully')),
+        );
+        Navigator.pop(context, newRequest);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error creating request: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create New Request'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Request Details',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              
-              const SizedBox(height: 16),
-              RequestForm(
-                initialItemName: '',
-                initialQuantity: 0,
-                initialRequestTo: '',
-                onSubmit: (itemName, quantity, requestBy, requestTo) async {
-                  try {
-                    await _requestController.createRequest(
-                      
-                      itemName, 
-                      quantity,
-                      requestBy, 
-                      requestTo
-                    );
-                    
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Request submitted successfully')),
-                    );
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Failed to create new request: $e')),
-                    );
-                  }
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : RequestForm(
+              onSubmit: _createRequest,
+              submitButtonText: 'Create Request',
+            ),
     );
   }
 }
-*//*
-// ignore_for_file: use_build_context_synchronously
-
-import 'package:flutter/material.dart';
-import '../../Controllers/ManageInventory/request_controller.dart';
-import '../ManageInventory/widgets/request_form.dart';
-
-class RequestCreateScreen extends StatelessWidget {
-  final RequestController _requestController = RequestController();
-
-  // Simulated logged-in workshop ID
-  final String loggedInWorkshopId = 'WS001';
-
-  RequestCreateScreen({super.key});
-  
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create New Request'),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Request Details',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              
-              RequestForm(
-                initialItemName: '',
-                initialQuantity: 0,
-                initialrequestBy: loggedInWorkshopId,
-                onSubmit: (itemName, quantity, requestBy, requestTo) async {
-                  try {
-                    await _requestController.createRequest(
-                      itemName, 
-                      quantity,
-                      requestBy, 
-                      requestTo
-                    );
-                    
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Request submitted successfully')),
-                    );
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Failed to create new request: $e')),
-                    );
-                  }
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-*/

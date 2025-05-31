@@ -1,197 +1,147 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:workshop_management_system/Models/ManageInventory/item_model.dart';
-//import 'package:workshop_management_system/Models/ManageInventory/request_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:workshop_management_system/Models/ManageInventory/inventory_barrel.dart';
 
+class InventoryService {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-
-class InventoryDBService {
-  // Singleton pattern
-  static final InventoryDBService _instance = InventoryDBService._internal();
-  factory InventoryDBService() => _instance;
-  InventoryDBService._internal();
-  
-  // Firestore collection references
-  final CollectionReference _itemsCollection = 
-      FirebaseFirestore.instance.collection('InventoryItem');
-  //final CollectionReference _requestsCollection =
-      //FirebaseFirestore.instance.collection('Request');
-  
-  // ITEM OPERATIONS
-  
-  // Create item
-  Future<Item> createItem(String itemName, String itemCategory, int quantity, double unitPrice) async {
-    final now = DateTime.now();
-    final item = Item(
-      id: '', // Firestore will generate ID
-      itemName: itemName,
-      itemCategory: itemCategory,
-      quantity: quantity,
-      unitPrice: unitPrice,
-      createdAt: now,
-      updatedAt: now,
-    );
-    
-    // Add to Firestore
-    final docRef = await _itemsCollection.add(item.toJson());
-    
-    // Return item with the Firestore document ID
-    return item.copyWith(id: docRef.id);
-  }
-
-  // Read all items (stream)
-  Stream<List<Item>> get itemsStream {
-    return _itemsCollection
-        .orderBy('createdAt', descending: true)
+  /// Get items for the current logged-in workshop owner (live stream)
+  Stream<List<Item>> getItemsForCurrentOwner() {
+    final String uid = FirebaseAuth.instance.currentUser!.uid;
+    return _firestore
+        .collection('InventoryItem')
+        .where('workshopOwnerId', isEqualTo: uid)
         .snapshots()
-        .map((snapshot) {
-      return snapshot.docs.map((doc) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        return Item.fromJson({...data, 'id': doc.id});
-      }).toList();
-    });
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => Item.fromFirestore(doc)).toList());
   }
 
-  // Read all items
-  Future<List<Item>> getItems() async {
-    final snapshot = await _itemsCollection
-        .orderBy('createdAt', descending: true)
-        .get();
-    
-    return snapshot.docs.map((doc) {
-      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-      return Item.fromJson({...data, 'id': doc.id});
-    }).toList();
-  }
+  /// Create a new item (assigns to logged-in owner)
+  Future<Item> createItem({
+    required String itemName,
+    required String itemCategory,
+    required int quantity,
+    required double unitPrice,
+  }) async {
+    final String uid = FirebaseAuth.instance.currentUser!.uid;
 
-  // Read one item
-  Future<Item?> getItem(String id) async {
-    final docSnapshot = await _itemsCollection.doc(id).get();
-    
-    if (docSnapshot.exists) {
-      Map<String, dynamic> data = docSnapshot.data() as Map<String, dynamic>;
-      return Item.fromJson({...data, 'id': docSnapshot.id});
+    try {
+      final itemData = {
+        'itemName': itemName,
+        'itemCategory': itemCategory,
+        'quantity': quantity,
+        'unitPrice': unitPrice,
+        'workshopOwnerId': uid,
+        'createdAt': FieldValue.serverTimestamp(),
+      };
+
+      final docRef = await _firestore.collection('InventoryItem').add(itemData);
+      return Item.fromFirestore(await docRef.get());
+    } catch (e) {
+      throw Exception('Failed to create item: $e');
     }
-    
-    return null;
   }
 
-  // Update item
-  Future<Item?> updateItem(String id, String itemName, String itemCategory, int quantity, double unitPrice) async {
-    final now = DateTime.now();
-    
-    await _itemsCollection.doc(id).update({
-      'itemName': itemName,
-      'itemCategory': itemCategory,
-      'quantity': quantity,
-      'unitPrice': unitPrice,
-      'updatedAt': now.toIso8601String(),
-    });
-    
-    // Fetch the updated document
-    final updatedDoc = await _itemsCollection.doc(id).get();
-    Map<String, dynamic> data = updatedDoc.data() as Map<String, dynamic>;
-    return Item.fromJson({...data, 'id': id});
+  /// Get all items for a specific owner (one-time fetch)
+  Future<List<Item>> getItemsByOwnerId(String workshopOwnerId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('InventoryItem')
+          .where('workshopOwnerId', isEqualTo: workshopOwnerId)
+          .get();
+
+      return snapshot.docs.map((doc) => Item.fromFirestore(doc)).toList();
+    } catch (e) {
+      throw Exception('Failed to get items: $e');
+    }
   }
 
-  // Delete item
-  Future<bool> deleteItem(String id) async {
-    await _itemsCollection.doc(id).delete();
-    return true;
-  }
-
-  
-  // REQUEST OPERATIONS
-  
-  // Create request
-  /*Future<ItemRequest> createRequest(String itemName, int quantity, String requestedBy, String requestedTo, String status) async {
-    final now = DateTime.now();
-    final request = ItemRequest(
-      id: '',
-      itemName: itemName,
-      quantity: quantity,
-      requestedBy: requestedBy,
-      requestedTo: requestedTo,
-      requestDate: now,
-      status: status,
-    );
-    
-    // Add to Firestore
-    final docRef = await _requestsCollection.add(request.toJson());
-    
-    // Return request with the Firestore document ID
-    return request.copyWith(id: docRef.id);
-  }
-
-  // Read all requests (stream)
-  Stream<List<ItemRequest>> get requestsStream {
-    return _requestsCollection
-        .orderBy('requestDate', descending: true)
+  /// Stream items for a specific owner
+  Stream<List<Item>> getItemsStreamByOwnerId(String workshopOwnerId) {
+    return _firestore
+        .collection('InventoryItem')
+        .where('workshopOwnerId', isEqualTo: workshopOwnerId)
         .snapshots()
-        .map((snapshot) {
-      return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return ItemRequest.fromJson({...data, 'id': doc.id});
-      }).toList();
-    });
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => Item.fromFirestore(doc)).toList());
   }
 
-  // Read all requests
-  Future<List<ItemRequest>> getRequests() async {
-    final snapshot = await _requestsCollection
-        .orderBy('requestDate', descending: true)
-        .get();
-    
-    return snapshot.docs.map((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      return ItemRequest.fromJson({...data, 'id': doc.id});
-    }).toList();
-  }
-
-  // Read one request
-  Future<ItemRequest?> getRequest(String id) async {
-    final docSnapshot = await _requestsCollection.doc(id).get();
-    
-    if (docSnapshot.exists) {
-      final data = docSnapshot.data() as Map<String, dynamic>;
-      return ItemRequest.fromJson({...data, 'id': docSnapshot.id});
+  /// Get a single item by ID and verify the owner
+  Future<Item?> getItemByIdAndOwner(
+      String itemId, String workshopOwnerId) async {
+    try {
+      final doc = await _firestore.collection('InventoryItem').doc(itemId).get();
+      if (doc.exists) {
+        final item = Item.fromFirestore(doc);
+        if (item.workshopOwnerId == workshopOwnerId) {
+          return item;
+        }
+      }
+      return null;
+    } catch (e) {
+      throw Exception('Failed to get item: $e');
     }
-    
-    return null;
   }
 
-  // Delete request
-  Future<bool> deleteRequest(String id) async {
-    await _requestsCollection.doc(id).delete();
-    return true;
+  /// Update an item after verifying ownership
+  Future<Item?> updateItemByOwner({
+    required String itemId,
+    required String itemName,
+    required String itemCategory,
+    required int quantity,
+    required double unitPrice,
+    required String workshopOwnerId,
+  }) async {
+    try {
+      final docRef = _firestore.collection('InventoryItem').doc(itemId);
+      final doc = await docRef.get();
+
+      if (!doc.exists || doc.data()?['workshopOwnerId'] != workshopOwnerId) {
+        throw Exception('Item not found or access denied');
+      }
+
+      final updateData = {
+        'itemName': itemName,
+        'itemCategory': itemCategory,
+        'quantity': quantity,
+        'unitPrice': unitPrice,
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+
+      await docRef.update(updateData);
+      return Item.fromFirestore(await docRef.get());
+    } catch (e) {
+      throw Exception('Failed to update item: $e');
+    }
   }
 
-  // Get incoming requests for a specific user
-  Future<List<ItemRequest>> getIncomingRequests(String userId) async {
-    final snapshot = await _requestsCollection
-        .where('requestedTo', isEqualTo: userId)
-        .orderBy('requestDate', descending: true)
-        .get();
-        
-    return snapshot.docs.map((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      return ItemRequest.fromJson({...data, 'id': doc.id});
-    }).toList();
-  }
-  
-  // Get outgoing requests for a specific user
-  Future<List<ItemRequest>> getOutgoingRequests(String userId) async {
-    final snapshot = await _requestsCollection
-        .where('requestedBy', isEqualTo: userId)
-        .orderBy('requestDate', descending: true)
-        .get();
+  /// Delete an item after verifying ownership
+  Future<bool> deleteItemByOwner(
+      String itemId, String workshopOwnerId) async {
+    try {
+      final docRef = _firestore.collection('InventoryItem').doc(itemId);
+      final doc = await docRef.get();
 
-    return snapshot.docs.map((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      return ItemRequest.fromJson({...data, 'id': doc.id});
-    }).toList();
-  }
-*/
+      if (!doc.exists || doc.data()?['workshopOwnerId'] != workshopOwnerId) {
+        return false;
+      }
 
+      await docRef.delete();
+      return true;
+    } catch (e) {
+      throw Exception('Failed to delete item: $e');
+    }
+  }
+
+  /// Get items by category and owner
+  Stream<List<Item>> getItemsByCategoryAndOwnerStream(
+      String category, String workshopOwnerId) {
+    return _firestore
+        .collection('InventoryItem')
+        .where('workshopOwnerId', isEqualTo: workshopOwnerId)
+        .where('itemCategory', isEqualTo: category)
+        .snapshots()
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => Item.fromFirestore(doc)).toList());
+  }
 }
-
-
