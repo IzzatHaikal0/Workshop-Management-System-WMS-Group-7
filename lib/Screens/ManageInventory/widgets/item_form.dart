@@ -4,7 +4,7 @@ import 'package:workshop_management_system/Models/ManageInventory/item_model.dar
 
 class ItemForm extends StatefulWidget {
   final Item? initialItem;
-  final Function(String itemName, String itemCategory, int quantity, double unitPrice) onSubmit;
+  final Function(String, String, int, double) onSubmit;
   final String submitButtonText;
 
   const ItemForm({
@@ -23,25 +23,22 @@ class _ItemFormState extends State<ItemForm> {
   final _itemNameController = TextEditingController();
   final _quantityController = TextEditingController();
   final _unitPriceController = TextEditingController();
-  
+
   String _selectedCategory = 'Tools';
-  final List<String> _categories = [
-    'Tools',
-    'Parts',
-    'Materials',
-    'Equipment',
-    'Consumables',
-    'Other'
+
+  final _categories = [
+    'Tools', 'Parts', 'Materials', 'Equipment', 'Consumables', 'Other'
   ];
 
   @override
   void initState() {
     super.initState();
-    if (widget.initialItem != null) {
-      _itemNameController.text = widget.initialItem!.itemName;
-      _selectedCategory = widget.initialItem!.itemCategory;
-      _quantityController.text = widget.initialItem!.quantity.toString();
-      _unitPriceController.text = widget.initialItem!.unitPrice.toString();
+    final item = widget.initialItem;
+    if (item != null) {
+      _itemNameController.text = item.itemName;
+      _selectedCategory = item.itemCategory;
+      _quantityController.text = item.quantity.toString();
+      _unitPriceController.text = item.unitPrice.toString();
     }
   }
 
@@ -53,232 +50,225 @@ class _ItemFormState extends State<ItemForm> {
     super.dispose();
   }
 
+  void _resetForm() {
+    _formKey.currentState?.reset();
+    _itemNameController.clear();
+    _quantityController.clear();
+    _unitPriceController.clear();
+    setState(() => _selectedCategory = 'Tools');
+  }
+
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      final itemName = _itemNameController.text.trim();
-      final quantity = int.parse(_quantityController.text);
-      final unitPrice = double.parse(_unitPriceController.text);
-      
-      widget.onSubmit(itemName, _selectedCategory, quantity, unitPrice);
+      final name = _itemNameController.text.trim();
+      final qty = int.parse(_quantityController.text);
+      final price = double.parse(_unitPriceController.text);
+      widget.onSubmit(name, _selectedCategory, qty, price);
     }
+  }
+
+  Widget _buildHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Text(
+          'Item Information',
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        TextButton(
+          onPressed: _resetForm,
+          child: const Text(
+            'Clear All',
+            style: TextStyle(
+              color: Color(0xFF4169E1),
+              fontSize: 12,
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required String? Function(String?) validator,
+    TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        border: const OutlineInputBorder(),
+      ),
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
+      style: const TextStyle(fontFamily: 'Poppins', fontSize: 12),
+      validator: validator,
+    );
+  }
+
+  Widget _buildTotalValue() {
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: _quantityController,
+      builder: (context, qtyVal, _) {
+        return ValueListenableBuilder<TextEditingValue>(
+          valueListenable: _unitPriceController,
+          builder: (context, priceVal, _) {
+            final qty = int.tryParse(qtyVal.text) ?? 0;
+            final price = double.tryParse(priceVal.text) ?? 0.0;
+            final total = (qty * price).toStringAsFixed(2);
+
+            return Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF4169E1).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Total Value:',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Poppins',
+                      fontSize: 12,
+                    ),
+                  ),
+                  Text(
+                    'RM $total',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF4169E1),
+                      fontSize: 14,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16),
       child: Form(
         key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // item name
-            Card(
-              elevation: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Item Information',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _itemNameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Item Name *',
-                        hintText: 'Enter item name',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.inventory_2),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter an item name';
-                        }
-                        if (value.trim().length < 2) {
-                          return 'Item name must be at least 2 characters';
-                        }
-                        return null;
-                      },
-                      textInputAction: TextInputAction.next,
-                    ),
-                    const SizedBox(height: 16),
-                    // dropdown-category
-                    DropdownButtonFormField<String>(
-                      value: _selectedCategory,
-                      decoration: const InputDecoration(
-                        labelText: 'Category *',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.category),
-                      ),
-                      items: _categories.map((category) {
-                        return DropdownMenuItem(
-                          value: category,
-                          child: Text(category),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedCategory = value!;
-                        });
-                      },
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please select a category';
-                        }
-                        return null;
-                      },
-                    ),
-                  ],
+        child: Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildHeader(),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  controller: _itemNameController,
+                  label: 'Item Name *',
+                  hint: 'Enter item name',
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) return 'Please enter an item name';
+                    if (value.trim().length < 2) return 'Item name must be at least 2 characters';
+                    return null;
+                  },
                 ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // quantity and price 
-            Card(
-              elevation: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: _selectedCategory,
+                  items: _categories.map((cat) {
+                    return DropdownMenuItem(
+                      value: cat,
+                      child: Text(cat, style: const TextStyle(fontFamily: 'Poppins', fontSize: 12)),
+                    );
+                  }).toList(),
+                  decoration: const InputDecoration(
+                    labelText: 'Category *',
+                    border: OutlineInputBorder(),
+                  ),
+                  style: const TextStyle(fontFamily: 'Poppins', fontSize: 12),
+                  onChanged: (value) => setState(() => _selectedCategory = value!),
+                  validator: (value) => (value == null || value.isEmpty) ? 'Select a category' : null,
+                ),
+                const SizedBox(height: 16),
+                Row(
                   children: [
-                    Text(
-                      'Stock & Pricing',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: _buildTextField(
+                        controller: _quantityController,
+                        label: 'Quantity *',
+                        hint: '0',
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        validator: (value) {
+                          final qty = int.tryParse(value ?? '');
+                          if (value == null || value.isEmpty) return 'Enter quantity';
+                          if (qty == null || qty < 0) return 'Enter valid quantity';
+                          return null;
+                        },
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        // quantity
-                        Expanded(
-                          flex: 1,
-                          child: TextFormField(
-                            controller: _quantityController,
-                            decoration: const InputDecoration(
-                              labelText: 'Quantity *',
-                              hintText: '0',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.numbers),
-                            ),
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter quantity';
-                              }
-                              final quantity = int.tryParse(value);
-                              if (quantity == null || quantity < 0) {
-                                return 'Enter valid quantity';
-                              }
-                              return null;
-                            },
-                            textInputAction: TextInputAction.next,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        // price
-                        Expanded(
-                          flex: 1,
-                          child: TextFormField(
-                            controller: _unitPriceController,
-                            decoration: const InputDecoration(
-                              labelText: 'Unit Price (RM) *',
-                              hintText: '0.00',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.attach_money),
-                            ),
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
-                            ],
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter unit price';
-                              }
-                              final price = double.tryParse(value);
-                              if (price == null || price < 0) {
-                                return 'Enter valid price';
-                              }
-                              return null;
-                            },
-                            textInputAction: TextInputAction.done,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    // total display
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Total Value:',
-                            style: TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                          ValueListenableBuilder(
-                            valueListenable: _quantityController,
-                            builder: (context, value1, child) {
-                              return ValueListenableBuilder(
-                                valueListenable: _unitPriceController,
-                                builder: (context, value2, child) {
-                                  final quantity = int.tryParse(_quantityController.text) ?? 0;
-                                  final unitPrice = double.tryParse(_unitPriceController.text) ?? 0.0;
-                                  final totalValue = quantity * unitPrice;
-                                  
-                                  return Text(
-                                    'RM ${totalValue.toStringAsFixed(2)}',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(context).primaryColor,
-                                      fontSize: 16,
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildTextField(
+                        controller: _unitPriceController,
+                        label: 'Unit Price (RM) *',
+                        hint: '0.00',
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
                         ],
+                        validator: (value) {
+                          final price = double.tryParse(value ?? '');
+                          if (value == null || value.isEmpty) return 'Enter unit price';
+                          if (price == null || price < 0) return 'Enter valid price';
+                          return null;
+                        },
                       ),
                     ),
                   ],
                 ),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // submit button
-            ElevatedButton(
-              onPressed: _submitForm,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                const SizedBox(height: 16),
+                _buildTotalValue(),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: _submitForm,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF4169E1),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    widget.submitButtonText,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
                 ),
-              ),
-              child: Text(
-                widget.submitButtonText,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

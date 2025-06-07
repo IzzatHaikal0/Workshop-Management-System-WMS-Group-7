@@ -13,12 +13,22 @@ class _ItemCreateScreenState extends State<ItemCreateScreen> {
   final ItemController _itemController = ItemController();
   bool _isLoading = false;
 
-  Future<void> _createItem(String itemName, String itemCategory, int quantity, double unitPrice) async {
+  Future<void> _createItem(
+    String itemName,
+    String itemCategory,
+    int quantity,
+    double unitPrice,
+  ) async {
     setState(() => _isLoading = true);
 
     try {
-      final newItem = await _itemController.createItem(itemName, itemCategory, quantity, unitPrice);
-      
+      final newItem = await _itemController.createItem(
+        itemName,
+        itemCategory,
+        quantity,
+        unitPrice,
+      );
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Item created successfully')),
@@ -27,9 +37,9 @@ class _ItemCreateScreenState extends State<ItemCreateScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error creating item: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error creating item: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -38,17 +48,26 @@ class _ItemCreateScreenState extends State<ItemCreateScreen> {
 
   @override
   Widget build(BuildContext context) {
+    const poppins = 'Poppins';
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add New Item'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        title: const Text(
+          'New Item',
+          style: TextStyle(
+            fontSize: 14,
+            fontFamily: poppins,
+            fontWeight: FontWeight.w600,
+            color: Color.fromARGB(255, 0, 0, 0),
+          ),
+        ),
+        centerTitle: true,
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ItemForm(
-              onSubmit: _createItem,
-              submitButtonText: 'Create Item',
-            ),
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : ItemForm(onSubmit: _createItem, submitButtonText: 'Save'),
     );
   }
 }
