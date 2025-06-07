@@ -4,7 +4,8 @@ import 'package:workshop_management_system/Models/RatingModel.dart';
 import 'package:workshop_management_system/Screens/ManageRating/RatingPage.dart';
 
 class EditRatingPage extends StatefulWidget {
-  const EditRatingPage({super.key});
+  final Rating rating;
+  const EditRatingPage({super.key, required this.rating});
 
   @override
   State<EditRatingPage> createState() => _EditRatingPageState();
@@ -32,7 +33,7 @@ class _EditRatingPageState extends State<EditRatingPage> {
                 child: Column(
                   children: [
                     Text('User Name'),
-                    Text('Ahmad Labu bin Ahmad John')
+                    Text('Ahmad Labu bin Ahmad John'),
                   ],
                 ),
               ),

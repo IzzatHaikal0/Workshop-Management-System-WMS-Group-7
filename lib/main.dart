@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,13 +10,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'Screens/Registration/manage_registration_barrel.dart';
 import 'Screens/welcome_screen.dart';
 import 'Screens/Profile/manage_profile_barrel.dart';
+import 'Screens/workshop_homepage.dart'; // <-- NEW IMPORT
+
 import 'Screens/ManageForemanSchedule/manage_foreman_schedule_barrel.dart';
-import 'Screens/ManageRating/RatingPage.dart';
-//import 'package:workshop_management_system/Screens/ManageForemanSchedule/ListSchedulePage.dart';
-//import 'package:workshop_management_system/Screens/ManageForemanSchedule/SelectSchedulePage.dart';
-//import 'package:workshop_management_system/Screens/ManageForemanSchedule/AddSchedulePage.dart';
-//import 'package:workshop_management_system/Screens/ManageForemanSchedule/EditSchedulePage.dart';
-//import 'package:workshop_management_system/Screens/ManageRating/RatingPage.dart';
+import 'Screens/ManageRating/manage_rating_barrel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -125,7 +124,7 @@ class MyApp extends StatelessWidget {
           case AppRoutes.profileEditForeman:
             return MaterialPageRoute(
               builder:
-                  (_) => EditProfilePageForeman(
+                  (_) => AddProfilePageForeman(
                     existingProfile: args['existingProfile'] ?? {},
                     foremanId: args['foremanId'] ?? '',
                   ),
@@ -134,7 +133,7 @@ class MyApp extends StatelessWidget {
           case AppRoutes.profileEditWorkshopOwner:
             return MaterialPageRoute(
               builder:
-                  (_) => EditProfilePageWorkshopOwner(
+                  (_) => AddProfilePageWorkshopOwner(
                     existingProfile: args['existingProfile'] ?? {},
                     workshopOwnerId: args['workshopOwnerId'] ?? '',
                   ),
@@ -214,45 +213,73 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   
   int _selectedIndex = 0;
+  String? currentUserRole;
+  String userName = '';
+  final String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
-  String get currentUserRole => 'workshop_owner'; // Replace with real logic
-  String get currentUserId => FirebaseAuth.instance.currentUser?.uid ?? '';
-  Map<String, dynamic> get currentUserData => {}; // Fetch from Firestore
+  @override
+  void initState() {
+    super.initState();
+    fetchUserRoleAndName();
+  }
 
-  List<Widget> get _pages => [
-    Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Workshop Management System App Home Page',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => RatingPage()),
-                  );
-                },
-                child: const Text('Go to Rating Page'),
-              ),
-            ],
-          ),
-        ),
-    //SelectSchedulePage(),
-    ListSchedulePage(),
-    currentUserRole == 'workshop_owner'
-        ? ViewProfilePageForeman(foremanId: currentUserId)
-        : ViewProfilePageWorkshopOwner(workshopOwnerId: currentUserId),
-    const Center(child: Text('Inventory Page')),
-  ];
+  Future<void> fetchUserRoleAndName() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final foremanDoc =
+        await FirebaseFirestore.instance.collection('foremen').doc(uid).get();
+    final workshopOwnerDoc =
+        await FirebaseFirestore.instance
+            .collection('workshop_owner')
+            .doc(uid)
+            .get();
+
+    if (foremanDoc.exists) {
+      setState(() {
+        currentUserRole = 'foreman';
+        userName = foremanDoc.data()?['first_name'] ?? 'Foreman';
+      });
+    } else if (workshopOwnerDoc.exists) {
+      setState(() {
+        currentUserRole = 'workshop_owner';
+        userName = workshopOwnerDoc.data()?['firstName'] ?? 'Workshop Owner';
+      });
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  Widget roleIcon(String? role) {
+    switch (role) {
+      case 'foreman':
+        return const Icon(Icons.engineering, color: Colors.white);
+      case 'workshop_owner':
+        return const Icon(Icons.business, color: Colors.white);
+      default:
+        return const Icon(Icons.person, color: Colors.white);
+    }
+  }
+
+  List<Widget> get _pages {
+    if (currentUserRole == null) {
+      return [const Center(child: CircularProgressIndicator())];
+    }
+
+    return [
+      const WorkshopHomePage(),
+      currentUserRole == 'foreman'
+          ? SelectSchedulePage(foremenId: currentUserId)
+          : ListSchedulePage(workshopOwnerId: currentUserId),
+      currentUserRole == 'foreman'
+          ? ViewProfilePageForeman(foremanId: currentUserId)
+          : ViewProfilePageWorkshopOwner(workshopOwnerId: currentUserId),
+      const Center(child: Text('Inventory Page')),
+    ];
   }
 
   Future<void> _confirmLogout() async {
@@ -283,9 +310,31 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Row(
+          children: [
+            Text('Hi, $userName'),
+            const SizedBox(width: 8),
+            roleIcon(currentUserRole),
+          ],
+        ),
         backgroundColor: Theme.of(context).colorScheme.primary,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.rate_review),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) =>
+                          currentUserRole == 'workshop_owner'
+                              ? RatingPage()
+                              : ForemanPage(),
+                ),
+              );
+            },
+          ),
+
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',

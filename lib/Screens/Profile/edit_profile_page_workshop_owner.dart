@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
@@ -36,13 +38,17 @@ class _EditProfilePageWorkshopOwnerState
   late final TextEditingController _workshopDetailController;
 
   String? _profileImageUrl;
+
   File? _pickedImage;
+  Uint8List? _webImageBytes;
+
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     final data = widget.existingProfile;
+
     _firstNameController = TextEditingController(text: data['firstName'] ?? '');
     _lastNameController = TextEditingController(text: data['lastName'] ?? '');
     _emailController = TextEditingController(text: data['email'] ?? '');
@@ -67,6 +73,7 @@ class _EditProfilePageWorkshopOwnerState
     _workshopDetailController = TextEditingController(
       text: data['workshopDetail'] ?? '',
     );
+
     _profileImageUrl = data['workshopProfilePicture'];
   }
 
@@ -75,27 +82,55 @@ class _EditProfilePageWorkshopOwnerState
       source: ImageSource.gallery,
       imageQuality: 70,
     );
+
     if (pickedFile != null) {
-      setState(() {
-        _pickedImage = File(pickedFile.path);
-      });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('New image selected')));
+      if (kIsWeb) {
+        final bytes = await pickedFile.readAsBytes();
+        setState(() {
+          _webImageBytes = bytes;
+          _pickedImage = null;
+        });
+      } else {
+        setState(() {
+          _pickedImage = File(pickedFile.path);
+          _webImageBytes = null;
+        });
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('New image selected')));
+      }
     }
   }
 
   Future<String?> _uploadProfileImage(String userId) async {
-    if (_pickedImage == null) return _profileImageUrl;
+    if (_pickedImage == null && _webImageBytes == null) return _profileImageUrl;
+
     final ref = FirebaseStorage.instance.ref().child(
-      'workshop/$userId/profile.jpg',
+      'workshop_owners/$userId/profile.jpg',
     );
-    await ref.putFile(_pickedImage!);
-    return await ref.getDownloadURL();
+
+    UploadTask uploadTask;
+    if (kIsWeb && _webImageBytes != null) {
+      uploadTask = ref.putData(
+        _webImageBytes!,
+        SettableMetadata(contentType: 'image/jpeg'),
+      );
+    } else if (_pickedImage != null) {
+      uploadTask = ref.putFile(_pickedImage!);
+    } else {
+      return _profileImageUrl;
+    }
+
+    final snapshot = await uploadTask;
+    return await snapshot.ref.getDownloadURL();
   }
 
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
+
     setState(() => _isLoading = true);
 
     try {
@@ -119,9 +154,9 @@ class _EditProfilePageWorkshopOwnerState
           });
 
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Profile updated')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile updated successfully')),
+      );
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
@@ -130,6 +165,33 @@ class _EditProfilePageWorkshopOwnerState
       ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _confirmAndSaveProfile() async {
+    final shouldSave = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Confirm Update'),
+            content: const Text(
+              'Are you sure you want to update this profile?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Confirm'),
+              ),
+            ],
+          ),
+    );
+
+    if (shouldSave == true) {
+      await _saveProfile();
     }
   }
 
@@ -151,149 +213,238 @@ class _EditProfilePageWorkshopOwnerState
   @override
   Widget build(BuildContext context) {
     final ImageProvider<Object>? profileImage =
-        _pickedImage != null
-            ? FileImage(_pickedImage!)
-            : (_profileImageUrl != null
-                ? NetworkImage(_profileImageUrl!)
-                : null);
+        kIsWeb
+            ? (_webImageBytes != null
+                ? MemoryImage(_webImageBytes!)
+                : (_profileImageUrl != null
+                    ? NetworkImage(_profileImageUrl!)
+                    : null))
+            : (_pickedImage != null
+                ? FileImage(_pickedImage!)
+                : (_profileImageUrl != null
+                    ? NetworkImage(_profileImageUrl!)
+                    : null));
+
+    final bool isNewImageSelected =
+        _pickedImage != null || _webImageBytes != null;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Workshop Profile')),
+      appBar: AppBar(title: const Text('Edit Workshop Owner Profile')),
       body:
           _isLoading
               ? const Center(child: CircularProgressIndicator())
-              : Padding(
-                padding: const EdgeInsets.all(16),
-                child: Form(
-                  key: _formKey,
-                  child: ListView(
-                    children: [
-                      Center(
+              : Scrollbar(
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Form(
+                        key: _formKey,
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            GestureDetector(
-                              onTap: _pickImage,
-                              child: CircleAvatar(
-                                radius: 50,
-                                backgroundImage: profileImage,
-                                child:
-                                    profileImage == null
-                                        ? const Icon(
-                                          Icons.add_a_photo,
-                                          size: 40,
-                                        )
-                                        : null,
+                            Center(
+                              child: Stack(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 60,
+                                    backgroundColor: Colors.grey[300],
+                                    backgroundImage: profileImage,
+                                    child:
+                                        profileImage == null
+                                            ? const Icon(
+                                              Icons.person,
+                                              size: 60,
+                                              color: Colors.white70,
+                                            )
+                                            : null,
+                                  ),
+                                  Positioned(
+                                    bottom: 0,
+                                    right: 0,
+                                    child: InkWell(
+                                      onTap: _pickImage,
+                                      borderRadius: BorderRadius.circular(30),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color:
+                                              Theme.of(
+                                                context,
+                                              ).colorScheme.primary,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: Colors.white,
+                                            width: 2,
+                                          ),
+                                        ),
+                                        padding: const EdgeInsets.all(6),
+                                        child: const Icon(
+                                          Icons.add,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              _pickedImage != null
-                                  ? 'New image selected. Will be uploaded when you save.'
-                                  : 'Tap to change profile picture',
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: Colors.grey,
+                            const SizedBox(height: 12),
+                            Center(
+                              child: Text(
+                                isNewImageSelected
+                                    ? 'New image selected. Will be uploaded when you save.'
+                                    : 'Tap pencil icon to change profile picture',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 14,
+                                ),
                               ),
+                            ),
+                            const SizedBox(height: 24),
+
+                            TextFormField(
+                              controller: _firstNameController,
+                              decoration: const InputDecoration(
+                                labelText: 'First Name',
+                                prefixIcon: Icon(Icons.person),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter first name';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: _lastNameController,
+                              decoration: const InputDecoration(
+                                labelText: 'Last Name',
+                                prefixIcon: Icon(Icons.person_outline),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter last name';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: _emailController,
+                              keyboardType: TextInputType.emailAddress,
+                              decoration: const InputDecoration(
+                                labelText: 'Email',
+                                prefixIcon: Icon(Icons.email),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter email';
+                                }
+                                if (!RegExp(
+                                  r'^[\w-\.]+@([\w-]+\.)+[\w]{2,4}$',
+                                ).hasMatch(value.trim())) {
+                                  return 'Please enter a valid email';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: _phoneNumberController,
+                              keyboardType: TextInputType.phone,
+                              decoration: const InputDecoration(
+                                labelText: 'Phone Number',
+                                prefixIcon: Icon(Icons.phone),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter phone number';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: _workshopNameController,
+                              decoration: const InputDecoration(
+                                labelText: 'Workshop Name',
+                                prefixIcon: Icon(Icons.work),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter workshop name';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: _workshopAddressController,
+                              maxLines: 2,
+                              decoration: const InputDecoration(
+                                labelText: 'Workshop Address',
+                                prefixIcon: Icon(Icons.location_on),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter workshop address';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: _workshopPhoneController,
+                              keyboardType: TextInputType.phone,
+                              decoration: const InputDecoration(
+                                labelText: 'Workshop Phone',
+                                prefixIcon: Icon(Icons.phone_android),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: _workshopEmailController,
+                              keyboardType: TextInputType.emailAddress,
+                              decoration: const InputDecoration(
+                                labelText: 'Workshop Email',
+                                prefixIcon: Icon(Icons.email_outlined),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: _workshopOperationHourController,
+                              decoration: const InputDecoration(
+                                labelText: 'Workshop Operation Hour',
+                                prefixIcon: Icon(Icons.access_time),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: _workshopDetailController,
+                              maxLines: 3,
+                              decoration: const InputDecoration(
+                                labelText: 'Workshop Detail',
+                                prefixIcon: Icon(Icons.details),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            ElevatedButton.icon(
+                              onPressed: _confirmAndSaveProfile,
+                              icon: const Icon(Icons.save),
+                              label: const Text('Update Profile'),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      TextFormField(
-                        controller: _firstNameController,
-                        decoration: const InputDecoration(
-                          labelText: 'First Name',
-                        ),
-                        validator:
-                            (value) =>
-                                value == null || value.isEmpty
-                                    ? 'Required'
-                                    : null,
-                      ),
-                      TextFormField(
-                        controller: _lastNameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Last Name',
-                        ),
-                        validator:
-                            (value) =>
-                                value == null || value.isEmpty
-                                    ? 'Required'
-                                    : null,
-                      ),
-                      TextFormField(
-                        controller: _emailController,
-                        decoration: const InputDecoration(labelText: 'Email'),
-                        keyboardType: TextInputType.emailAddress,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) return 'Required';
-                          final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-                          if (!emailRegex.hasMatch(value))
-                            return 'Invalid email';
-                          return null;
-                        },
-                      ),
-                      TextFormField(
-                        controller: _phoneNumberController,
-                        decoration: const InputDecoration(
-                          labelText: 'Phone Number',
-                        ),
-                        keyboardType: TextInputType.phone,
-                        validator:
-                            (value) =>
-                                value == null || value.isEmpty
-                                    ? 'Required'
-                                    : null,
-                      ),
-                      TextFormField(
-                        controller: _workshopNameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Workshop Name',
-                        ),
-                        validator:
-                            (value) =>
-                                value == null || value.isEmpty
-                                    ? 'Required'
-                                    : null,
-                      ),
-                      TextFormField(
-                        controller: _workshopAddressController,
-                        decoration: const InputDecoration(
-                          labelText: 'Workshop Address',
-                        ),
-                        maxLines: 2,
-                      ),
-                      TextFormField(
-                        controller: _workshopPhoneController,
-                        decoration: const InputDecoration(
-                          labelText: 'Workshop Phone Number',
-                        ),
-                      ),
-                      TextFormField(
-                        controller: _workshopEmailController,
-                        decoration: const InputDecoration(
-                          labelText: 'Workshop Email',
-                        ),
-                      ),
-                      TextFormField(
-                        controller: _workshopOperationHourController,
-                        decoration: const InputDecoration(
-                          labelText: 'Operation Hour',
-                        ),
-                      ),
-                      TextFormField(
-                        controller: _workshopDetailController,
-                        decoration: const InputDecoration(
-                          labelText: 'Descriptions',
-                        ),
-                        maxLines: 3,
-                      ),
-                      const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: _saveProfile,
-                        child: const Text('Save Changes'),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),

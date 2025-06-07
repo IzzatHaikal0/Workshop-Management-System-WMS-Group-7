@@ -9,7 +9,7 @@ class WorkshopOwnerController {
 
   Future<OwnerModel?> getOwnerProfile() async {
     try {
-      var doc = await _firestore.collection('workshopOwners').doc(uid).get();
+      var doc = await _firestore.collection('workshop_owner').doc(uid).get();
       if (doc.exists) {
         return OwnerModel.fromMap(doc.data()!);
       }
@@ -24,7 +24,7 @@ class WorkshopOwnerController {
 
   Future<void> updateOwnerProfile(OwnerModel owner) async {
     try {
-      await _firestore.collection('workshopOwners').doc(uid).set(owner.toMap());
+      await _firestore.collection('workshop_owner').doc(uid).set(owner.toMap());
     } catch (e) {
       if (kDebugMode) {
         print('Error updating owner profile: $e');

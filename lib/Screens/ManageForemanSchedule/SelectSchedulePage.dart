@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class SelectSchedulePage extends StatelessWidget {
-  SelectSchedulePage({super.key});
+  SelectSchedulePage({super.key, required String foremenId});
   final ScheduleController controller = ScheduleController();
 
   @override
@@ -29,7 +29,7 @@ class SelectSchedulePage extends StatelessWidget {
             StreamBuilder<List<Schedule>>(
               stream: controller.getAcceptedSchedules(
                 FirebaseAuth.instance.currentUser!.uid,
-              ), // You must implement this method
+              ),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
@@ -42,18 +42,10 @@ class SelectSchedulePage extends StatelessWidget {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: schedules.map((schedule) {
-                      String day = DateFormat(
-                        'EEEE',
-                      ).format(schedule.scheduleDate); // e.g., Tuesday
-                      String date = DateFormat('d MMMM yyyy').format(
-                        schedule.scheduleDate,
-                      ); // e.g., 1st January 2025
-                      String startTime = DateFormat(
-                        'HH:mm',
-                      ).format(schedule.startTime);
-                      String endTime = DateFormat(
-                        'HH:mm',
-                      ).format(schedule.endTime);
+                      String day = DateFormat('EEEE').format(schedule.scheduleDate);
+                      String date = DateFormat('d MMMM yyyy').format(schedule.scheduleDate);
+                      String startTime = DateFormat('HH:mm').format(schedule.startTime);
+                      String endTime = DateFormat('HH:mm').format(schedule.endTime);
 
                       return Container(
                         width: double.infinity,
@@ -66,6 +58,15 @@ class SelectSchedulePage extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Text(
+                              'Workshop Name: ${schedule.workshopName ?? 'Unknown'}',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            SizedBox(height: 8),
                             Text(
                               "$day, $startTime - $endTime",
                               style: TextStyle(
@@ -89,8 +90,6 @@ class SelectSchedulePage extends StatelessWidget {
                 }
               },
             ),
-            //FIX THIS --> ONLY SHOW ACCEPTED SCHEDULE BASED ON FOREMAN ID
-            //GOTTA WAIT FOR MANAGE PROFILE
 
             //START OF SELECT SCHEDULE
             Padding(
@@ -127,106 +126,107 @@ class SelectSchedulePage extends StatelessWidget {
                               60)
                           : (duration.inMinutes / 60);
 
-                      return Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ListTile(
-                                title: Text(
-                                  'Schedule Date: ${DateFormat('yyyy-MM-dd').format(schedule.scheduleDate)}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Color.fromARGB(255, 8, 8, 8),
-                                  ),
-                                ),
-                                subtitle: Text(
-                                  'Start Time: ${DateFormat('hh:mm a').format(schedule.startTime)}\n'
-                                  'End Time: ${DateFormat('hh:mm a').format(schedule.endTime)}\n'
-                                  'Total Hours: ${totalHours.toStringAsFixed(2)} h\n'
-                                  'Salary Rate: RM ${schedule.salaryRate}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.normal,
-                                    color: Color.fromARGB(255, 8, 8, 8),
-                                  ),
-                                ),
-                                trailing: Icon(Icons.arrow_forward),
-                                leading: Icon(Icons.calendar_today),
-                                contentPadding: EdgeInsets.zero,
-                                dense: true,
-                                onTap: () {
-                                  debugPrint('Schedule tapped');
-                                },
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
+                          return Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  OutlinedButton.icon(
-                                    onPressed: () {
-                                      showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return AlertDialog(
-                                            title: Text('Confirm Accept'),
-                                            content: Text(
-                                              'Are you sure you want to accept this schedule?',
-                                            ),
-                                            actions: <Widget>[
-                                              TextButton(
-                                                child: Text(
-                                                  'Cancel',
-                                                  style: TextStyle(
-                                                    color: Colors.red,
-                                                  ),
+                                  ListTile(
+                                    title: Text(
+                                      'Schedule Date: ${DateFormat('yyyy-MM-dd').format(schedule.scheduleDate)}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Color.fromARGB(255, 8, 8, 8),
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      'Start Time: ${DateFormat('hh:mm a').format(schedule.startTime)}\n'
+                                      'End Time: ${DateFormat('hh:mm a').format(schedule.endTime)}\n'
+                                      'Total Hours: ${totalHours.toStringAsFixed(2)} h\n'
+                                      'Salary Rate: RM ${schedule.salaryRate} h\n'
+                                      'Workshop Name: ${schedule.workshopName ?? 'Unknown'}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.normal,
+                                        color: Color.fromARGB(255, 8, 8, 8),
+                                      ),
+                                    ),
+                                    trailing: Icon(Icons.arrow_forward),
+                                    leading: Icon(Icons.calendar_today),
+                                    contentPadding: EdgeInsets.zero,
+                                    dense: true,
+                                    onTap: () {
+                                      debugPrint('Schedule tapped');
+                                    },
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      OutlinedButton.icon(
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                title: Text('Confirm Accept'),
+                                                content: Text(
+                                                  'Are you sure you want to accept this schedule?',
                                                 ),
-                                                onPressed: () {
-                                                  Navigator.of(
-                                                    context,
-                                                  ).pop();
-                                                },
-                                              ),
-                                              TextButton(
-                                                child: Text(
-                                                  'Accept',
-                                                  style: TextStyle(
-                                                    color: Colors.blue,
+                                                actions: <Widget>[
+                                                  TextButton(
+                                                    child: Text(
+                                                      'Cancel',
+                                                      style: TextStyle(
+                                                        color: Colors.red,
+                                                      ),
+                                                    ),
+                                                    onPressed: () {
+                                                      Navigator.of(
+                                                        context,
+                                                      ).pop();
+                                                    },
                                                   ),
-                                                ),
-                                                onPressed: () {
-                                                  Navigator.of(
-                                                    context,
-                                                  ).pop();
-                                                  debugPrint(
-                                                    'Accept confirmed',
-                                                  );
-                                                  controller.acceptSchedule(
-                                                    schedule.docId!,
-                                                  );
-                                                  // You can add your accept logic here
-                                                },
-                                              ),
-                                            ],
+                                                  TextButton(
+                                                    child: Text(
+                                                      'Accept',
+                                                      style: TextStyle(
+                                                        color: Colors.blue,
+                                                      ),
+                                                    ),
+                                                    onPressed: () {
+                                                      Navigator.of(
+                                                        context,
+                                                      ).pop();
+                                                      debugPrint(
+                                                        'Accept confirmed',
+                                                      );
+                                                      controller.acceptSchedule(
+                                                        schedule.docId!,
+                                                      );
+                                                      // You can add your accept logic here
+                                                    },
+                                                  ),
+                                                ],
+                                              );
+                                            },
                                           );
                                         },
-                                      );
-                                    },
-                                    icon: Icon(
-                                      Icons.check,
-                                      color: Colors.blue,
-                                    ),
-                                    label: Text(
-                                      'Accept',
-                                      style: TextStyle(color: Colors.blue),
-                                    ),
+                                        icon: Icon(
+                                          Icons.check,
+                                          color: Colors.blue,
+                                        ),
+                                        label: Text(
+                                          'Accept',
+                                          style: TextStyle(color: Colors.blue),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                            ),
+                          );
+                        }).toList(),
                   );
                 }
               },

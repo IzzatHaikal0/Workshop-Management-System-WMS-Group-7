@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:workshop_management_system/Controllers/ScheduleController.dart';
 import 'package:workshop_management_system/Models/ScheduleModel.dart';
 import 'package:workshop_management_system/Screens/ManageForemanSchedule/ListSchedulePage.dart';
-//import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 /*void main() {
   runApp(const MaterialApp(home: AddSchedulePage()));
@@ -11,21 +11,25 @@ import 'package:workshop_management_system/Screens/ManageForemanSchedule/ListSch
 class AddSchedulePage extends StatelessWidget {
   AddSchedulePage({super.key});
   final ScheduleController controller = ScheduleController();
+  final String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Add New Schedule')),
-      body: const Padding(
+      body: Padding(
         padding: EdgeInsets.all(16.0),
-        child: DatePickerExample(),
+        child: DatePickerExample(currentUserId: currentUserId,),
       ),
     );
   }
 }
 
 class DatePickerExample extends StatefulWidget {
-  const DatePickerExample({super.key});
-
+  final String currentUserId;
+  const DatePickerExample({super.key, required this.currentUserId});
+    
+  
   @override
   State<DatePickerExample> createState() => _DatePickerExampleState();
 }
@@ -158,7 +162,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
     );
   }
 
-  //I DONT THINK THIS IS MVC
+
   //CALCULATE TOTAL HOURS AND RETURN
   double _calculateTotalHours(TimeOfDay start, TimeOfDay end) {
     final now = DateTime.now();
@@ -221,7 +225,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
 
       Navigator.pop(
         context,
-        MaterialPageRoute(builder: (context) => ListSchedulePage()),
+        MaterialPageRoute(builder: (context) => ListSchedulePage(workshopOwnerId: widget.currentUserId)),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -234,7 +238,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
   void _onCancel() {
     Navigator.pop(
       context,
-      MaterialPageRoute(builder: (context) => ListSchedulePage()),
+      MaterialPageRoute(builder: (context) => ListSchedulePage(workshopOwnerId: widget.currentUserId,)),
     );
   }
 }

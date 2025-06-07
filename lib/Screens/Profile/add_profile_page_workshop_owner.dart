@@ -7,88 +7,74 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-class EditProfilePageForeman extends StatefulWidget {
-  final String foremanId;
+class AddProfilePageWorkshopOwner extends StatefulWidget {
+  final String workshopOwnerId;
+  final Map<String, dynamic> existingProfile;
 
-  const EditProfilePageForeman({
+  const AddProfilePageWorkshopOwner({
     super.key,
-    required this.foremanId,
-    required Map<String, dynamic> existingProfile,
+    required this.workshopOwnerId,
+    required this.existingProfile,
   });
 
   @override
-  State<EditProfilePageForeman> createState() => _EditProfilePageForemanState();
+  State<AddProfilePageWorkshopOwner> createState() =>
+      _AddProfilePageWorkshopOwnerState();
 }
 
-class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
+class _AddProfilePageWorkshopOwnerState
+    extends State<AddProfilePageWorkshopOwner> {
   final _formKey = GlobalKey<FormState>();
 
-  late TextEditingController _firstNameController;
-  late TextEditingController _lastNameController;
-  late TextEditingController _emailController;
-  late TextEditingController _phoneNumberController;
-  late TextEditingController _foremanAddressController;
-  late TextEditingController _foremanSkillsController;
-  late TextEditingController _foremanWorkExperienceController;
+  late final TextEditingController _firstNameController;
+  late final TextEditingController _lastNameController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _phoneNumberController;
+  late final TextEditingController _workshopNameController;
+  late final TextEditingController _workshopAddressController;
+  late final TextEditingController _workshopPhoneController;
+  late final TextEditingController _workshopEmailController;
+  late final TextEditingController _workshopOperationHourController;
+  late final TextEditingController _workshopDetailController;
 
   String? _profileImageUrl;
 
-  File? _pickedImage; // For mobile
-  Uint8List? _webImageBytes; // For web
+  File? _pickedImage;
+  Uint8List? _webImageBytes;
 
-  bool _isLoading = true;
-  bool _isSaving = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _loadForemanData();
-  }
+    final data = widget.existingProfile;
 
-  Future<void> _loadForemanData() async {
-    try {
-      final doc =
-          await FirebaseFirestore.instance
-              .collection('foremen')
-              .doc(widget.foremanId)
-              .get();
-      final data = doc.data();
+    _firstNameController = TextEditingController(text: data['firstName'] ?? '');
+    _lastNameController = TextEditingController(text: data['lastName'] ?? '');
+    _emailController = TextEditingController(text: data['email'] ?? '');
+    _phoneNumberController = TextEditingController(
+      text: data['phoneNumber'] ?? '',
+    );
+    _workshopNameController = TextEditingController(
+      text: data['workshopName'] ?? '',
+    );
+    _workshopAddressController = TextEditingController(
+      text: data['workshopAddress'] ?? '',
+    );
+    _workshopPhoneController = TextEditingController(
+      text: data['workshopPhone'] ?? '',
+    );
+    _workshopEmailController = TextEditingController(
+      text: data['workshopEmail'] ?? '',
+    );
+    _workshopOperationHourController = TextEditingController(
+      text: data['workshopOperationHour'] ?? '',
+    );
+    _workshopDetailController = TextEditingController(
+      text: data['workshopDetail'] ?? '',
+    );
 
-      if (data == null) {
-        throw Exception('Foreman profile not found');
-      }
-
-      setState(() {
-        _firstNameController = TextEditingController(
-          text: data['first_name'] ?? '',
-        );
-        _lastNameController = TextEditingController(
-          text: data['last_name'] ?? '',
-        );
-        _emailController = TextEditingController(text: data['email'] ?? '');
-        _phoneNumberController = TextEditingController(
-          text: data['phone_number'] ?? '',
-        );
-        _foremanAddressController = TextEditingController(
-          text: data['foremanAddress'] ?? '',
-        );
-        _foremanSkillsController = TextEditingController(
-          text: data['foremanSkills'] ?? '',
-        );
-        _foremanWorkExperienceController = TextEditingController(
-          text: data['foremanWorkExperience'] ?? '',
-        );
-        _profileImageUrl = data['foremanProfilePicture'];
-        _isLoading = false;
-      });
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error loading profile: $e')));
-        setState(() => _isLoading = false);
-      }
-    }
+    _profileImageUrl = data['workshopProfilePicture'];
   }
 
   Future<void> _pickImage() async {
@@ -123,7 +109,7 @@ class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
     if (_pickedImage == null && _webImageBytes == null) return _profileImageUrl;
 
     final ref = FirebaseStorage.instance.ref().child(
-      'foremen/$userId/profile.jpg',
+      'workshop_owners/$userId/profile.jpg',
     );
 
     UploadTask uploadTask;
@@ -145,61 +131,81 @@ class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isSaving = true);
+    setState(() => _isLoading = true);
 
     try {
-      final imageUrl = await _uploadProfileImage(widget.foremanId);
+      final imageUrl = await _uploadProfileImage(widget.workshopOwnerId);
       await FirebaseFirestore.instance
-          .collection('foremen')
-          .doc(widget.foremanId)
+          .collection('workshop_owner')
+          .doc(widget.workshopOwnerId)
           .update({
-        'first_name': _firstNameController.text.trim(),
-        'last_name': _lastNameController.text.trim(),
-        'email': _emailController.text.trim(),
-        'phone_number': _phoneNumberController.text.trim(),
-        'foremanAddress': _foremanAddressController.text.trim(),
-        'foremanSkills': _foremanSkillsController.text.trim(),
-        'foremanWorkExperience': _foremanWorkExperienceController.text.trim(),
-        'foremanProfilePicture': imageUrl,
-      });
+            'firstName': _firstNameController.text.trim(),
+            'lastName': _lastNameController.text.trim(),
+            'email': _emailController.text.trim(),
+            'phoneNumber': _phoneNumberController.text.trim(),
+            'workshopName': _workshopNameController.text.trim(),
+            'workshopAddress': _workshopAddressController.text.trim(),
+            'workshopPhone': _workshopPhoneController.text.trim(),
+            'workshopEmail': _workshopEmailController.text.trim(),
+            'workshopOperationHour':
+                _workshopOperationHourController.text.trim(),
+            'workshopDetail': _workshopDetailController.text.trim(),
+            'workshopProfilePicture': imageUrl,
+          });
 
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully')),
+        const SnackBar(content: Text('Profile has been successfully added')),
       );
-
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Failed to update profile: $e')));
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
-      if (mounted) setState(() => _isSaving = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  Future<bool> _showConfirmationDialog() async {
-    return await showDialog<bool>(
-          context: context,
-          builder:
-              (context) => AlertDialog(
-                title: const Text('Confirm Update'),
-                content: const Text('Are you sure you want to save changes?'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('Cancel'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text('Confirm'),
-                  ),
-                ],
+  Future<void> _confirmAndSaveProfile() async {
+    final shouldSave = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Confirm Add'),
+            content: const Text('Are you sure you want to add this profile?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
               ),
-        ) ??
-        false;
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Confirm'),
+              ),
+            ],
+          ),
+    );
+
+    if (shouldSave == true) {
+      await _saveProfile();
+    }
+  }
+
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _emailController.dispose();
+    _phoneNumberController.dispose();
+    _workshopNameController.dispose();
+    _workshopAddressController.dispose();
+    _workshopPhoneController.dispose();
+    _workshopEmailController.dispose();
+    _workshopOperationHourController.dispose();
+    _workshopDetailController.dispose();
+    super.dispose();
   }
 
   @override
@@ -221,7 +227,13 @@ class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
         _pickedImage != null || _webImageBytes != null;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Foreman Profile')),
+      appBar: AppBar(
+        title: Text(
+          widget.existingProfile.isEmpty
+              ? 'Add Workshop Owner Profile'
+              : 'Add Workshop Owner Profile',
+        ),
+      ),
       body:
           _isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -292,7 +304,7 @@ class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
                               child: Text(
                                 isNewImageSelected
                                     ? 'New image selected. Will be uploaded when you save.'
-                                    : 'Tap pencil icon to change profile picture',
+                                    : 'Tap pencil icon to add profile picture',
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontSize: 14,
@@ -301,7 +313,6 @@ class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
                             ),
                             const SizedBox(height: 24),
 
-                            // First Name
                             TextFormField(
                               controller: _firstNameController,
                               decoration: const InputDecoration(
@@ -317,7 +328,6 @@ class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
                             ),
                             const SizedBox(height: 16),
 
-                            // Last Name
                             TextFormField(
                               controller: _lastNameController,
                               decoration: const InputDecoration(
@@ -333,39 +343,37 @@ class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
                             ),
                             const SizedBox(height: 16),
 
-                            // Email
                             TextFormField(
                               controller: _emailController,
-                              keyboardType: TextInputType.emailAddress,
                               decoration: const InputDecoration(
                                 labelText: 'Email',
                                 border: OutlineInputBorder(),
                                 prefixIcon: Icon(Icons.email),
                               ),
+                              keyboardType: TextInputType.emailAddress,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Required';
                                 }
                                 final emailRegex = RegExp(
-                                  r'^[^@]+@[^@]+\.[^@]+',
+                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                                 );
                                 if (!emailRegex.hasMatch(value)) {
-                                  return 'Invalid email';
+                                  return 'Invalid email format';
                                 }
                                 return null;
                               },
                             ),
                             const SizedBox(height: 16),
 
-                            // Phone Number
                             TextFormField(
                               controller: _phoneNumberController,
-                              keyboardType: TextInputType.phone,
                               decoration: const InputDecoration(
                                 labelText: 'Phone Number',
                                 border: OutlineInputBorder(),
                                 prefixIcon: Icon(Icons.phone),
                               ),
+                              keyboardType: TextInputType.phone,
                               validator:
                                   (value) =>
                                       value == null || value.isEmpty
@@ -374,13 +382,27 @@ class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
                             ),
                             const SizedBox(height: 16),
 
-                            // Foreman Address
                             TextFormField(
-                              controller: _foremanAddressController,
+                              controller: _workshopNameController,
                               decoration: const InputDecoration(
-                                labelText: 'Address',
+                                labelText: 'Workshop Name',
                                 border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.home),
+                                prefixIcon: Icon(Icons.business),
+                              ),
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
+                            ),
+                            const SizedBox(height: 16),
+
+                            TextFormField(
+                              controller: _workshopAddressController,
+                              decoration: const InputDecoration(
+                                labelText: 'Workshop Address',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.location_on),
                               ),
                               maxLines: 2,
                               validator:
@@ -391,46 +413,81 @@ class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
                             ),
                             const SizedBox(height: 16),
 
-                            // Foreman Skills
                             TextFormField(
-                              controller: _foremanSkillsController,
+                              controller: _workshopPhoneController,
                               decoration: const InputDecoration(
-                                labelText: 'Skills',
+                                labelText: 'Workshop Phone',
                                 border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.handyman),
+                                prefixIcon: Icon(Icons.phone_android),
                               ),
-                              maxLines: 2,
+                              keyboardType: TextInputType.phone,
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
                             ),
                             const SizedBox(height: 16),
 
-                            // Work Experience
                             TextFormField(
-                              controller: _foremanWorkExperienceController,
+                              controller: _workshopEmailController,
                               decoration: const InputDecoration(
-                                labelText: 'Work Experience',
+                                labelText: 'Workshop Email',
                                 border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.work),
+                                prefixIcon: Icon(Icons.email_outlined),
+                              ),
+                              keyboardType: TextInputType.emailAddress,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Required';
+                                }
+                                final emailRegex = RegExp(
+                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                );
+                                if (!emailRegex.hasMatch(value)) {
+                                  return 'Invalid email format';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+
+                            TextFormField(
+                              controller: _workshopOperationHourController,
+                              decoration: const InputDecoration(
+                                labelText: 'Workshop Operation Hour',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.access_time),
+                              ),
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
+                            ),
+                            const SizedBox(height: 16),
+
+                            TextFormField(
+                              controller: _workshopDetailController,
+                              decoration: const InputDecoration(
+                                labelText: 'Workshop Detail',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.description),
                               ),
                               maxLines: 3,
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 30),
 
                             ElevatedButton.icon(
                               onPressed:
-                                  _isSaving
-                                      ? null
-                                      : () async {
-                                        final confirmed =
-                                            await _showConfirmationDialog();
-                                        if (confirmed) {
-                                          await _saveProfile();
-                                        }
-                                      },
+                                  _isLoading ? null : _confirmAndSaveProfile,
                               icon: const Icon(Icons.save),
-                              label:
-                                  _isSaving
-                                      ? const Text('Saving...')
-                                      : const Text('Save Changes'),
+                              label: const Text('Add Profile'),
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 14,

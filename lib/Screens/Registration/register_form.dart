@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:workshop_management_system/controllers/registration_controller.dart';
 import '../Registration/widgets/confirmation_dialog.dart';
@@ -21,8 +22,10 @@ class _RegisterFormState extends State<RegisterForm> {
   final TextEditingController _emailCtrl = TextEditingController();
   final TextEditingController _phoneCtrl = TextEditingController();
   final TextEditingController _passwordCtrl = TextEditingController();
+  final TextEditingController _confirmPasswordCtrl = TextEditingController();
 
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   bool _isSubmitting = false;
 
   @override
@@ -32,6 +35,7 @@ class _RegisterFormState extends State<RegisterForm> {
     _emailCtrl.dispose();
     _phoneCtrl.dispose();
     _passwordCtrl.dispose();
+    _confirmPasswordCtrl.dispose();
     super.dispose();
   }
 
@@ -50,6 +54,10 @@ class _RegisterFormState extends State<RegisterForm> {
         setState(() {
           _isSubmitting = true;
         });
+
+        if (kDebugMode) {
+          print('Registering user with role: ${widget.userRole}');
+        }
 
         final user = _controller.createUser(
           role: widget.userRole,
@@ -172,6 +180,30 @@ class _RegisterFormState extends State<RegisterForm> {
                   onPressed: () {
                     setState(() {
                       _obscurePassword = !_obscurePassword;
+                    });
+                  },
+                ),
+              ),
+              _buildTextField(
+                controller: _confirmPasswordCtrl,
+                label: 'Confirm Password *',
+                obscureText: _obscureConfirmPassword,
+                validator: (value) {
+                  if (value == null || value.isEmpty) return 'Required';
+                  if (value != _passwordCtrl.text) {
+                    return 'Passwords do not match';
+                  }
+                  return null;
+                },
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureConfirmPassword
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureConfirmPassword = !_obscureConfirmPassword;
                     });
                   },
                 ),

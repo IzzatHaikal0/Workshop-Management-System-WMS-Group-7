@@ -1,19 +1,22 @@
-import 'dart:io';
+import 'dart:io' show File;
+import 'package:flutter/foundation.dart' show Uint8List, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-class EditProfilePage extends StatefulWidget {
+class AddProfilePage extends StatefulWidget {
   final Map<String, dynamic>? existingProfile;
-  const EditProfilePage({super.key, this.existingProfile});
+  final String? role; // Optional: pass role from outside if known
+
+  const AddProfilePage({super.key, this.existingProfile, this.role});
 
   @override
-  State<EditProfilePage> createState() => _EditProfilePageState();
+  State<AddProfilePage> createState() => _AddProfilePageState();
 }
 
-class _EditProfilePageState extends State<EditProfilePage> {
+class _AddProfilePageState extends State<AddProfilePage> {
   final _formKey = GlobalKey<FormState>();
 
   late TextEditingController _firstNameController;
@@ -32,14 +35,22 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   String? _role;
   String? _existingImageUrl;
-  File? _pickedImageFile;
+
+  XFile? _pickedImageFile;
+  Uint8List? _pickedImageBytes; // For Web preview
+
   bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
     _initializeControllers();
-    _fetchRole();
+    if (widget.role != null) {
+      _role = widget.role;
+      _loadExistingImageUrl();
+    } else {
+      _fetchRole();
+    }
   }
 
   void _initializeControllers() {
@@ -78,6 +89,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
+  void _loadExistingImageUrl() {
+    setState(() {
+      _existingImageUrl =
+          widget.existingProfile?[_role == 'foreman'
+              ? 'ForemanProfilePicture'
+              : 'workshopProfilePicture'];
+    });
+  }
+
   Future<void> _fetchRole() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -99,16 +119,34 @@ class _EditProfilePageState extends State<EditProfilePage> {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
     if (picked != null) {
-      setState(() => _pickedImageFile = File(picked.path));
+      if (kIsWeb) {
+        final bytes = await picked.readAsBytes();
+        setState(() {
+          _pickedImageFile = picked;
+          _pickedImageBytes = bytes;
+        });
+      } else {
+        setState(() {
+          _pickedImageFile = picked;
+          _pickedImageBytes = null;
+        });
+      }
     }
   }
 
   Future<String?> _uploadImage(String uid) async {
     if (_pickedImageFile == null) return _existingImageUrl;
+
     final ref = FirebaseStorage.instance.ref().child(
       'profile_pictures/$_role/$uid.jpg',
     );
-    await ref.putFile(_pickedImageFile!);
+
+    if (kIsWeb) {
+      await ref.putData(_pickedImageBytes!);
+    } else {
+      await ref.putFile(File(_pickedImageFile!.path));
+    }
+
     return await ref.getDownloadURL();
   }
 
@@ -117,11 +155,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     setState(() => _isSaving = true);
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    if (user == null) {
+      setState(() => _isSaving = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('No user logged in')));
+      return;
+    }
 
     try {
       String? imageUrl = await _uploadImage(user.uid);
-      Map<String, dynamic> data = {
+
+      final data = {
         'first_name': _firstNameController.text.trim(),
         'last_name': _lastNameController.text.trim(),
         'phone_number': _phoneController.text.trim(),
@@ -144,33 +189,39 @@ class _EditProfilePageState extends State<EditProfilePage> {
       await FirebaseFirestore.instance
           .collection(_role == 'foreman' ? 'foremen' : 'workshop_owner')
           .doc(user.uid)
-          .update(data);
+          .set(data, SetOptions(merge: true));
 
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      ScaffoldMessenger.of(
-        // ignore: use_build_context_synchronously
-        context,
-      ).showSnackBar(SnackBar(content: Text('Update failed: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Update failed: $e')));
+      }
     }
 
     setState(() => _isSaving = false);
   }
 
   Widget _buildProfileImage() {
-    final imageProvider =
-        _pickedImageFile != null
-            ? FileImage(_pickedImageFile!)
-            : (_existingImageUrl != null
-                ? NetworkImage(_existingImageUrl!)
-                : null);
+    ImageProvider<Object>? imageProvider;
+
+    if (_pickedImageFile != null) {
+      if (kIsWeb && _pickedImageBytes != null) {
+        imageProvider = MemoryImage(_pickedImageBytes!);
+      } else {
+        imageProvider = FileImage(File(_pickedImageFile!.path));
+      }
+    } else if (_existingImageUrl != null) {
+      imageProvider = NetworkImage(_existingImageUrl!);
+    }
 
     return Center(
       child: Stack(
         children: [
           CircleAvatar(
             radius: 60,
-            backgroundImage: imageProvider as ImageProvider<Object>?,
+            backgroundImage: imageProvider,
             backgroundColor: Colors.grey[300],
             child:
                 imageProvider == null
@@ -217,7 +268,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
         keyboardType: keyboardType,
         validator:
             required
-                ? (val) => val == null || val.isEmpty ? 'Enter $label' : null
+                ? (val) {
+                  if (val == null || val.isEmpty) {
+                    return 'Enter $label';
+                  }
+                  return null;
+                }
                 : null,
       ),
     );
@@ -242,18 +298,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Profile')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child:
-            _isSaving || _role == null
-                ? const Center(child: CircularProgressIndicator())
-                : Form(
+      appBar: AppBar(title: const Text('Add / Edit Profile')),
+      body:
+          _role == null
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Form(
                   key: _formKey,
-                  child: ListView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildProfileImage(),
-                      _buildSectionTitle('Personal Information'),
                       _buildTextField(
                         _firstNameController,
                         'First Name',
@@ -270,7 +326,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         keyboardType: TextInputType.phone,
                         required: true,
                       ),
-
                       if (_role == 'foreman') ...[
                         _buildSectionTitle('Foreman Details'),
                         _buildTextField(
@@ -284,21 +339,23 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           'Work Experience',
                         ),
                       ],
-
                       if (_role == 'workshop_owner') ...[
                         _buildSectionTitle('Workshop Details'),
                         _buildTextField(
                           _workshopNameController,
                           'Workshop Name',
+                          required: true,
                         ),
                         _buildTextField(
                           _workshopAddressController,
-                          'Workshop Address',
+                          'Address',
+                          required: true,
                         ),
                         _buildTextField(
                           _workshopPhoneController,
-                          'Workshop Phone Number',
+                          'Phone Number',
                           keyboardType: TextInputType.phone,
+                          required: true,
                         ),
                         _buildTextField(
                           _workshopHoursController,
@@ -306,24 +363,26 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         ),
                         _buildTextField(
                           _workshopDetailController,
-                          'Descriptions',
+                          'Workshop Detail',
                         ),
                       ],
-
                       const SizedBox(height: 24),
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.save),
-                        label: const Text('Update'),
-                        onPressed: _updateProfile,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          textStyle: const TextStyle(fontSize: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _isSaving ? null : _updateProfile,
+                          child:
+                              _isSaving
+                                  ? const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  )
+                                  : const Text('Save'),
                         ),
                       ),
                     ],
                   ),
                 ),
-      ),
+              ),
     );
   }
 }
