@@ -58,6 +58,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
   TimeOfDay? endTime;
   int? salaryRate;
   int? scheduleID;
+  String? jobDescription;
 
   @override
   void initState() {
@@ -172,7 +173,23 @@ class _DatePickerExampleState extends State<DatePickerExample> {
               trailing: const Icon(Icons.attach_money),
             ),
           ),
-
+          Card(
+            child: ListTile(
+              title: const Text('Job Task Description'),
+              subtitle: TextFormField(
+                decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: 'Enter job details',
+                ),
+                onChanged: (value) {
+                setState(() {
+                    jobDescription = value;
+                  });
+                },
+              ),
+              trailing: const Icon(Icons.note_add),
+            ),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -255,6 +272,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
         totalHours: _calculateTotalHours(startTime!, endTime!),
         docId: widget.schedule.docId, // Firestore will generate this
         //TotalHours: _calculateTotalHours(StartTime!, EndTime!),
+        jobDescription:jobDescription ?? '',
       );
 
       ScheduleController().editSchedule(schedule);
