@@ -46,6 +46,7 @@ class SelectSchedulePage extends StatelessWidget {
                       String date = DateFormat('d MMMM yyyy').format(schedule.scheduleDate);
                       String startTime = DateFormat('HH:mm').format(schedule.startTime);
                       String endTime = DateFormat('HH:mm').format(schedule.endTime);
+                      String jobDescription = schedule.jobDescription ?? 'No description provided';
 
                       return Container(
                         width: double.infinity,
@@ -77,6 +78,13 @@ class SelectSchedulePage extends StatelessWidget {
                             SizedBox(height: 4),
                             Text(
                               date,
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
+                            ),
+                            Text(
+                              'Job Description: $jobDescription',
                               style: TextStyle(
                                 color: Colors.white70,
                                 fontSize: 14,
@@ -145,6 +153,7 @@ class SelectSchedulePage extends StatelessWidget {
                                       'End Time: ${DateFormat('hh:mm a').format(schedule.endTime)}\n'
                                       'Total Hours: ${totalHours.toStringAsFixed(2)} h\n'
                                       'Salary Rate: RM ${schedule.salaryRate} h\n'
+                                      'Job Description: ${schedule.jobDescription ?? 'No description provided'} \n'
                                       'Workshop Name: ${schedule.workshopName ?? 'Unknown'}',
                                       style: TextStyle(
                                         fontWeight: FontWeight.normal,

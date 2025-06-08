@@ -48,25 +48,55 @@ class _AddRatingPageState extends State<AddRatingPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Card(
-                      child: Padding(
-                        padding: EdgeInsets.all(10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Foreman Information',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                    Center(
+                      child: Card(
+                        child: Padding(
+                          padding: EdgeInsets.all(10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              CircleAvatar(
+                                backgroundColor: const Color.fromARGB(255, 25, 148, 111),
+                                radius: 70,
+                                child: Text(
+                                  (foremanData!['first_name'] as String).isNotEmpty
+                                      ? (foremanData!['first_name'][0] as String).toUpperCase()
+                                      : '?',
+                                  style: const TextStyle(color: Colors.white, fontSize: 50),
+                                ),
                               ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'Name: ${foremanData!['first_name']} ${foremanData!['last_name']}',
-                            ),
-                            Text('Email: ${foremanData!['email']}'),
-                          ],
+                              SizedBox(width: 16),
+                              Text(
+                                'Foreman Information',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                'Name: ${foremanData!['first_name']} ${foremanData!['last_name']}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                'Email: ${foremanData!['email']}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                'Phone: ${foremanData!['phone_number']}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

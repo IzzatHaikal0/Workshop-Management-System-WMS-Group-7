@@ -10,6 +10,7 @@ class Schedule {
   final String? docId;
   final String status; // Default status
   final String? workshopName;
+  final String? jobDescription;
 
   Schedule({
     //required this.ScheduleID,
@@ -21,6 +22,7 @@ class Schedule {
     required this.docId,
     this.status = 'pending', // Default to 'pending'
     this.workshopName,
+    required this.jobDescription,
   });
 
   // Proper factory method
@@ -44,6 +46,7 @@ class Schedule {
       docId: doc.id,
       status: data['status'] ?? 'pending', // Default to 'pending' if not present
       workshopName: workshopName, 
+      jobDescription: data['jobDescription'] ?? '', // Default to empty string if not present
     );
   }
 
@@ -56,6 +59,7 @@ class Schedule {
       totalHours: (map['totalHours'] ?? 0).toDouble(),
       docId: docId,
       status: map['status'] ?? 'pending',
+      jobDescription: map['jobDescription'] ?? '',
     );
   }
 
@@ -67,7 +71,8 @@ class Schedule {
       'scheduleDate': Timestamp.fromDate(scheduleDate),
       'salaryRate': salaryRate,
       'totalHours': totalHours,
-      'status': status, // Include status in the map
+      'status': status, 
+      'jobDescription': jobDescription ?? '', 
     };
   }
 }
