@@ -80,7 +80,7 @@ class _ItemFormState extends State<ItemForm> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Item Information',
+            'Item Details',
             style: MyTextStyles.semiBold.copyWith(fontSize: 16),
           ),
           TextButton(

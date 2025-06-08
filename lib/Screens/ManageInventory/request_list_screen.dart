@@ -126,7 +126,7 @@ class _RequestListScreenState extends State<RequestListScreen> {
         child: Row(
           children: [
             _buildSegmentButton(0, 'My Requests'),
-            _buildSegmentButton(1, 'Approvals'),
+            _buildSegmentButton(1, 'Others'),
           ],
         ),
       ),

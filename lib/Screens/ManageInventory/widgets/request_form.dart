@@ -43,30 +43,36 @@ class _RequestFormState extends State<RequestForm> {
     }
   }
 
+  Widget _buildHeader() {
+    return Container(
+      alignment: Alignment.centerLeft,
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      child: Text(
+        'Request Details',
+        style: MyTextStyles.semiBold.copyWith(fontSize: 16),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      padding: const EdgeInsets.all(16),
       child: Form(
         key: _formKey,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Card(
               elevation: 2,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      'Request Details',
-                      style: MyTextStyles.semiBold.copyWith(fontSize: 16),
-                    ),
+                    _buildHeader(),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _itemNameController,
@@ -146,27 +152,27 @@ class _RequestFormState extends State<RequestForm> {
                       textInputAction: TextInputAction.done,
                       textCapitalization: TextCapitalization.sentences,
                     ),
+
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: _submitForm,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF4169E1),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        widget.submitButtonText,
+                        style: MyTextStyles.bold.copyWith(fontSize: 14),
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
-
-            ElevatedButton(
-              onPressed: _submitForm,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4169E1),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Text(
-                widget.submitButtonText,
-                style: MyTextStyles.bold.copyWith(fontSize: 14),
-              ),
-            ),
-
             const SizedBox(height: 16),
             Card(
               color: Colors.blue[50],
