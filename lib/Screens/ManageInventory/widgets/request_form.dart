@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:workshop_management_system/Screens/ManageInventory/widgets/custom_text.dart';
 
 class RequestForm extends StatefulWidget {
   final Function(String itemName, int quantity, String? notes) onSubmit;
@@ -33,8 +34,11 @@ class _RequestFormState extends State<RequestForm> {
     if (_formKey.currentState!.validate()) {
       final itemName = _itemNameController.text.trim();
       final quantity = int.parse(_quantityController.text);
-      final notes = _notesController.text.trim().isEmpty ? null : _notesController.text.trim();
-      
+      final notes =
+          _notesController.text.trim().isEmpty
+              ? null
+              : _notesController.text.trim();
+
       widget.onSubmit(itemName, quantity, notes);
     }
   }
@@ -42,15 +46,18 @@ class _RequestFormState extends State<RequestForm> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       child: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // request details
             Card(
               elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -58,25 +65,21 @@ class _RequestFormState extends State<RequestForm> {
                   children: [
                     Text(
                       'Request Details',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
-                      ),
+                      style: MyTextStyles.semiBold.copyWith(fontSize: 16),
                     ),
                     const SizedBox(height: 16),
-                    
-                    // item name
                     TextFormField(
                       controller: _itemNameController,
                       decoration: InputDecoration(
-                        labelText: 'Item Name *',
+                        labelText: 'Item Name',
                         hintText: 'Enter the item you need',
-                        prefixIcon: const Icon(Icons.inventory_2_outlined),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        border: const OutlineInputBorder(),
                         filled: true,
-                        fillColor: Colors.grey[50],
+                        fillColor: Colors.white,
+                      ),
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 14,
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -91,24 +94,23 @@ class _RequestFormState extends State<RequestForm> {
                       textCapitalization: TextCapitalization.words,
                     ),
                     const SizedBox(height: 16),
-                    
-                    // quantity
                     TextFormField(
                       controller: _quantityController,
                       decoration: InputDecoration(
-                        labelText: 'Quantity *',
+                        labelText: 'Quantity',
                         hintText: 'Enter quantity needed',
-                        prefixIcon: const Icon(Icons.numbers),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        border: const OutlineInputBorder(),
                         filled: true,
-                        fillColor: Colors.grey[50],
+                        fillColor: Colors.white,
+                      ),
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 12,
                       ),
                       keyboardType: TextInputType.number,
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(6), // Max 999,999
+                        LengthLimitingTextInputFormatter(6),
                       ],
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -126,19 +128,18 @@ class _RequestFormState extends State<RequestForm> {
                       textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: 16),
-                    
-                    // notes
                     TextFormField(
                       controller: _notesController,
                       decoration: InputDecoration(
                         labelText: 'Notes (Optional)',
-                        hintText: 'Additional details or specifications',
-                        prefixIcon: const Icon(Icons.note_outlined),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        hintText: 'Additional details',
+                        border: const OutlineInputBorder(),
                         filled: true,
-                        fillColor: Colors.grey[50],
+                        fillColor: Colors.white,
+                      ),
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 12,
                       ),
                       maxLines: 3,
                       maxLength: 500,
@@ -149,60 +150,41 @@ class _RequestFormState extends State<RequestForm> {
                 ),
               ),
             ),
-            
-            const SizedBox(height: 24),
-            
-            // submit button
-            SizedBox(
-              height: 50,
-              child: ElevatedButton(
-                onPressed: _submitForm,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 2,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.send),
-                    const SizedBox(width: 8),
-                    Text(
-                      widget.submitButtonText,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+
+            ElevatedButton(
+              onPressed: _submitForm,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4169E1),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
+              child: Text(
+                widget.submitButtonText,
+                style: MyTextStyles.bold.copyWith(fontSize: 14),
+              ),
             ),
-            
+
             const SizedBox(height: 16),
-            
-            // details
             Card(
               color: Colors.blue[50],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.info_outline,
-                      color: Colors.blue[700],
-                      size: 20,
-                    ),
+                    Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Your request will be submitted to other workshop.',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.blue[700],
+                        style: MyTextStyles.medium.copyWith(
+                          fontSize: 10,
+                          color: Color(0xFF4169E1),
                         ),
                       ),
                     ),

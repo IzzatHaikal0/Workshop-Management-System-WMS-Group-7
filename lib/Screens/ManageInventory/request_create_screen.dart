@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:workshop_management_system/Controllers/ManageInventory/request_controller.dart';
+import 'package:workshop_management_system/Screens/ManageInventory/widgets/custom_text.dart';
 import 'package:workshop_management_system/Screens/ManageInventory/widgets/request_form.dart';
 
 class RequestCreateScreen extends StatefulWidget {
@@ -13,7 +14,11 @@ class _RequestCreateScreenState extends State<RequestCreateScreen> {
   final RequestController _requestController = RequestController();
   bool _isLoading = false;
 
-  Future<void> _createRequest(String itemName, int quantity, String? notes) async {
+  Future<void> _createRequest(
+    String itemName,
+    int quantity,
+    String? notes,
+  ) async {
     setState(() => _isLoading = true);
 
     try {
@@ -22,17 +27,27 @@ class _RequestCreateScreenState extends State<RequestCreateScreen> {
         quantity: quantity,
         notes: notes,
       );
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Request created successfully')),
+          const SnackBar(
+            content: Text(
+              'Request created successfully',
+              style: MyTextStyles.regular,
+            ),
+          ),
         );
         Navigator.pop(context, newRequest);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error creating request: $e')),
+          SnackBar(
+            content: Text(
+              'Error creating request: $e',
+              style: MyTextStyles.regular,
+            ),
+          ),
         );
       }
     } finally {
@@ -44,15 +59,24 @@ class _RequestCreateScreenState extends State<RequestCreateScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create New Request'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(
+          'New Request',
+          style: MyTextStyles.bold.copyWith(
+            fontSize: 16,
+            color: Color.fromARGB(255, 0, 0, 0),
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : RequestForm(
-              onSubmit: _createRequest,
-              submitButtonText: 'Create Request',
-            ),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : RequestForm(
+                onSubmit: _createRequest,
+                submitButtonText: 'Create Request',
+              ),
     );
   }
 }

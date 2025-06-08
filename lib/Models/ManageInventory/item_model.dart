@@ -6,7 +6,7 @@ class Item {
   final String itemCategory;
   final int quantity;
   final double unitPrice;
-  final String workshopOwnerId; 
+  final String workshopOwnerId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -16,7 +16,7 @@ class Item {
     required this.itemCategory,
     required this.quantity,
     required this.unitPrice,
-    required this.workshopOwnerId, 
+    required this.workshopOwnerId,
     this.createdAt,
     this.updatedAt,
   });
@@ -27,7 +27,7 @@ class Item {
       'itemCategory': itemCategory,
       'quantity': quantity,
       'unitPrice': unitPrice,
-      'workshopOwnerId': workshopOwnerId, 
+      'workshopOwnerId': workshopOwnerId,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
     };
@@ -41,7 +41,7 @@ class Item {
       itemCategory: data['itemCategory'] ?? '',
       quantity: data['quantity'] ?? 0,
       unitPrice: (data['unitPrice'] ?? 0.0).toDouble(),
-      workshopOwnerId: data['workshopOwnerId'] ?? '', 
+      workshopOwnerId: data['workshopOwnerId'] ?? '',
       createdAt: data['createdAt']?.toDate(),
       updatedAt: data['updatedAt']?.toDate(),
     );

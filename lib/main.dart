@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-
 // Import inventory and request barrel
 import 'package:workshop_management_system/Screens/ManageInventory/inventory_barrel.dart';
 import 'package:workshop_management_system/Screens/Profile/edit_profile_page_workshop_owner.dart';
@@ -141,27 +140,6 @@ class MyApp extends StatelessWidget {
                     workshopOwnerId: args['workshopOwnerId'] ?? '',
                   ),
             );
-            // Inventory routes <<<<
-            case AppRoutes.inventoryList:
-              return MaterialPageRoute(builder: (_) => const ItemListScreen());
-
-            case AppRoutes.inventoryCreate:
-              return MaterialPageRoute(builder: (_) => const ItemCreateScreen());
-
-            case AppRoutes.inventoryDetail:
-              return MaterialPageRoute(
-                builder: (_) => ItemDetailScreen(item: args['itemId'] ?? ''),
-            );
-
-            case AppRoutes.inventoryEdit:
-              return MaterialPageRoute(
-                builder: (_) => ItemEditScreen(
-                  item: args['itemId'] ?? '',
-              ),
-              // >>>>
-            );
-
-
           default:
             return MaterialPageRoute(
               builder:
@@ -205,7 +183,6 @@ class AuthGate extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
- 
   final String title;
 
   @override
@@ -217,7 +194,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String? currentUserRole;
   String userName = '';
   final String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
-  
+
   @override
   void initState() {
     super.initState();
@@ -267,78 +244,78 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   // Pages
-    List<Widget> get _pages {
-      if (currentUserRole == null) {
-        return [const Center(child: CircularProgressIndicator())];
-      }
-        return [
-        const WorkshopHomePage(),
-        const Center(child: Text('Schedule Page')),
-        currentUserRole == 'foreman'
-            ? ViewProfilePageForeman(foremanId: currentUserId)
-            : ViewProfilePageWorkshopOwner(workshopOwnerId: currentUserId),
-        const ItemListScreen(),
-      ];
+  List<Widget> get _pages {
+    if (currentUserRole == null) {
+      return [const Center(child: CircularProgressIndicator())];
     }
+    return [
+      const WorkshopHomePage(),
+      const Center(child: Text('Schedule Page')),
+      currentUserRole == 'foreman'
+          ? ViewProfilePageForeman(foremanId: currentUserId)
+          : ViewProfilePageWorkshopOwner(workshopOwnerId: currentUserId),
+      const ItemListScreen(),
+    ];
+  }
 
-    Future<void> _confirmLogout() async {
-      final shouldLogout = await showDialog<bool>(
-        context: context,
-        builder:
-            (context) => AlertDialog(
-              title: const Text('Logout Confirmation'),
-              content: const Text('Are you sure you want to logout?'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Cancel'),
-                ),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: const Text('Logout'),
-                ),
-              ],
-            ),
-      );
-      if (shouldLogout == true) {
-        await FirebaseAuth.instance.signOut();
-      }
-    }
-
-    @override
-    Widget build(BuildContext context) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.logout),
-              tooltip: 'Logout',
-              onPressed: _confirmLogout,
-            ),
-          ],
-        ),
-        body: _pages[_selectedIndex],
-        bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: const Color.fromARGB(255, 211, 222, 239),
-          selectedItemColor: const Color.fromARGB(255, 17, 24, 218),
-          unselectedItemColor: Colors.grey,
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.schedule),
-              label: 'Schedule',
-            ),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.inventory),
-              label: 'Inventory',
-            ),
-          ],
-        ),
-      );
+  Future<void> _confirmLogout() async {
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Logout Confirmation'),
+            content: const Text('Are you sure you want to logout?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Logout'),
+              ),
+            ],
+          ),
+    );
+    if (shouldLogout == true) {
+      await FirebaseAuth.instance.signOut();
     }
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: _confirmLogout,
+          ),
+        ],
+      ),
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: const Color.fromARGB(255, 211, 222, 239),
+        selectedItemColor: const Color.fromARGB(255, 17, 24, 218),
+        unselectedItemColor: Colors.grey,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.schedule),
+            label: 'Schedule',
+          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.inventory),
+            label: 'Inventory',
+          ),
+        ],
+      ),
+    );
+  }
+}

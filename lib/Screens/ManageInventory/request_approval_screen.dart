@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:workshop_management_system/Controllers/ManageInventory/request_controller.dart';
 import 'package:workshop_management_system/Models/ManageInventory/request_model.dart';
+import 'package:workshop_management_system/Screens/ManageInventory/widgets/custom_text.dart';
 import 'package:workshop_management_system/Screens/ManageInventory/widgets/request_card.dart';
 
 class RequestApprovalScreen extends StatefulWidget {
@@ -23,7 +24,7 @@ class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
 
   List<Request> _filterBySearch(List<Request> requests) {
     if (_searchText.isEmpty) return requests;
-    
+
     return requests.where((request) {
       return request.itemName.toLowerCase().contains(_searchText.toLowerCase());
     }).toList();
@@ -31,65 +32,88 @@ class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
 
   Future<void> _handleApproval(Request request, bool isApproved) async {
     final TextEditingController notesController = TextEditingController();
-    
+
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(isApproved ? 'Approve Request' : 'Reject Request'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Item: ${request.itemName}'),
-            Text('Quantity: ${request.quantity}'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: notesController,
-              decoration: const InputDecoration(
-                labelText: 'Notes (optional)',
-                border: OutlineInputBorder(),
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              isApproved ? 'Approve Request' : 'Reject Request',
+              style: MyTextStyles.medium,
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Item: ${request.itemName}', style: MyTextStyles.regular),
+                Text(
+                  'Quantity: ${request.quantity}',
+                  style: MyTextStyles.regular,
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: notesController,
+                  decoration: const InputDecoration(
+                    labelText: 'Notes (optional)',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 3,
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
               ),
-              maxLines: 3,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: TextButton.styleFrom(
+                  foregroundColor: isApproved ? Colors.green : Colors.red,
+                ),
+                child: Text(isApproved ? 'Approve' : 'Reject'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(
-              foregroundColor: isApproved ? Colors.green : Colors.red,
-            ),
-            child: Text(isApproved ? 'Approve' : 'Reject'),
-          ),
-        ],
-      ),
     );
 
     if (result == true && request.id != null) {
       try {
         if (isApproved) {
-          await _requestController.approveRequest(request.id!, notesController.text);
+          await _requestController.approveRequest(
+            request.id!,
+            notesController.text,
+          );
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Request approved successfully')),
+              const SnackBar(
+                content: Text(
+                  'Request approved successfully',
+                  style: MyTextStyles.regular,
+                ),
+              ),
             );
           }
         } else {
-          await _requestController.rejectRequest(request.id!, notesController.text);
+          await _requestController.rejectRequest(
+            request.id!,
+            notesController.text,
+          );
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Request rejected successfully')),
+              const SnackBar(
+                content: Text(
+                  'Request rejected successfully',
+                  style: MyTextStyles.regular,
+                ),
+              ),
             );
           }
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
+            SnackBar(content: Text('Error: $e', style: MyTextStyles.regular)),
           );
         }
       }
@@ -99,29 +123,35 @@ class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pending Approvals'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        elevation: 2,
-      ),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+
       body: Column(
         children: [
           // search
           Container(
             padding: const EdgeInsets.all(16.0),
-            color: Colors.grey[50],
+            color: const Color.fromARGB(255, 250, 250, 250),
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search requests...',
+                hintText: 'Search items...',
                 prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
                 filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                fillColor: const Color.fromARGB(255, 250, 250, 250),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: Color.fromARGB(255, 219, 225, 244),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.grey, width: 1.5),
+                ),
               ),
               onChanged: (value) {
                 setState(() {
@@ -152,12 +182,12 @@ class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
                         const SizedBox(height: 16),
                         Text(
                           'Error loading requests',
-                          style: Theme.of(context).textTheme.headlineSmall,
+                          style: MyTextStyles.regular,
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Please try again later',
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          style: MyTextStyles.medium,
                         ),
                       ],
                     ),
@@ -179,15 +209,17 @@ class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          allRequests.isEmpty ? 'No pending approvals' : 'No matching requests',
-                          style: Theme.of(context).textTheme.headlineSmall,
+                          allRequests.isEmpty
+                              ? 'No pending approvals'
+                              : 'No matching requests',
+                          style: MyTextStyles.bold,
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          allRequests.isEmpty 
-                            ? 'All requests have been processed' 
-                            : 'Try adjusting your search',
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          allRequests.isEmpty
+                              ? 'All requests have been processed'
+                              : 'Try adjusting your search',
+                          style: MyTextStyles.regular,
                         ),
                       ],
                     ),
@@ -214,25 +246,43 @@ class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
                             // Show request details
                             showDialog(
                               context: context,
-                              builder: (context) => AlertDialog(
-                                title: Text(request.itemName),
-                                content: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Quantity: ${request.quantity}'),
-                                    Text('Request Date: ${request.requestDate.day}/${request.requestDate.month}/${request.requestDate.year}'),
-                                    if (request.notes != null && request.notes!.isNotEmpty)
-                                      Text('Notes: ${request.notes}'),
-                                  ],
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: const Text('Close'),
+                              builder:
+                                  (context) => AlertDialog(
+                                    title: Text(
+                                      request.itemName,
+                                      style: MyTextStyles.bold,
+                                    ),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Quantity: ${request.quantity}',
+                                          style: MyTextStyles.regular,
+                                        ),
+                                        Text(
+                                          'Request Date: ${request.requestDate.day}/${request.requestDate.month}/${request.requestDate.year}',
+                                          style: MyTextStyles.regular,
+                                        ),
+                                        if (request.notes != null &&
+                                            request.notes!.isNotEmpty)
+                                          Text(
+                                            'Notes: ${request.notes}',
+                                            style: MyTextStyles.regular,
+                                          ),
+                                      ],
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text(
+                                          'Close',
+                                          style: MyTextStyles.regular,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
                             );
                           },
                         ),

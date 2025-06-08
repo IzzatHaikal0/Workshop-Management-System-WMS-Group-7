@@ -6,7 +6,12 @@ class ItemController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   /// create item
-  Future<Item> createItem(String itemName, String itemCategory, int quantity, double unitPrice) async {
+  Future<Item> createItem(
+    String itemName,
+    String itemCategory,
+    int quantity,
+    double unitPrice,
+  ) async {
     final String uid = FirebaseAuth.instance.currentUser!.uid;
 
     try {
@@ -30,10 +35,11 @@ class ItemController {
   Future<List<Item>> getItems() async {
     final String uid = FirebaseAuth.instance.currentUser!.uid;
     try {
-      final snapshot = await _firestore
-          .collection('InventoryItem')
-          .where('workshopOwnerId', isEqualTo: uid)
-          .get();
+      final snapshot =
+          await _firestore
+              .collection('InventoryItem')
+              .where('workshopOwnerId', isEqualTo: uid)
+              .get();
 
       return snapshot.docs.map((doc) => Item.fromFirestore(doc)).toList();
     } catch (e) {
@@ -48,15 +54,18 @@ class ItemController {
         .collection('InventoryItem')
         .where('workshopOwnerId', isEqualTo: uid)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => Item.fromFirestore(doc)).toList());
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => Item.fromFirestore(doc)).toList(),
+        );
   }
 
   /// get specific item by id
   Future<Item?> getItem(String itemId) async {
     final String uid = FirebaseAuth.instance.currentUser!.uid;
     try {
-      final doc = await _firestore.collection('InventoryItem').doc(itemId).get();
+      final doc =
+          await _firestore.collection('InventoryItem').doc(itemId).get();
       if (doc.exists) {
         final item = Item.fromFirestore(doc);
         if (item.workshopOwnerId == uid) {
@@ -70,7 +79,13 @@ class ItemController {
   }
 
   /// update item
-  Future<Item?> updateItem(String itemId, String itemName, String itemCategory, int quantity, double unitPrice) async {
+  Future<Item?> updateItem(
+    String itemId,
+    String itemName,
+    String itemCategory,
+    int quantity,
+    double unitPrice,
+  ) async {
     final String uid = FirebaseAuth.instance.currentUser!.uid;
     try {
       final docRef = _firestore.collection('InventoryItem').doc(itemId);
@@ -98,7 +113,7 @@ class ItemController {
   /// delete item
   Future<bool> deleteItem(String itemId) async {
     final String uid = FirebaseAuth.instance.currentUser!.uid;
-    
+
     try {
       final docRef = _firestore.collection('InventoryItem').doc(itemId);
       final doc = await docRef.get();
@@ -122,8 +137,9 @@ class ItemController {
         .where('workshopOwnerId', isEqualTo: uid)
         .where('itemCategory', isEqualTo: category)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => Item.fromFirestore(doc)).toList());
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => Item.fromFirestore(doc)).toList(),
+        );
   }
-
 }

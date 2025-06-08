@@ -5,7 +5,7 @@ class Request {
   final String itemName;
   final int quantity;
   final String requestedBy;
-  final String status; // pending, approved, fulfilled, rejected
+  final String status; // pending, approved, rejected
   final DateTime requestDate;
   final String? notes;
   final String? approvedBy;

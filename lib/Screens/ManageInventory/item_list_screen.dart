@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:workshop_management_system/Controllers/ManageInventory/item_controller.dart';
 import 'package:workshop_management_system/Models/ManageInventory/item_model.dart';
 import 'package:workshop_management_system/Screens/ManageInventory/inventory_barrel.dart';
+import 'package:workshop_management_system/Screens/ManageInventory/widgets/custom_text.dart';
 
 class ItemListScreen extends StatefulWidget {
   const ItemListScreen({super.key});
@@ -23,7 +24,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
     'Materials',
     'Equipment',
     'Consumables',
-    'Other'
+    'Other',
   ];
 
   @override
@@ -42,10 +43,10 @@ class _ItemListScreenState extends State<ItemListScreen> {
 
   List<Item> _filterBySearch(List<Item> items) {
     if (_searchText.isEmpty) return items;
-    
+
     return items.where((item) {
       return item.itemName.toLowerCase().contains(_searchText.toLowerCase()) ||
-             item.itemCategory.toLowerCase().contains(_searchText.toLowerCase());
+          item.itemCategory.toLowerCase().contains(_searchText.toLowerCase());
     }).toList();
   }
 
@@ -59,20 +60,28 @@ class _ItemListScreenState extends State<ItemListScreen> {
             child: Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.arrow_back),
+                  icon: const Icon(
+                    Icons.arrow_back_ios,
+                    color: Color(0xFF4169E1),
+                  ),
                   onPressed: () => Navigator.pop(context),
                 ),
-                const Expanded(
-                  child: Text(
-                    'Inventory Management',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w500,
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      'Inventory',
+                      style: MyTextStyles.bold.copyWith(
+                        fontSize: 16,
+                        color: Color.fromARGB(255, 0, 0, 0),
+                      ),
                     ),
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.assignment),
+                  icon: const Icon(
+                    Icons.request_page,
+                    color: Color(0xFF4169E1),
+                  ),
                   tooltip: 'View Requests',
                   onPressed: () {
                     Navigator.push(
@@ -98,13 +107,25 @@ class _ItemListScreenState extends State<ItemListScreen> {
                   decoration: InputDecoration(
                     hintText: 'Search items...',
                     prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
                     filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    fillColor: const Color.fromARGB(255, 250, 250, 250),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Color.fromARGB(255, 219, 225, 244),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Colors.grey,
+                        width: 1.5,
+                      ),
+                    ),
                   ),
                   onChanged: (value) {
                     setState(() {
@@ -112,6 +133,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
                     });
                   },
                 ),
+
                 const SizedBox(height: 12),
                 // category filter
                 SizedBox(
@@ -122,11 +144,11 @@ class _ItemListScreenState extends State<ItemListScreen> {
                     itemBuilder: (context, index) {
                       final category = _categories[index];
                       final isSelected = _selectedCategory == category;
-                      
+
                       return Padding(
                         padding: const EdgeInsets.only(right: 8.0),
                         child: FilterChip(
-                          label: Text(category),
+                          label: Text((category), style: MyTextStyles.regular),
                           selected: isSelected,
                           onSelected: (selected) {
                             setState(() {
@@ -134,9 +156,14 @@ class _ItemListScreenState extends State<ItemListScreen> {
                             });
                           },
                           backgroundColor: Colors.white,
-                          // ignore: deprecated_member_use
-                          selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
-                          checkmarkColor: Theme.of(context).primaryColor,
+                          selectedColor: Colors.grey[300],
+                          checkmarkColor: const Color(0xFF4169E1),
+                          side: BorderSide(
+                            color:
+                                isSelected
+                                    ? Colors.grey[300]!
+                                    : const Color.fromARGB(255, 219, 225, 244),
+                          ),
                         ),
                       );
                     },
@@ -165,14 +192,11 @@ class _ItemListScreenState extends State<ItemListScreen> {
                           color: Colors.red[300],
                         ),
                         const SizedBox(height: 16),
-                        Text(
-                          'Error loading items',
-                          style: Theme.of(context).textTheme.headlineSmall,
-                        ),
+                        Text('Error loading items', style: MyTextStyles.bold),
                         const SizedBox(height: 8),
                         Text(
                           'Please try again later',
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          style: MyTextStyles.medium,
                         ),
                       ],
                     ),
@@ -194,15 +218,17 @@ class _ItemListScreenState extends State<ItemListScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          allItems.isEmpty ? 'No items found' : 'No matching items',
-                          style: Theme.of(context).textTheme.headlineSmall,
+                          allItems.isEmpty
+                              ? 'No items found'
+                              : 'No matching items',
+                          style: MyTextStyles.bold,
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          allItems.isEmpty 
-                            ? 'Add your first inventory item' 
-                            : 'Try adjusting your search or filter',
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          allItems.isEmpty
+                              ? 'Add your first inventory item'
+                              : 'Try adjusting your search or filter',
+                          style: MyTextStyles.regular,
                         ),
                       ],
                     ),
@@ -226,7 +252,8 @@ class _ItemListScreenState extends State<ItemListScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => ItemDetailScreen(item: item),
+                                builder:
+                                    (context) => ItemDetailScreen(item: item),
                               ),
                             );
                           },
@@ -244,11 +271,10 @@ class _ItemListScreenState extends State<ItemListScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const ItemCreateScreen(),
-            ),
+            MaterialPageRoute(builder: (context) => const ItemCreateScreen()),
           );
         },
+        backgroundColor: const Color.fromARGB(255, 233, 238, 249),
         child: const Icon(Icons.add),
       ),
     );

@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:workshop_management_system/Models/ManageInventory/item_model.dart';
+import 'package:workshop_management_system/Screens/ManageInventory/widgets/custom_text.dart';
 
 class ItemCard extends StatelessWidget {
   final Item item;
   final VoidCallback onTap;
 
-  const ItemCard({
-    super.key,
-    required this.item,
-    required this.onTap,
-  });
+  const ItemCard({super.key, required this.item, required this.onTap});
 
   Color _getStockStatusColor() {
     if (item.quantity == 0) return Colors.red;
@@ -47,9 +44,7 @@ class ItemCard extends StatelessWidget {
     return Card(
       elevation: 2,
       margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -57,13 +52,12 @@ class ItemCard extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
-
               // icon
               Container(
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withOpacity(0.1),
+                  color: Theme.of(context).primaryColor.withAlpha(25),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -73,7 +67,7 @@ class ItemCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              
+
               // item details
               Expanded(
                 child: Column(
@@ -81,37 +75,38 @@ class ItemCard extends StatelessWidget {
                   children: [
                     Text(
                       item.itemName,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: MyTextStyles.bold.copyWith(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-                    
+
                     // Category
                     Text(
                       item.itemCategory,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      style: MyTextStyles.regular.copyWith(
                         color: Colors.grey[600],
+                        fontSize: 12,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    
+
                     // stock and quantity status
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: _getStockStatusColor().withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             _getStockStatus(),
-                            style: TextStyle(
+                            style: MyTextStyles.semiBold.copyWith(
                               color: _getStockStatusColor(),
-                              fontWeight: FontWeight.w600,
                               fontSize: 11,
                             ),
                           ),
@@ -119,8 +114,9 @@ class ItemCard extends StatelessWidget {
                         const SizedBox(width: 8),
                         Text(
                           'Qty: ${item.quantity}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w500,
+                          style: MyTextStyles.medium.copyWith(
+                            fontSize: 10,
+                            color: Colors.grey[600],
                           ),
                         ),
                       ],
@@ -128,22 +124,21 @@ class ItemCard extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               // price
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
                     'RM ${item.unitPrice.toStringAsFixed(2)}',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                    style: MyTextStyles.semiBold.copyWith(
                       color: Theme.of(context).primaryColor,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Total: RM ${(item.quantity * item.unitPrice).toStringAsFixed(2)}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    style: MyTextStyles.regular.copyWith(
                       color: Colors.grey[600],
                     ),
                   ),

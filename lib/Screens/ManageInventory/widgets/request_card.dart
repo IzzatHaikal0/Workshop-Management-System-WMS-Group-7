@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:workshop_management_system/Models/ManageInventory/request_model.dart';
+import 'package:workshop_management_system/Screens/ManageInventory/widgets/custom_text.dart';
 
 class RequestCard extends StatelessWidget {
   final Request request;
@@ -56,10 +57,7 @@ class RequestCard extends StatelessWidget {
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: statusColor.withOpacity(0.3),
-          width: 1,
-        ),
+        side: BorderSide(color: statusColor.withOpacity(0.3), width: 1),
       ),
       child: InkWell(
         onTap: onTap,
@@ -87,7 +85,7 @@ class RequestCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  
+
                   // request details
                   Expanded(
                     child: Column(
@@ -95,24 +93,18 @@ class RequestCard extends StatelessWidget {
                       children: [
                         Text(
                           request.itemName,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: MyTextStyles.bold.copyWith(fontSize: 14),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            Icon(
-                              Icons.numbers,
-                              size: 16,
-                              color: Colors.grey[600],
-                            ),
                             const SizedBox(width: 4),
                             Text(
                               'Qty: ${request.quantity}',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              style: MyTextStyles.medium.copyWith(
+                                fontSize: 10,
                                 color: Colors.grey[600],
                               ),
                             ),
@@ -121,10 +113,13 @@ class RequestCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  
+
                   // status
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
@@ -132,17 +127,12 @@ class RequestCard extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          statusIcon,
-                          size: 14,
-                          color: statusColor,
-                        ),
+                        Icon(statusIcon, size: 14, color: statusColor),
                         const SizedBox(width: 4),
                         Text(
                           request.status.toUpperCase(),
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
+                          style: MyTextStyles.semiBold.copyWith(
+                            fontSize: 11,
                             color: statusColor,
                           ),
                         ),
@@ -151,21 +141,18 @@ class RequestCard extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // date and notes
               Row(
                 children: [
-                  Icon(
-                    Icons.calendar_today,
-                    size: 14,
-                    color: Colors.grey[600],
-                  ),
+                  Icon(Icons.calendar_today, size: 14, color: Colors.grey[600]),
                   const SizedBox(width: 4),
                   Text(
                     'Requested: ${_formatDate(request.requestDate)}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    style: MyTextStyles.semiBold.copyWith(
+                      fontSize: 10,
                       color: Colors.grey[600],
                     ),
                   ),
@@ -179,14 +166,15 @@ class RequestCard extends StatelessWidget {
                     const SizedBox(width: 4),
                     Text(
                       'Processed: ${_formatDate(request.approvedDate!)}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      style: MyTextStyles.semiBold.copyWith(
+                        fontSize: 10,
                         color: Colors.grey[600],
                       ),
                     ),
                   ],
                 ],
               ),
-              
+
               // notes
               if (request.notes != null && request.notes!.isNotEmpty) ...[
                 const SizedBox(height: 8),
@@ -194,20 +182,18 @@ class RequestCard extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.grey[50],
+                    color: const Color.fromARGB(255, 248, 248, 248),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     request.notes!,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontStyle: FontStyle.italic,
-                    ),
+                    style: MyTextStyles.medium.copyWith(fontSize: 12),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
-              
+
               // approval action
               if (showApprovalActions && request.status == 'pending') ...[
                 const SizedBox(height: 12),
@@ -220,7 +206,10 @@ class RequestCard extends StatelessWidget {
                       child: TextButton.icon(
                         onPressed: onReject,
                         icon: const Icon(Icons.close, size: 18),
-                        label: const Text('Reject'),
+                        label: const Text(
+                          'Reject',
+                          style: MyTextStyles.semiBold,
+                        ),
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.red,
                           backgroundColor: Colors.red.withOpacity(0.1),
@@ -235,7 +224,7 @@ class RequestCard extends StatelessWidget {
                       child: TextButton.icon(
                         onPressed: onApprove,
                         icon: const Icon(Icons.check, size: 18),
-                        label: const Text('Approve'),
+                        label: const Text('Approve', style: MyTextStyles.bold),
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.green,
                           backgroundColor: Colors.green.withOpacity(0.1),

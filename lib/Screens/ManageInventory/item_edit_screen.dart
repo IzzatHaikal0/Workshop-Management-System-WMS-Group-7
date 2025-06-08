@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:workshop_management_system/Controllers/ManageInventory/item_controller.dart';
 import 'package:workshop_management_system/Models/ManageInventory/item_model.dart';
+import 'package:workshop_management_system/Screens/ManageInventory/widgets/custom_text.dart';
 import 'package:workshop_management_system/Screens/ManageInventory/widgets/item_form.dart';
 
 class ItemEditScreen extends StatefulWidget {
@@ -16,7 +17,12 @@ class _ItemEditScreenState extends State<ItemEditScreen> {
   final ItemController _itemController = ItemController();
   bool _isLoading = false;
 
-  Future<void> _updateItem(String itemName, String itemCategory, int quantity, double unitPrice) async {
+  Future<void> _updateItem(
+    String itemName,
+    String itemCategory,
+    int quantity,
+    double unitPrice,
+  ) async {
     if (widget.item.id == null) return;
 
     setState(() => _isLoading = true);
@@ -29,7 +35,7 @@ class _ItemEditScreenState extends State<ItemEditScreen> {
         quantity,
         unitPrice,
       );
-      
+
       if (mounted && updatedItem != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Item updated successfully')),
@@ -38,9 +44,9 @@ class _ItemEditScreenState extends State<ItemEditScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error updating item: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error updating item: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -51,16 +57,25 @@ class _ItemEditScreenState extends State<ItemEditScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Item'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(
+          'Edit Item',
+          style: MyTextStyles.bold.copyWith(
+            fontSize: 14,
+            color: Color.fromARGB(255, 0, 0, 0),
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ItemForm(
-              initialItem: widget.item,
-              onSubmit: _updateItem,
-              submitButtonText: 'Update Item',
-            ),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : ItemForm(
+                initialItem: widget.item,
+                onSubmit: _updateItem,
+                submitButtonText: 'Update Item',
+              ),
     );
   }
 }

@@ -12,8 +12,10 @@ class InventoryService {
         .collection('InventoryItem')
         .where('workshopOwnerId', isEqualTo: uid)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => Item.fromFirestore(doc)).toList());
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => Item.fromFirestore(doc)).toList(),
+        );
   }
 
   /// Create a new item (assigns to logged-in owner)
@@ -45,10 +47,11 @@ class InventoryService {
   /// Get all items for a specific owner (one-time fetch)
   Future<List<Item>> getItemsByOwnerId(String workshopOwnerId) async {
     try {
-      final snapshot = await _firestore
-          .collection('InventoryItem')
-          .where('workshopOwnerId', isEqualTo: workshopOwnerId)
-          .get();
+      final snapshot =
+          await _firestore
+              .collection('InventoryItem')
+              .where('workshopOwnerId', isEqualTo: workshopOwnerId)
+              .get();
 
       return snapshot.docs.map((doc) => Item.fromFirestore(doc)).toList();
     } catch (e) {
@@ -62,15 +65,20 @@ class InventoryService {
         .collection('InventoryItem')
         .where('workshopOwnerId', isEqualTo: workshopOwnerId)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => Item.fromFirestore(doc)).toList());
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => Item.fromFirestore(doc)).toList(),
+        );
   }
 
   /// Get a single item by ID and verify the owner
   Future<Item?> getItemByIdAndOwner(
-      String itemId, String workshopOwnerId) async {
+    String itemId,
+    String workshopOwnerId,
+  ) async {
     try {
-      final doc = await _firestore.collection('InventoryItem').doc(itemId).get();
+      final doc =
+          await _firestore.collection('InventoryItem').doc(itemId).get();
       if (doc.exists) {
         final item = Item.fromFirestore(doc);
         if (item.workshopOwnerId == workshopOwnerId) {
@@ -116,8 +124,7 @@ class InventoryService {
   }
 
   /// Delete an item after verifying ownership
-  Future<bool> deleteItemByOwner(
-      String itemId, String workshopOwnerId) async {
+  Future<bool> deleteItemByOwner(String itemId, String workshopOwnerId) async {
     try {
       final docRef = _firestore.collection('InventoryItem').doc(itemId);
       final doc = await docRef.get();
@@ -135,13 +142,17 @@ class InventoryService {
 
   /// Get items by category and owner
   Stream<List<Item>> getItemsByCategoryAndOwnerStream(
-      String category, String workshopOwnerId) {
+    String category,
+    String workshopOwnerId,
+  ) {
     return _firestore
         .collection('InventoryItem')
         .where('workshopOwnerId', isEqualTo: workshopOwnerId)
         .where('itemCategory', isEqualTo: category)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => Item.fromFirestore(doc)).toList());
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => Item.fromFirestore(doc)).toList(),
+        );
   }
 }
