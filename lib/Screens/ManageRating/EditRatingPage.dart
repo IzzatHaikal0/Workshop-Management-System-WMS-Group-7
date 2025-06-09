@@ -231,7 +231,7 @@ class _EditRatingPageState extends State<EditRatingPage> {
         ratingDate: DateTime.now().toIso8601String(),
       );
 
-      await controller.addRating(rating);
+      await controller.addRating(rating, widget.foremanId);
 
       Navigator.pop(context, true); // Pass true to indicate saved/updated
     }

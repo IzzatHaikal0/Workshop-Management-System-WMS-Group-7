@@ -85,11 +85,9 @@ class _RatingPageState extends State<RatingPage> {
                                       final foremanId = f['foremanId'] as String? ?? '';
                                       final ratingMap = f['rating'] as Map<String, dynamic>? ?? {};
                                       final ratingScore = ratingMap['ratingScore'] as int? ?? 0;
-            
-                                      final schedules = f['WorkshopSchedule'] as List<dynamic>? ?? [];
-                                      final jobDescription = schedules.isNotEmpty
-                                          ? (schedules[0]['jobDescription'] ?? 'No Description')
-                                          : 'No Description';
+                                      final jobDescription = f['jobDescription'] ?? 'No Description';
+                                      final scheduleDocId = f['scheduleId'] ?? '';  
+
                                       
                                       return Card(
                                         color: Colors.purple.shade50,
@@ -116,7 +114,7 @@ class _RatingPageState extends State<RatingPage> {
                                                     Navigator.push(
                                                       context,
                                                       MaterialPageRoute(
-                                                        builder: (_) => AddRatingPage(foremanId: foremanId),
+                                                        builder: (_) => AddRatingPage(foremanId: foremanId, scheduleDocId: scheduleDocId),
                                                       ),
                                                     ).then((_) => setState(() {})); // refresh after rating
                                                   },
@@ -156,6 +154,7 @@ class _RatingPageState extends State<RatingPage> {
                                       final name = '${(f['first_name'] ?? '').toString().trim()} ${(f['last_name'] ?? '').toString().trim()}'.trim();
                                       final ratingScore = f['ratingScore'] ?? '0';
                                       final foremanId = f['foremanId'] ?? '';
+                                      
                                     
                                       return Card(
                                         color: Colors.blue.shade50,

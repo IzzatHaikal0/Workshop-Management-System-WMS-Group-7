@@ -8,83 +8,72 @@ import 'package:firebase_auth/firebase_auth.dart';
 class Ratingcontroller {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  //FUNCTION UNTUL LISTKAN SEMUA FOREMEN YANG ADA SCHEDULE CREATED BY LOGIN WORKSHOP OWNER
   Future<List<Map<String, dynamic>>> getForemenByWorkshopOwner() async {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) return [];
 
     final workshopOwnerId = currentUser.uid;
 
-    // Step 1: Get accepted schedules for this workshop owner
+    // Step 1: Get accepted & unrated schedules
     QuerySnapshot scheduleSnapshot =
         await _firestore
             .collection('WorkshopSchedule')
             .where('workshopOwnerId', isEqualTo: workshopOwnerId)
             .where('status', isEqualTo: 'accepted')
+            .where('isRated', isEqualTo: false)
             .get();
 
-    // Map: foremanId -> list of schedules
-    final Map<String, List<Map<String, dynamic>>> foremanSchedules = {};
+    if (scheduleSnapshot.docs.isEmpty) return [];
 
-    for (var doc in scheduleSnapshot.docs) {
-      final data = doc.data() as Map<String, dynamic>;
-      final foremanId = data['foremanId'] as String;
+    // Collect foremanIds from these schedules
+    final foremanIds =
+        scheduleSnapshot.docs
+            .map(
+              (doc) =>
+                  (doc.data() as Map<String, dynamic>)['foremanId'] as String,
+            )
+            .toSet()
+            .toList();
 
-      if (!foremanSchedules.containsKey(foremanId)) {
-        foremanSchedules[foremanId] = [];
-      }
-      foremanSchedules[foremanId]!.add({'scheduleId': doc.id, ...data});
-    }
-
-    final foremanIds = foremanSchedules.keys.toList();
-
-    if (foremanIds.isEmpty) return [];
-
-    // Step 2: Get rated foremen
-    QuerySnapshot ratingSnapshot =
-        await _firestore
-            .collection('Rating')
-            .where('workshopOwnerId', isEqualTo: workshopOwnerId)
-            .where('status', isEqualTo: 'rated')
-            .get();
-
-    final ratedForemanIds =
-        ratingSnapshot.docs.map((doc) => doc['foremanId'] as String).toSet();
-
-    // Step 3: Filter unrated foremen
-    final unratedForemanIds =
-        foremanIds.where((id) => !ratedForemanIds.contains(id)).toList();
-
-    if (unratedForemanIds.isEmpty) return [];
-
-    // Step 4: Fetch foreman details
+    // Step 2: Get foreman details
     QuerySnapshot foremenSnapshot =
         await _firestore
             .collection('foremen')
-            .where(FieldPath.documentId, whereIn: unratedForemanIds)
+            .where(FieldPath.documentId, whereIn: foremanIds)
             .get();
 
-    final result = <Map<String, dynamic>>[];
+    // Map foremanId to foreman data
+    final Map<String, Map<String, dynamic>> foremanDataMap = {
+      for (var doc in foremenSnapshot.docs)
+        doc.id: doc.data() as Map<String, dynamic>,
+    };
 
-    for (var doc in foremenSnapshot.docs) {
-      final data = doc.data() as Map<String, dynamic>;
-      final firstName = data['first_name'] as String? ?? '';
-      final lastName = data['last_name'] as String? ?? '';
-      final phoneNumber = data['phone_number'] as String? ?? '';
-      final foremanId = doc.id;
+    // Step 3: Build a list where each schedule includes foreman info
+    final List<Map<String, dynamic>> result = [];
 
+    for (var scheduleDoc in scheduleSnapshot.docs) {
+      final scheduleData = scheduleDoc.data() as Map<String, dynamic>;
+      final foremanId = scheduleData['foremanId'] as String;
+      final foremanData = foremanDataMap[foremanId];
+
+      if (foremanData == null) continue; // just in case
+
+      final firstName = foremanData['first_name'] ?? '';
+      final lastName = foremanData['last_name'] ?? '';
       final foremanName =
           ('$firstName $lastName').trim().isNotEmpty
               ? ('$firstName $lastName').trim()
               : 'Unknown';
 
       result.add({
+        'scheduleId': scheduleDoc.id,
+        'scheduleData': scheduleData,
         'foremanId': foremanId,
         'foremanName': foremanName,
-        'foremanEmail': data['email'] ?? '',
-        'foremanPhoneNumber': phoneNumber,
-        'foremanData': data,
-        'WorkshopSchedule': foremanSchedules[foremanId] ?? [],
+        'foremanEmail': foremanData['email'] ?? '',
+        'foremanPhoneNumber': foremanData['phone_number'] ?? '',
+        'foremanData': foremanData,
+        'jobDescription': scheduleData['jobDescription'] ?? 'No Description',
       });
     }
 
@@ -124,7 +113,7 @@ class Ratingcontroller {
     }
   }
 
-  Future<void> addRating(Rating rating) async {
+  Future<void> addRating(Rating rating, String scheduleDocId) async {
     try {
       final ratingData =
           rating.toJson()
@@ -134,6 +123,11 @@ class Ratingcontroller {
 
       final docRef = await _firestore.collection('Rating').add(ratingData);
       await docRef.update({'status': 'rated'});
+
+       await _firestore
+          .collection('WorkshopSchedule')
+          .doc(scheduleDocId)
+          .update({'isRated': true}); 
     } catch (e) {
       debugPrint('Error adding rating: $e');
     }

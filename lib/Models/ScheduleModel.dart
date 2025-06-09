@@ -11,6 +11,7 @@ class Schedule {
   final String status; // Default status
   final String? workshopName;
   final String? jobDescription;
+  final bool isRated; // Default to 'false'
 
   Schedule({
     //required this.ScheduleID,
@@ -23,6 +24,7 @@ class Schedule {
     this.status = 'pending', // Default to 'pending'
     this.workshopName,
     required this.jobDescription,
+    this.isRated = false // Default to 'false'
   });
 
   // Proper factory method
@@ -39,14 +41,13 @@ class Schedule {
       startTime: (data['startTime'] as Timestamp).toDate(),
       endTime: (data['endTime'] as Timestamp).toDate(),
       scheduleDate: (data['scheduleDate'] as Timestamp).toDate(),
-      salaryRate: data['salaryRate'] ?? 0, // Default to 0 if not present
-      totalHours:
-          (data['totalHours'] as num?)?.toDouble() ??
-          0.0, // Default to 0 if not present
+      salaryRate: data['salaryRate'] ?? 0, 
+      totalHours:(data['totalHours'] as num?)?.toDouble() ??0.0, 
       docId: doc.id,
-      status: data['status'] ?? 'pending', // Default to 'pending' if not present
+      status: data['status'] ?? 'pending', 
       workshopName: workshopName, 
-      jobDescription: data['jobDescription'] ?? '', // Default to empty string if not present
+      jobDescription: data['jobDescription'] ?? '', 
+      isRated: data['isRated'] ?? false, 
     );
   }
 
@@ -60,6 +61,7 @@ class Schedule {
       docId: docId,
       status: map['status'] ?? 'pending',
       jobDescription: map['jobDescription'] ?? '',
+      isRated: map['isRated'] ?? false,
     );
   }
 
@@ -73,6 +75,7 @@ class Schedule {
       'totalHours': totalHours,
       'status': status, 
       'jobDescription': jobDescription ?? '', 
+      'isRated': isRated,
     };
   }
 }

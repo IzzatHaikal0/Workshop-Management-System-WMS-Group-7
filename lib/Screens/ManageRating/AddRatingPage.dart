@@ -5,7 +5,9 @@ import 'package:workshop_management_system/Screens/ManageRating/RatingPage.dart'
 
 class AddRatingPage extends StatefulWidget {
   final String foremanId;
-  const AddRatingPage({super.key, required this.foremanId});
+  final String scheduleDocId;
+
+  const AddRatingPage({super.key, required this.foremanId, required this.scheduleDocId});
 
   @override
   State<AddRatingPage> createState() => _AddRatingPageState();
@@ -196,7 +198,7 @@ class _AddRatingPageState extends State<AddRatingPage> {
 
         );
 
-        await controller.addRating(rating);
+        await controller.addRating(rating, widget.scheduleDocId);
 
         Navigator.pop(
           context, 
