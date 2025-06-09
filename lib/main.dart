@@ -12,6 +12,10 @@ import 'package:workshop_management_system/Screens/workshop_homepage.dart';
 // Registration and profile barrel imports
 import 'Screens/Registration/manage_registration_barrel.dart';
 import 'Screens/Profile/manage_profile_barrel.dart';
+import 'Screens/workshop_homepage.dart'; // <-- NEW IMPORT
+
+import 'Screens/ManageForemanSchedule/manage_foreman_schedule_barrel.dart';
+import 'Screens/ManageRating/manage_rating_barrel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,6 +57,11 @@ class AppRoutes {
   static const String profileAddWorkshopOwner = '/profile/add/workshop_owner';
   static const String profileEditForeman = '/profile/edit/foreman';
   static const String profileEditWorkshopOwner = '/profile/edit/workshop_owner';
+
+  static const String scheduleList = '/schedule/list';
+  static const String scheduleSelect = '/schedule/select';
+  static const String scheduleAdd = '/schedule/add';
+  static const String scheduleEdit = '/schedule/edit';
 
   static const String inventoryList = '/inventory';
   static const String inventoryCreate = '/inventory/create';
@@ -183,7 +192,9 @@ class AuthGate extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
+
   final String title;
+  //final Icon icon;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -250,7 +261,9 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     return [
       const WorkshopHomePage(),
-      const Center(child: Text('Schedule Page')),
+      currentUserRole == 'foreman'
+          ? SelectSchedulePage(foremenId: currentUserId)
+          : ListSchedulePage(workshopOwnerId: currentUserId),
       currentUserRole == 'foreman'
           ? ViewProfilePageForeman(foremanId: currentUserId)
           : ViewProfilePageWorkshopOwner(workshopOwnerId: currentUserId),
@@ -289,6 +302,22 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
         backgroundColor: Theme.of(context).colorScheme.primary,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.rate_review),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) =>
+                          currentUserRole == 'workshop_owner'
+                              ? RatingPage()
+                              : ForemanPage(),
+                ),
+              );
+            },
+          ),
+
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',
