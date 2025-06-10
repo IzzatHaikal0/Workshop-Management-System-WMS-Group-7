@@ -1,62 +1,81 @@
-// ignore_for_file: use_build_context_synchronously
 import 'package:flutter/material.dart';
-import '../../Controllers/ManageInventory/item_controller.dart';
-import '../ManageInventory/widgets/item_form.dart';
+import 'package:workshop_management_system/Controllers/ManageInventory/item_controller.dart';
+import 'package:workshop_management_system/Screens/ManageInventory/widgets/custom_text.dart';
+import 'package:workshop_management_system/Screens/ManageInventory/widgets/item_form.dart';
 
-class ItemCreateScreen extends StatelessWidget {
+class ItemCreateScreen extends StatefulWidget {
+  const ItemCreateScreen({super.key});
+
+  @override
+  State<ItemCreateScreen> createState() => _ItemCreateScreenState();
+}
+
+class _ItemCreateScreenState extends State<ItemCreateScreen> {
   final ItemController _itemController = ItemController();
+  bool _isLoading = false;
 
-  ItemCreateScreen({super.key});
-  
+  Future<void> _createItem(
+    String itemName,
+    String itemCategory,
+    int quantity,
+    double unitPrice,
+  ) async {
+    setState(() => _isLoading = true);
+
+    try {
+      final newItem = await _itemController.createItem(
+        itemName,
+        itemCategory,
+        quantity,
+        unitPrice,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Item created successfully',
+              style: MyTextStyles.regular,
+            ),
+          ),
+        );
+        Navigator.pop(context, newItem);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              ('Error creating item: $e'),
+              style: MyTextStyles.regular,
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add New Item'),
-      ),
-
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Item Details',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              
-              const SizedBox(height: 16),
-              ItemForm(
-                initialItemName: '',
-                initialItemCategory: '',
-                initialQuantity: 0,
-                initialUnitPrice: 0.0,
-                onSubmit: (itemName, itemCategory, quantity, unitPrice) async {
-                  try {
-                    await _itemController.createItem(
-                      
-                      itemName, 
-                      itemCategory, 
-                      quantity, 
-                      unitPrice
-                    );
-                    
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Item created successfully')),
-                    );
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Failed to create item: $e')),
-                    );
-                  }
-                },
-              ),
-            ],
+        title: Text(
+          'New Item',
+          style: MyTextStyles.bold.copyWith(
+            fontSize: 16,
+            color: Color.fromARGB(255, 0, 0, 0),
           ),
         ),
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       ),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : ItemForm(onSubmit: _createItem, submitButtonText: 'Save'),
     );
   }
 }

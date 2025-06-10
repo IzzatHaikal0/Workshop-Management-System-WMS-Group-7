@@ -1,197 +1,98 @@
-/*import 'package:cloud_firestore/cloud_firestore.dart';
-
-class ItemRequest {
-  final String id;
-  final String itemName;
-  final int quantity;
-  final String requestedBy; //workshop owner ID
-  final String requestedTo; //workshop owner ID
-  final DateTime requestDate;
-  final String status;
-
-  ItemRequest({
-     required this.id,
-    required this.itemName,
-    required this.quantity,
-    required this.requestedBy,
-    required this.requestedTo,
-    required this.requestDate,
-    required this.status, //required String requestBy, required String requestTo,
-  });
-
-  factory ItemRequest.fromJson(Map<String, dynamic> json) {
-    return ItemRequest(
-      id: json['id'] ?? '',
-      itemName: json['itemName'] ?? '',
-      quantity: json['quantity'] is int
-          ? (json['quantity'] as int).toDouble() 
-          : (json['quantity'] ?? 0.0),
-      requestedBy: json['requestedBy'] ?? '',
-      requestedTo: json['requestedTo'] ?? '',
-      requestDate: json['requestDate'] is Timestamp 
-          ? (json['requestDate'] as Timestamp).toDate() 
-          : DateTime.parse(json['requestDate']),
-      status: RequestStatusExtension.fromString(json['status']),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      // We don't include id in toJson because Firestore manages that separately
-      'itemName': itemName,
-      'quantity': quantity,
-      'requestedBy': requestedBy,
-      'requestedTo': requestedTo,
-      'requestDate': requestDate.toIso8601String(),
-      'status': status.toString().split('.').last,
-    };
-  }
-
-  ItemRequest copyWith({
-    String? id,
-    String? itemName,
-    int? quantity,
-    String? requestedBy,
-    String? requestedTo,
-    DateTime? requestDate,
-    String? status,
-  }) {
-    return ItemRequest(
-      id: id ?? this.id,
-      itemName: itemName ?? this.itemName,
-      quantity: quantity ?? this.quantity,
-      requestedBy: requestedBy ?? this.requestedBy,
-      requestedTo: requestedTo ?? this.requestedTo,
-      requestDate: requestDate ?? this.requestDate,
-      status: status ?? this.status,
-      
-    );
-  }
-
-}
-enum RequestStatus {
-  pending,
-  approved,
-  rejected,
-  shipped,
-  completed
-}
-
-// Extension for request status methods
-extension RequestStatusExtension on RequestStatus {
-  String get name {
-    return toString().split('.').last;
-  }
-
-  String get displayName {
-    return name[0].toUpperCase() + name.substring(1);
-  }
-
-  static RequestStatus fromString(String status) {
-    return RequestStatus.values.firstWhere(
-      (e) => e.toString().split('.').last == status,
-      orElse: () => RequestStatus.pending,
-    );
-  }
-}
-*//*
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class ItemRequest {
-  final String id;
+class Request {
+  final String? id;
   final String itemName;
   final int quantity;
-  final String requestedBy; //workshop owner ID
-  final String requestedTo; //workshop owner ID
+  final String requestedBy;
+  final String status; // pending, approved, rejected
   final DateTime requestDate;
-  //final String status;
+  final String? notes;
+  final String? approvedBy;
+  final DateTime? approvedDate;
+  final DateTime? shippedDate;
 
-  ItemRequest({
-    required this.id,
+  Request({
+    this.id,
     required this.itemName,
     required this.quantity,
     required this.requestedBy,
-    required this.requestedTo,
+    required this.status,
     required this.requestDate,
-   // required this.status, //required String requestBy, required String requestTo,
+    this.notes,
+    this.approvedBy,
+    this.approvedDate,
+    this.shippedDate,
   });
-
-  factory ItemRequest.fromJson(Map<String, dynamic> json) {
-    return ItemRequest(
-      id: json['id'] ?? '',
-      itemName: json['itemName'] ?? '',
-      quantity: json['quantity'] is int
-          ? (json['quantity'] as int).toDouble() 
-          : (json['quantity'] ?? 0.0),
-      requestedBy: json['requestedBy'] ?? '',
-      requestedTo: json['requestedTo'] ?? '',
-      requestDate: json['requestDate'] is Timestamp 
-          ? (json['requestDate'] as Timestamp).toDate() 
-          : DateTime.parse(json['requestDate']),
-     // status: RequestStatusExtension.fromString(json['status']),
-    );
-  }
 
   Map<String, dynamic> toJson() {
     return {
-      // We don't include id in toJson because Firestore manages that separately
       'itemName': itemName,
       'quantity': quantity,
       'requestedBy': requestedBy,
-      'requestedTo': requestedTo,
-      'requestDate': requestDate.toIso8601String(),
-      //'status': status.toString().split('.').last,
+      'status': status,
+      'requestDate': requestDate,
+      'notes': notes,
+      'approvedBy': approvedBy,
+      'approvedDate': approvedDate,
+      'shippedDate': shippedDate,
     };
   }
 
-  ItemRequest copyWith({
+  factory Request.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return Request(
+      id: doc.id,
+      itemName: data['itemName'] ?? '',
+      quantity: data['quantity'] ?? 0,
+      requestedBy: data['requestedBy'] ?? '',
+      status: data['status'] ?? 'pending',
+      requestDate: data['requestDate']?.toDate() ?? DateTime.now(),
+      notes: data['notes'],
+      approvedBy: data['approvedBy'],
+      approvedDate: data['approvedDate']?.toDate(),
+      shippedDate: data['shippedDate']?.toDate(),
+    );
+  }
+
+  factory Request.fromMap(Map<String, dynamic> data, String id) {
+    return Request(
+      id: id,
+      itemName: data['itemName'] ?? '',
+      quantity: data['quantity'] ?? 0,
+      requestedBy: data['requestedBy'] ?? '',
+      status: data['status'] ?? 'pending',
+      requestDate: data['requestDate']?.toDate() ?? DateTime.now(),
+      notes: data['notes'],
+      approvedBy: data['approvedBy'],
+      approvedDate: data['approvedDate']?.toDate(),
+      shippedDate: data['shippedDate']?.toDate(),
+    );
+  }
+
+  Request copyWith({
     String? id,
     String? itemName,
     int? quantity,
     String? requestedBy,
-    String? requestedTo,
+    String? status,
     DateTime? requestDate,
-   // String? status,
+    String? notes,
+    String? approvedBy,
+    DateTime? approvedDate,
+    DateTime? shippedDate,
   }) {
-    return ItemRequest(
+    return Request(
       id: id ?? this.id,
       itemName: itemName ?? this.itemName,
       quantity: quantity ?? this.quantity,
       requestedBy: requestedBy ?? this.requestedBy,
-      requestedTo: requestedTo ?? this.requestedTo,
+      status: status ?? this.status,
       requestDate: requestDate ?? this.requestDate,
-      //status: status ?? this.status,
-      
-    );
-  }
-
-}
-/*enum RequestStatus {
-  pending,
-  approved,
-  rejected,
-  shipped,
-  completed
-}
-
-// Extension for request status methods
-extension RequestStatusExtension on RequestStatus {
-  String get name {
-    return toString().split('.').last;
-  }
-
-  String get displayName {
-    return name[0].toUpperCase() + name.substring(1);
-  }
-
-  static RequestStatus fromString(String status) {
-    return RequestStatus.values.firstWhere(
-      (e) => e.toString().split('.').last == status,
-      orElse: () => RequestStatus.pending,
+      notes: notes ?? this.notes,
+      approvedBy: approvedBy ?? this.approvedBy,
+      approvedDate: approvedDate ?? this.approvedDate,
+      shippedDate: shippedDate ?? this.shippedDate,
     );
   }
 }
-*/
-*/
-
-

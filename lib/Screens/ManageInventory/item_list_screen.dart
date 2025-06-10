@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:workshop_management_system/Controllers/ManageInventory/item_controller.dart';
 import 'package:workshop_management_system/Models/ManageInventory/item_model.dart';
-import 'package:workshop_management_system/Screens/ManageInventory/manage_inventory_barrel.dart';
+import 'package:workshop_management_system/Screens/ManageInventory/inventory_barrel.dart';
 import 'package:workshop_management_system/Screens/ManageInventory/widgets/custom_text.dart';
 
 class ItemListScreen extends StatefulWidget {

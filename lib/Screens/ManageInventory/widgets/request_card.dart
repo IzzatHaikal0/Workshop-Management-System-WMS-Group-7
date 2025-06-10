@@ -1,327 +1,246 @@
-/*import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import '../models/inventory/request_model.dart';
+import 'package:flutter/material.dart';
+import 'package:workshop_management_system/Models/ManageInventory/request_model.dart';
+import 'package:workshop_management_system/Screens/ManageInventory/widgets/custom_text.dart';
 
-class RequestCard extends StatefulWidget {
-  final WorkshopRequest request;
-  final User currentUser;
-  final bool isWorkshopOwner;
-  final bool canDelete;
-  final Function(String)? onDelete;
-  final Function(String, String)? onStatusUpdate;
-  
+class RequestCard extends StatelessWidget {
+  final Request request;
+  final VoidCallback? onTap;
+  final bool showApprovalActions;
+  final VoidCallback? onApprove;
+  final VoidCallback? onReject;
+
   const RequestCard({
     super.key,
     required this.request,
-    required this.currentUser,
-    this.isWorkshopOwner = false,
-    this.canDelete = false,
-    this.onDelete,
-    this.onStatusUpdate,
+    this.onTap,
+    this.showApprovalActions = false,
+    this.onApprove,
+    this.onReject,
   });
 
-  @override
-  // ignore: library_private_types_in_public_api
-  _RequestCardState createState() => _RequestCardState();
-}
-
-class _RequestCardState extends State<RequestCard> {
-  bool isExpanded = false;
-  
-  String formatDate(String dateString) {
-    final date = DateTime.parse(dateString);
-    return DateFormat('MMM d, yyyy').format(date);
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return Colors.orange;
+      case 'approved':
+        return Colors.blue;
+      case 'rejected':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
   }
-  
+
+  IconData _getStatusIcon(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return Icons.hourglass_empty;
+      case 'approved':
+        return Icons.check_circle;
+      case 'rejected':
+        return Icons.cancel_outlined;
+      default:
+        return Icons.help_outline;
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
+    final statusColor = _getStatusColor(request.status);
+    final statusIcon = _getStatusIcon(request.status);
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: statusColor.withOpacity(0.3), width: 1),
       ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.request.title,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            widget.isWorkshopOwner
-                                ? 'From: ${widget.request.requesterName}'
-                                : 'To: ${widget.request.workshopOwnerName}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // icon
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: statusColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    Row(
+                    child: Icon(
+                      Icons.inventory_2_outlined,
+                      color: statusColor,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+
+                  // request details
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildStatusBadge(widget.request.status),
-                        IconButton(
-                          icon: Icon(
-                            isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                            color: Colors.grey,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              isExpanded = !isExpanded;
-                            });
-                          },
+                        Text(
+                          request.itemName,
+                          style: MyTextStyles.bold.copyWith(fontSize: 14),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const SizedBox(width: 4),
+                            Text(
+                              'Qty: ${request.quantity}',
+                              style: MyTextStyles.medium.copyWith(
+                                fontSize: 10,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Created: ${formatDate(widget.request.createdAt)}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
+                  ),
+
+                  // status
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
                     ),
-                    Text(
-                      '${widget.request.items.length} item${widget.request.items.length != 1 ? 's' : ''}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
+                    decoration: BoxDecoration(
+                      color: statusColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          if (isExpanded)
-            Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(color: Colors.grey[200]!),
-                ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(statusIcon, size: 14, color: statusColor),
+                        const SizedBox(width: 4),
+                        Text(
+                          request.status.toUpperCase(),
+                          style: MyTextStyles.semiBold.copyWith(
+                            fontSize: 11,
+                            color: statusColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+
+              const SizedBox(height: 12),
+
+              // date and notes
+              Row(
                 children: [
-                  if (widget.request.description.isNotEmpty) ...[
-                    const Text(
-                      'Description:',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.request.description,
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                  
-                  const Text(
-                    'Items:',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
+                  Icon(Icons.calendar_today, size: 14, color: Colors.grey[600]),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Requested: ${_formatDate(request.requestDate)}',
+                    style: MyTextStyles.semiBold.copyWith(
+                      fontSize: 10,
+                      color: Colors.grey[600],
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: widget.request.items.length,
-                    itemBuilder: (context, index) {
-                      final item = widget.request.items[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 2),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(item.name),
-                            Text('Qty: ${item.quantity}'),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                  
-                  if (widget.request.status == 'rejected' && widget.request.reason != null) ...[
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Rejection Reason:',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
+                  if (request.approvedDate != null) ...[
+                    const SizedBox(width: 16),
+                    Icon(
+                      Icons.event_available,
+                      size: 14,
+                      color: Colors.grey[600],
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Processed: ${_formatDate(request.approvedDate!)}',
+                      style: MyTextStyles.semiBold.copyWith(
+                        fontSize: 10,
+                        color: Colors.grey[600],
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.request.reason!,
-                      style: const TextStyle(fontSize: 14),
-                    ),
                   ],
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Action buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      if (widget.isWorkshopOwner && widget.request.status == 'pending') ...[
-                        OutlinedButton.icon(
-                          icon: const Icon(Icons.close, color: Colors.red),
-                          label: const Text('REJECT'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.red, side: const BorderSide(color: Colors.red),
-                          ),
-                          onPressed: () {
-                            widget.onStatusUpdate?.call(widget.request.id, 'reject');
-                          },
-                        ),
-                        const SizedBox(width: 8),
-                        OutlinedButton.icon(
-                          icon: const Icon(Icons.check, color: Colors.green),
-                          label: const Text('ACCEPT'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.green, side: const BorderSide(color: Colors.green),
-                          ),
-                          onPressed: () {
-                            widget.onStatusUpdate?.call(widget.request.id, 'accept');
-                          },
-                        ),
-                  ]
-                    ]
-                  )
-                  ]
-              )
-            )
-        ]
-    )
-    );
-  }
-}
-*/
-/*
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import '../../../Models/ManageInventory/request_model.dart';
-import '../../../Controllers/ManageInventory/request_controller.dart';
+                ],
+              ),
 
-
-class RequestCard extends StatelessWidget {
-  final ItemRequest request;
-  final bool isIncoming;
-  final RequestController controller;
-
-  const RequestCard({
-    super.key,
-    required this.request,
-    required this.isIncoming,
-    required this.controller,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
+              // notes
+              if (request.notes != null && request.notes!.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 248, 248, 248),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
                   child: Text(
-                    request.itemName,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    request.notes!,
+                    style: MyTextStyles.medium.copyWith(fontSize: 12),
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                _buildStatusChip(request.status),
               ],
-            ),
-            const SizedBox(height: 8),
-            Text('Quantity: ${request.quantity}'),
-            const SizedBox(height: 4),
-            Text(
-              '${isIncoming ? 'From' : 'To'}: ${isIncoming ? request.requestedBy : request.requestedTo}',
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Date: ${DateFormat('MMM dd, yyyy').format(request.requestDate)}',
-            ),
-            if (isIncoming && request.status == 'pending')
-              Padding(
-                padding: const EdgeInsets.only(top: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+
+              // approval action
+              if (showApprovalActions && request.status == 'pending') ...[
+                const SizedBox(height: 12),
+                const Divider(height: 1),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    
+                    Expanded(
+                      child: TextButton.icon(
+                        onPressed: onReject,
+                        icon: const Icon(Icons.close, size: 18),
+                        label: const Text(
+                          'Reject',
+                          style: MyTextStyles.semiBold,
+                        ),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.red,
+                          backgroundColor: Colors.red.withOpacity(0.1),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextButton.icon(
+                        onPressed: onApprove,
+                        icon: const Icon(Icons.check, size: 18),
+                        label: const Text('Approve', style: MyTextStyles.bold),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.green,
+                          backgroundColor: Colors.green.withOpacity(0.1),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-              ),
-          ],
+              ],
+            ],
+          ),
         ),
       ),
-    );
-  }
-
-  Widget _buildStatusChip(String status) {
-    Color color;
-    switch (status.toLowerCase()) {
-      case 'approved':
-        color = Colors.green;
-        break;
-      case 'rejected':
-        color = Colors.red;
-        break;
-      case 'pending':
-      default:
-        color = Colors.orange;
-        break;
-    }
-
-    return Chip(
-      label: Text(
-        status.toUpperCase(),
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 12,
-        ),
-      ),
-      backgroundColor: color,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
     );
   }
 }
-*/

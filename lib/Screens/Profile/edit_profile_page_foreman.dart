@@ -153,16 +153,15 @@ class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
           .collection('foremen')
           .doc(widget.foremanId)
           .update({
-            'first_name': _firstNameController.text.trim(),
-            'last_name': _lastNameController.text.trim(),
-            'email': _emailController.text.trim(),
-            'phone_number': _phoneNumberController.text.trim(),
-            'foremanAddress': _foremanAddressController.text.trim(),
-            'foremanSkills': _foremanSkillsController.text.trim(),
-            'foremanWorkExperience':
-                _foremanWorkExperienceController.text.trim(),
-            'foremanProfilePicture': imageUrl,
-          });
+        'first_name': _firstNameController.text.trim(),
+        'last_name': _lastNameController.text.trim(),
+        'email': _emailController.text.trim(),
+        'phone_number': _phoneNumberController.text.trim(),
+        'foremanAddress': _foremanAddressController.text.trim(),
+        'foremanSkills': _foremanSkillsController.text.trim(),
+        'foremanWorkExperience': _foremanWorkExperienceController.text.trim(),
+        'foremanProfilePicture': imageUrl,
+      });
 
       if (!mounted) return;
 

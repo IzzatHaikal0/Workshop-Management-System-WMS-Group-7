@@ -1,107 +1,178 @@
-/*import '../../../Models/ManageInventory/request_model.dart';
-import '../../services/database_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:workshop_management_system/Models/ManageInventory/request_model.dart';
 
 class RequestController {
-  final DatabaseService _databaseService = DatabaseService();
-  List<ItemRequest> _incomingRequests = [];
-  List<ItemRequest> _outgoingRequests = [];
-  bool _isLoading = false;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  List<ItemRequest> get incomingRequests => _incomingRequests;
-  List<ItemRequest> get outgoingRequests => _outgoingRequests;
-  bool get isLoading => _isLoading;
+  // create request
+  Future<Request> createRequest({
+    required String itemName,
+    required int quantity,
+    String? notes,
+  }) async {
+    final String uid = FirebaseAuth.instance.currentUser!.uid;
 
-  Future<void> fetchIncomingRequests(String userId) async {
-    _isLoading = true;
-    notifyListeners();
-    
     try {
-      _incomingRequests = await _databaseService.getIncomingRequests(userId);
+      final requestData = {
+        'itemName': itemName,
+        'quantity': quantity,
+        'requestedBy': uid,
+        'status': 'pending',
+        'requestDate': FieldValue.serverTimestamp(),
+        'notes': notes ?? '',
+      };
+
+      final docRef = await _firestore
+          .collection('InventoryRequest')
+          .add(requestData);
+      return Request.fromFirestore(await docRef.get());
     } catch (e) {
-      print('Error fetching incoming requests: $e');
+      throw Exception('Failed to create request: $e');
     }
-    
-    _isLoading = false;
-    notifyListeners();
   }
 
-  Future<void> fetchOutgoingRequests(String userId) async {
-    _isLoading = true;
-    notifyListeners();
-    
+  //Stream all requests - current user
+  Stream<List<Request>> getMyRequestsStream() {
+    final String? uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return Stream.value([]);
+
+    return _firestore
+        .collection('InventoryRequest')
+        .where('requestedBy', isEqualTo: uid)
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => Request.fromFirestore(doc)).toList(),
+        );
+  }
+
+  //Stream pending approvals - other user
+  Stream<List<Request>> getPendingApprovalsStream() {
+    return _firestore
+        .collection('InventoryRequest')
+        .where('status', isEqualTo: 'pending')
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => Request.fromFirestore(doc)).toList(),
+        );
+  }
+
+  // Stream requests by status - current user
+  Stream<List<Request>> getRequestsByStatusStream(String status) {
+    final String? uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return Stream.value([]);
+
+    return _firestore
+        .collection('InventoryRequest')
+        .where('requestedBy', isEqualTo: uid)
+        .where('status', isEqualTo: status)
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => Request.fromFirestore(doc)).toList(),
+        );
+  }
+
+  // approve request
+  Future<Request?> approveRequest(String requestId, String? notes) async {
+    final String? uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) throw Exception('User not authenticated');
+    final docRef = _firestore.collection('InventoryRequest').doc(requestId);
     try {
-      _outgoingRequests = await _databaseService.getOutgoingRequests(userId);
+      final doc = await docRef.get();
+      if (!doc.exists) throw Exception('Request not found');
+
+      final request = Request.fromFirestore(doc);
+      if (request.requestedBy == uid) {
+        throw Exception('You cannot approve your own request');
+      }
+
+      await docRef.update({
+        'status': 'approved',
+        'approvedBy': uid,
+        'approvedDate': FieldValue.serverTimestamp(),
+
+        if (notes != null && notes.isNotEmpty) 'approvalNotes': notes,
+      });
+
+      await Future.delayed(Duration(milliseconds: 500));
+      final updatedDoc = await docRef.get();
+      final updatedRequest = Request.fromFirestore(updatedDoc);
+
+      final approvedDate = updatedRequest.approvedDate;
+      if (approvedDate != null) {
+        final shippedDate = approvedDate.add(Duration(days: 7));
+        await docRef.update({'shippedDate': Timestamp.fromDate(shippedDate)});
+      }
+      return Request.fromFirestore(await docRef.get());
     } catch (e) {
-      print('Error fetching outgoing requests: $e');
+      throw Exception('Failed to approve request: $e');
     }
-    
-    _isLoading = false;
-    notifyListeners();
   }
 
-  // Create 
-  Future<ItemRequest> createRequest(String itemName, int quantity, /*String requestBy, String requestTo,*/ ) async {
-    return await _databaseService.createRequest(itemName, quantity, /*requestBy, requestTo,*/ );
-  }
-  
-  // Read all
-  /*Future<List<ItemRequest>> getRequests() async {
-    return await _databaseService.getRequest();
-  }
+  // reject request
+  Future<Request?> rejectRequest(String requestId, String? notes) async {
+    final String? uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) throw Exception('User not authenticated');
 
-  // Get stream of items - useful for real-time updates with Firebase
-  Stream<List<ItemRequest>> getRequestStream() {
-    return _databaseService.RequestStream;
-  }
+    try {
+      final docRef = _firestore.collection('InventoryRequest').doc(requestId);
+      final doc = await docRef.get();
+      if (!doc.exists) throw Exception('Request not found');
 
-  // Read one
-  Future<ItemRequest?> getRequest(String id) async {
-    return await _databaseService.getRequest(id);
-  }
+      final request = Request.fromFirestore(doc);
+      if (request.requestedBy == uid) {
+        throw Exception('You cannot reject your own request');
+      }
 
-  // Delete
-  Future<bool> deleteRequest(String id) async {
-    return await _databaseService.deleteRequest(id);
-  }
-  
-  // get Workshop ID
-  Future<List<WorkshopRequest>> getRequestsByUser(String userId) async {
-    return await _databaseService.getRequestsByUser(id);
-  }
+      final updateData = {
+        'status': 'rejected',
+        'approvedBy': uid,
+        'approvedDate': FieldValue.serverTimestamp(),
+        if (notes != null && notes.isNotEmpty) 'rejectionNotes': notes,
+      };
 
-  */
-}
-*//*
-import '../../../Models/ManageInventory/request_model.dart';
-
-class RequestController {
-  Future<void> createRequest(
-    String itemName,
-    int quantity,
-    String requestBy,
-    String requestTo,
-  ) async {
-    // Simulated logic – you can connect to Firebase, REST API, or SQLite
-    final newRequest = ItemRequest(
-      itemName: itemName,
-      quantity: quantity,
-      requestBy: requestBy,
-      requestTo: requestTo,
-    );
-
-    // Simulate saving to backend
-    await Future.delayed(const Duration(seconds: 1));
-    print("Request Created: ${newRequest.toJson()}");
-
-    // If using Firebase:
-    // await FirebaseFirestore.instance.collection('requests').add(newRequest.toJson());
+      await docRef.update(updateData);
+      return Request.fromFirestore(await docRef.get());
+    } catch (e) {
+      throw Exception('Failed to reject request: $e');
+    }
   }
 
-  // Optional: Fetch requests
-  Future<List<WorkshopRequest>> getRequests() async {
-    // Simulated fetch
-    await Future.delayed(const Duration(seconds: 1));
-    return [];
+  // Delete pending request by current user
+  Future<bool> deleteRequest(String requestId) async {
+    final String? uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) throw Exception('User not authenticated');
+
+    try {
+      final docRef = _firestore.collection('InventoryRequest').doc(requestId);
+      final doc = await docRef.get();
+      if (!doc.exists) return false;
+
+      final request = Request.fromFirestore(doc);
+      if (request.requestedBy != uid ||
+          !(request.status == 'pending' ||
+              request.status == 'rejected' ||
+              request.status == 'approved')) {
+        return false;
+      }
+      await docRef.delete();
+      return true;
+    } catch (e) {
+      throw Exception('Failed to delete request: $e');
+    }
+  }
+
+  // get request by id
+  Future<Request?> getRequest(String requestId) async {
+    try {
+      final doc =
+          await _firestore.collection('InventoryRequest').doc(requestId).get();
+      return doc.exists ? Request.fromFirestore(doc) : null;
+    } catch (e) {
+      throw Exception('Failed to get request: $e');
+    }
   }
 }
-*/

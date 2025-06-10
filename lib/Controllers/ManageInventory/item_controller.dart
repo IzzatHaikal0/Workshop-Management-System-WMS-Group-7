@@ -1,45 +1,145 @@
-import '../../../Models/ManageInventory/item_model.dart';
-import '../../Services/inventory_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:workshop_management_system/Models/ManageInventory/item_model.dart';
 
 class ItemController {
-  final InventoryDBService _inventoryDBService = InventoryDBService();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Create 
-  Future<Item> createItem(String itemName, String itemCategory, int quantity, double unitPrice) async {
-    return await _inventoryDBService.createItem(itemName, itemCategory, quantity, unitPrice);
+  /// create item
+  Future<Item> createItem(
+    String itemName,
+    String itemCategory,
+    int quantity,
+    double unitPrice,
+  ) async {
+    final String uid = FirebaseAuth.instance.currentUser!.uid;
+
+    try {
+      final itemData = {
+        'itemName': itemName,
+        'itemCategory': itemCategory,
+        'quantity': quantity,
+        'unitPrice': unitPrice,
+        'workshopOwnerId': uid,
+        'createdAt': FieldValue.serverTimestamp(),
+      };
+
+      final docRef = await _firestore.collection('InventoryItem').add(itemData);
+      return Item.fromFirestore(await docRef.get());
+    } catch (e) {
+      throw Exception('Failed to create item: $e');
+    }
   }
 
-  // Read all -list
+  /// get items for current user
   Future<List<Item>> getItems() async {
-    return await _inventoryDBService.getItems();
+    final String uid = FirebaseAuth.instance.currentUser!.uid;
+    try {
+      final snapshot =
+          await _firestore
+              .collection('InventoryItem')
+              .where('workshopOwnerId', isEqualTo: uid)
+              .get();
+
+      return snapshot.docs.map((doc) => Item.fromFirestore(doc)).toList();
+    } catch (e) {
+      throw Exception('Failed to get items: $e');
+    }
   }
 
-  // Get stream of items - useful for real-time updates with Firebase
+  /// stream of item for current user
   Stream<List<Item>> getItemsStream() {
-    return _inventoryDBService.itemsStream;
+    final String uid = FirebaseAuth.instance.currentUser!.uid;
+    return _firestore
+        .collection('InventoryItem')
+        .where('workshopOwnerId', isEqualTo: uid)
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => Item.fromFirestore(doc)).toList(),
+        );
   }
 
-  // Read one -detail
-  Future<Item?> getItem(String id) async {
-    return await _inventoryDBService.getItem(id);
+  /// get specific item by id
+  Future<Item?> getItem(String itemId) async {
+    final String uid = FirebaseAuth.instance.currentUser!.uid;
+    try {
+      final doc =
+          await _firestore.collection('InventoryItem').doc(itemId).get();
+      if (doc.exists) {
+        final item = Item.fromFirestore(doc);
+        if (item.workshopOwnerId == uid) {
+          return item;
+        }
+      }
+      return null;
+    } catch (e) {
+      throw Exception('Failed to get item: $e');
+    }
   }
 
-  // Update
-  Future<Item?> updateItem(String id, String itemName, String itemCategory, int quantity, double unitPrice) async {
-    return await _inventoryDBService.updateItem(id, itemName, itemCategory, quantity, unitPrice);
+  /// update item
+  Future<Item?> updateItem(
+    String itemId,
+    String itemName,
+    String itemCategory,
+    int quantity,
+    double unitPrice,
+  ) async {
+    final String uid = FirebaseAuth.instance.currentUser!.uid;
+    try {
+      final docRef = _firestore.collection('InventoryItem').doc(itemId);
+      final doc = await docRef.get();
+
+      if (!doc.exists || doc.data()?['workshopOwnerId'] != uid) {
+        throw Exception('Item not found');
+      }
+
+      final updateData = {
+        'itemName': itemName,
+        'itemCategory': itemCategory,
+        'quantity': quantity,
+        'unitPrice': unitPrice,
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+
+      await docRef.update(updateData);
+      return Item.fromFirestore(await docRef.get());
+    } catch (e) {
+      throw Exception('Failed to update item: $e');
+    }
   }
 
-  // Delete
-  Future<bool> deleteItem(String id) async {
-    return await _inventoryDBService.deleteItem(id);
+  /// delete item
+  Future<bool> deleteItem(String itemId) async {
+    final String uid = FirebaseAuth.instance.currentUser!.uid;
+
+    try {
+      final docRef = _firestore.collection('InventoryItem').doc(itemId);
+      final doc = await docRef.get();
+
+      if (!doc.exists || doc.data()?['workshopOwnerId'] != uid) {
+        return false;
+      }
+
+      await docRef.delete();
+      return true;
+    } catch (e) {
+      throw Exception('Failed to delete item: $e');
+    }
   }
-  
-  /* Get stream of items filtered by category
+
+  /// get items by category
   Stream<List<Item>> getItemsByCategoryStream(String category) {
-    return _inventoryDBService.itemsStream.map((items) {
-      return items
-          .where((item) => item.itemCategory.toLowerCase() == category.toLowerCase())
-          .toList();
-    });
-  }*/
+    final String uid = FirebaseAuth.instance.currentUser!.uid;
+    return _firestore
+        .collection('InventoryItem')
+        .where('workshopOwnerId', isEqualTo: uid)
+        .where('itemCategory', isEqualTo: category)
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => Item.fromFirestore(doc)).toList(),
+        );
+  }
 }

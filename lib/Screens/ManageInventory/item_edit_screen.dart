@@ -1,64 +1,81 @@
-// ignore_for_file: use_build_context_synchronously
 import 'package:flutter/material.dart';
-import '../../../Controllers/ManageInventory/item_controller.dart';
-import '../../Models/ManageInventory/item_model.dart';
-import '../ManageInventory/widgets/item_form.dart';
+import 'package:workshop_management_system/Controllers/ManageInventory/item_controller.dart';
+import 'package:workshop_management_system/Models/ManageInventory/item_model.dart';
+import 'package:workshop_management_system/Screens/ManageInventory/widgets/custom_text.dart';
+import 'package:workshop_management_system/Screens/ManageInventory/widgets/item_form.dart';
 
-class ItemEditScreen extends StatelessWidget {
+class ItemEditScreen extends StatefulWidget {
   final Item item;
 
   const ItemEditScreen({super.key, required this.item});
 
   @override
-  Widget build(BuildContext context) {
-    // ignore: no_leading_underscores_for_local_identifiers
-    final ItemController _itemController = ItemController();
+  State<ItemEditScreen> createState() => _ItemEditScreenState();
+}
 
+class _ItemEditScreenState extends State<ItemEditScreen> {
+  final ItemController _itemController = ItemController();
+  bool _isLoading = false;
+
+  Future<void> _updateItem(
+    String itemName,
+    String itemCategory,
+    int quantity,
+    double unitPrice,
+  ) async {
+    if (widget.item.id == null) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      final updatedItem = await _itemController.updateItem(
+        widget.item.id!,
+        itemName,
+        itemCategory,
+        quantity,
+        unitPrice,
+      );
+
+      if (mounted && updatedItem != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Item updated successfully')),
+        );
+        Navigator.pop(context, updatedItem);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error updating item: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Item'),
-      ),
-
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Edit Item Details',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              ItemForm(
-                initialItemName: item.itemName,
-                initialItemCategory: item.itemCategory,
-                initialQuantity: item.quantity,
-                initialUnitPrice: item.unitPrice,
-                onSubmit: (itemName, itemCategory, quantity, unitPrice) async {
-                  try{
-                    await _itemController.updateItem(
-                      item.id, 
-                      itemName, 
-                      itemCategory, 
-                      quantity, 
-                      unitPrice
-                    );
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Item updated successfully')),
-                    );
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Failed to update item: $e')),
-                    );
-                  }
-                } 
-              ),
-            ],
+        title: Text(
+          'Edit Item',
+          style: MyTextStyles.bold.copyWith(
+            fontSize: 14,
+            color: Color.fromARGB(255, 0, 0, 0),
           ),
         ),
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       ),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : ItemForm(
+                initialItem: widget.item,
+                onSubmit: _updateItem,
+                submitButtonText: 'Update Item',
+              ),
     );
   }
 }

@@ -1,127 +1,153 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import '../../../Models/ManageInventory/item_model.dart';
+import 'package:workshop_management_system/Models/ManageInventory/item_model.dart';
+import 'package:workshop_management_system/Screens/ManageInventory/widgets/custom_text.dart';
 
 class ItemCard extends StatelessWidget {
   final Item item;
   final VoidCallback onTap;
 
-  const ItemCard({
-    super.key,
-    required this.item,
-    required this.onTap,
-  });
+  const ItemCard({super.key, required this.item, required this.onTap});
+
+  Color _getStockStatusColor() {
+    if (item.quantity == 0) return Colors.red;
+    if (item.quantity <= 5) return Colors.orange;
+    return Colors.green;
+  }
+
+  String _getStockStatus() {
+    if (item.quantity == 0) return 'Out of Stock';
+    if (item.quantity <= 5) return 'Low Stock';
+    return 'In Stock';
+  }
+
+  IconData _getCategoryIcon() {
+    switch (item.itemCategory.toLowerCase()) {
+      case 'tools':
+        return Icons.build;
+      case 'parts':
+        return Icons.precision_manufacturing;
+      case 'materials':
+        return Icons.inventory;
+      case 'equipment':
+        return Icons.construction;
+      case 'consumables':
+        return Icons.local_gas_station;
+      case 'other':
+        return Icons.category;
+      default:
+        return Icons.inventory_2;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormat = NumberFormat.currency(symbol: 'RM');
-    
     return Card(
-      elevation: 3,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      elevation: 2,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8), 
+              // icon
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor.withAlpha(25),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  _getCategoryIcon(),
+                  color: Theme.of(context).primaryColor,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+
+              // item details
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.itemName,
+                      style: MyTextStyles.bold.copyWith(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    child: Icon(
-                      Icons.inventory_2,
-                      color: Theme.of(context).primaryColor,
+                    const SizedBox(height: 4),
+
+                    // Category
+                    Text(
+                      item.itemCategory,
+                      style: MyTextStyles.regular.copyWith(
+                        color: Colors.grey[600],
+                        fontSize: 12,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    const SizedBox(height: 8),
+
+                    // stock and quantity status
+                    Row(
                       children: [
-                        Text(
-                          item.itemName,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _getStockStatusColor().withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            _getStockStatus(),
+                            style: MyTextStyles.semiBold.copyWith(
+                              color: _getStockStatusColor(),
+                              fontSize: 11,
+                            ),
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(width: 8),
                         Text(
-                          item.itemCategory,
-                          style: TextStyle(
+                          'Qty: ${item.quantity}',
+                          style: MyTextStyles.medium.copyWith(
+                            fontSize: 10,
                             color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ),
-                  ),
-
-                  Icon(Icons.chevron_right),
-                ],
+                  ],
+                ),
               ),
 
-              SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildInfoChip(
-                    context,
-                    'Quantity',
-                    item.quantity.toInt().toString(),
-                    Icons.shopping_cart,
-                  ),
-                  _buildInfoChip(
-                    context,
-                    'Unit Price',
-                    currencyFormat.format(item.unitPrice),
-                    Icons.attach_money,
-                    
-                  ),
-              
-                ],
-              ),
-
-              SizedBox(height: 8),
-              Divider(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // price
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    'Updated: ${_formatDate(item.updatedAt)}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
+                    'RM ${item.unitPrice.toStringAsFixed(2)}',
+                    style: MyTextStyles.semiBold.copyWith(
+                      color: Theme.of(context).primaryColor,
                     ),
                   ),
-                  if (item.quantity < 10)
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.red[100],
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        'Low Stock',
-                        style: TextStyle(
-                          color: const Color.fromARGB(255, 206, 5, 5),
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Total: RM ${(item.quantity * item.unitPrice).toStringAsFixed(2)}',
+                    style: MyTextStyles.regular.copyWith(
+                      color: Colors.grey[600],
                     ),
+                  ),
+                  const SizedBox(height: 8),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: Colors.grey[400],
+                  ),
                 ],
               ),
             ],
@@ -129,46 +155,5 @@ class ItemCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Widget _buildInfoChip(BuildContext context, String label, String value, IconData icon) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[600],
-            ),
-          ),
-          SizedBox(height: 4),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 14, color: Theme.of(context).primaryColor),
-              SizedBox(width: 4),
-              Text(
-                value,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-
-  String _formatDate(DateTime date) {
-    final DateFormat formatter = DateFormat('MMM dd, yyyy');
-    return formatter.format(date);
   }
 }

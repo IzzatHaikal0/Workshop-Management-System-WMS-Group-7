@@ -9,6 +9,9 @@ import 'Screens/Registration/manage_registration_barrel.dart';
 import 'Screens/welcome_screen.dart';
 import 'Screens/Profile/manage_profile_barrel.dart';
 import 'Screens/workshop_homepage.dart'; // <-- NEW IMPORT
+import 'Screens/ManageForemanSchedule/manage_foreman_schedule_barrel.dart';
+import 'Screens/ManageInventory/inventory_barrel.dart';
+import 'Screens/ManageRating/manage_rating_barrel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,10 +41,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Workshop Management System App',
+      title: 'Pomen.IO',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color.fromARGB(255, 13, 13, 224),
+          seedColor: const Color.fromARGB(255, 23, 80, 202),
         ),
         useMaterial3: true,
       ),
@@ -94,7 +97,7 @@ class MyApp extends StatelessWidget {
           case AppRoutes.profileEditForeman:
             return MaterialPageRoute(
               builder:
-                  (_) => AddProfilePageForeman(
+                  (_) => EditProfilePageForeman(
                     existingProfile: args['existingProfile'] ?? {},
                     foremanId: args['foremanId'] ?? '',
                   ),
@@ -103,12 +106,11 @@ class MyApp extends StatelessWidget {
           case AppRoutes.profileEditWorkshopOwner:
             return MaterialPageRoute(
               builder:
-                  (_) => AddProfilePageWorkshopOwner(
+                  (_) => EditProfilePageWorkshopOwner(
                     existingProfile: args['existingProfile'] ?? {},
                     workshopOwnerId: args['workshopOwnerId'] ?? '',
                   ),
             );
-
           default:
             return MaterialPageRoute(
               builder:
@@ -124,6 +126,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// AuthGate
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
@@ -148,10 +151,12 @@ class AuthGate extends StatelessWidget {
 }
 
 // MyHomePage
+// MyHomePage
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
   final String title;
+  //final Icon icon;
   //final Icon icon;
 
   @override
@@ -212,18 +217,20 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  // Pages
   List<Widget> get _pages {
     if (currentUserRole == null) {
       return [const Center(child: CircularProgressIndicator())];
     }
-
     return [
       const WorkshopHomePage(),
-      const Center(child: Text('Schedule Page')),
+      currentUserRole == 'foreman'
+          ? SelectSchedulePage(foremenId: currentUserId)
+          : ListSchedulePage(workshopOwnerId: currentUserId),
       currentUserRole == 'foreman'
           ? ViewProfilePageForeman(foremanId: currentUserId)
           : ViewProfilePageWorkshopOwner(workshopOwnerId: currentUserId),
-      const Center(child: Text('Inventory Page')),
+      const ItemListScreen(),
     ];
   }
 
@@ -264,6 +271,22 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.rate_review),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) =>
+                          currentUserRole == 'workshop_owner'
+                              ? RatingPage()
+                              : ForemanPage(),
+                ),
+              );
+            },
+          ),
+
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',
