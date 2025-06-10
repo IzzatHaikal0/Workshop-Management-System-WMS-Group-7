@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 8.2.2" type="incidents">
+
+    <incident
+        id="ObsoleteSdkInt"
+        severity="warning"
+        message="This folder configuration (`v21`) is unnecessary; `minSdkVersion` is 23. Merge all the resources in this folder into `drawable`.">
+        <fix-data file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/drawable-v21" folderName="drawable" requiresApi="23"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/drawable-v21"/>
+    </incident>
+
+</incidents>
