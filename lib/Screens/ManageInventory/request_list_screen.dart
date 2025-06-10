@@ -13,17 +13,9 @@ class RequestListScreen extends StatefulWidget {
 
 class _RequestListScreenState extends State<RequestListScreen> {
   final RequestController _requestController = RequestController();
-  String _selectedStatus = 'All';
   final TextEditingController _searchController = TextEditingController();
   String _searchText = '';
   int _selectedSegment = 0;
-
-  final List<String> _statusOptions = [
-    'All',
-    'pending',
-    'approved',
-    'rejected',
-  ];
 
   @override
   void dispose() {
@@ -32,32 +24,13 @@ class _RequestListScreenState extends State<RequestListScreen> {
   }
 
   Stream<List<Request>> _getFilteredRequests() {
-    if (_selectedStatus == 'All') {
-      return _requestController.getMyRequestsStream();
-    } else {
-      return _requestController.getRequestsByStatusStream(_selectedStatus);
-    }
+    return _requestController.getMyRequestsStream();
   }
 
   List<Request> _filterBySearch(List<Request> requests) {
-    if (_searchText.isEmpty) return requests;
-
     return requests.where((request) {
       return request.itemName.toLowerCase().contains(_searchText.toLowerCase());
     }).toList();
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'pending':
-        return Colors.orange;
-      case 'approved':
-        return Colors.blue;
-      case 'rejected':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
   }
 
   @override
@@ -68,7 +41,7 @@ class _RequestListScreenState extends State<RequestListScreen> {
           _buildTopBar(),
           _buildSegmentedHeader(),
           if (_selectedSegment == 0) ...[
-            _buildSearchAndFilterSection(),
+            _buildSearchSection(),
             Expanded(child: _buildMyRequestsView()),
           ] else if (_selectedSegment == 1) ...[
             Expanded(child: const RequestApprovalScreen()),
@@ -174,13 +147,12 @@ class _RequestListScreenState extends State<RequestListScreen> {
     );
   }
 
-  Widget _buildSearchAndFilterSection() {
+  Widget _buildSearchSection() {
     return Container(
       padding: const EdgeInsets.all(16.0),
       color: Colors.grey[50],
       child: Column(
         children: [
-          // search
           TextField(
             controller: _searchController,
             decoration: InputDecoration(
@@ -194,9 +166,7 @@ class _RequestListScreenState extends State<RequestListScreen> {
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                  color: Color.fromARGB(255, 219, 225, 244),
-                ),
+                borderSide: const BorderSide(color: Color(0xFFDBE1F4)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -210,37 +180,6 @@ class _RequestListScreenState extends State<RequestListScreen> {
             },
           ),
           const SizedBox(height: 12),
-          SizedBox(
-            height: 40,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: _statusOptions.length,
-              itemBuilder: (context, index) {
-                final status = _statusOptions[index];
-                final isSelected = _selectedStatus == status;
-
-                /// status filter
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: FilterChip(
-                    label: Text(
-                      status == 'All' ? 'All' : status,
-                      style: MyTextStyles.regular,
-                    ),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() {
-                        _selectedStatus = status;
-                      });
-                    },
-                    backgroundColor: Colors.white,
-                    selectedColor: _getStatusColor(status).withAlpha(50),
-                    checkmarkColor: _getStatusColor(status),
-                  ),
-                );
-              },
-            ),
-          ),
         ],
       ),
     );
@@ -350,10 +289,13 @@ class _RequestListScreenState extends State<RequestListScreen> {
                 ),
               ],
             ),
+            actionsAlignment: MainAxisAlignment.center,
+
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Close', style: MyTextStyles.regular),
+                onPressed: () => Navigator.pop(context, false),
+                style: TextButton.styleFrom(foregroundColor: Color(0xFF006FFD)),
+                child: const Text(('Close'), style: MyTextStyles.regular),
               ),
               if (request.status == 'pending' ||
                   request.status == 'rejected' ||
@@ -376,7 +318,10 @@ class _RequestListScreenState extends State<RequestListScreen> {
                       );
                     }
                   },
-                  style: TextButton.styleFrom(foregroundColor: Colors.red),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Color(0xFF006FFD),
+                  ),
                   child: const Text('Delete', style: MyTextStyles.regular),
                 ),
             ],
