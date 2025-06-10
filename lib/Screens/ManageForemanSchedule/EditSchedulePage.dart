@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:workshop_management_system/Controllers/ScheduleController.dart';
 import 'package:workshop_management_system/Models/ScheduleModel.dart';
 import 'package:workshop_management_system/Screens/ManageForemanSchedule/ListSchedulePage.dart';
-
-
+import 'package:firebase_auth/firebase_auth.dart';
 
 class EditSchedulePage extends StatelessWidget {
   final String docId;
 
   EditSchedulePage({super.key, required this.docId});
   final ScheduleController controller = ScheduleController();
+  final String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,10 @@ class EditSchedulePage extends StatelessWidget {
           } else {
             return Padding(
               padding: const EdgeInsets.all(16.0),
-              child: DatePickerExample(schedule: snapshot.data!),
+              child: DatePickerExample(
+                schedule: snapshot.data!,
+                currentUserId: currentUserId,
+              ),
             );
           }
         },
@@ -36,15 +39,18 @@ class EditSchedulePage extends StatelessWidget {
   }
 }
 
-
 class DatePickerExample extends StatefulWidget {
   final Schedule schedule;
-  const DatePickerExample({super.key, required this.schedule});
+  final String currentUserId;
+  const DatePickerExample({
+    super.key,
+    required this.schedule,
+    required this.currentUserId,
+  });
 
   @override
   State<DatePickerExample> createState() => _DatePickerExampleState();
 }
-
 
 class _DatePickerExampleState extends State<DatePickerExample> {
   DateTime? scheduleDate;
@@ -52,6 +58,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
   TimeOfDay? endTime;
   int? salaryRate;
   int? scheduleID;
+  String? jobDescription;
 
   @override
   void initState() {
@@ -68,7 +75,6 @@ class _DatePickerExampleState extends State<DatePickerExample> {
       initialTime: TimeOfDay.now(),
     );
 
-
     if (picked != null) {
       setState(() {
         if (type == 'start') startTime = picked;
@@ -78,23 +84,18 @@ class _DatePickerExampleState extends State<DatePickerExample> {
   }
 
   Future<void> _selectDate() async {
-      final DateTime? picked = await showDatePicker(
-        context: context,
-        initialDate: scheduleDate ?? DateTime.now(),
-        firstDate: DateTime(2000),
-        lastDate: DateTime(2100),
-      );
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: scheduleDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
 
-      if (picked != null) {
-        setState(() => scheduleDate = picked);
-      }
+    if (picked != null) {
+      setState(() => scheduleDate = picked);
+    }
   }
-  
 
-  
-
-  
-  
   String formatTime(TimeOfDay? time) {
     if (time == null) return 'Select Time';
     final hour = time.hourOfPeriod.toString().padLeft(2, '0');
@@ -103,7 +104,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
     return '$hour:$minute $period';
   }
 
-  //THE SCHEDULE CARD 
+  //THE SCHEDULE CARD
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -111,94 +112,127 @@ class _DatePickerExampleState extends State<DatePickerExample> {
         children: [
           Text(
             scheduleDate != null
-                ? 'Selected Date: ${scheduleDate!.day}/${scheduleDate!.month}/${scheduleDate!.year}': 'No date selected',
-              ),
-              const SizedBox(height: 10),
-              OutlinedButton(
-                onPressed: _selectDate, child: const Text('Select Date')),
-              const SizedBox(height: 20),
-              Card(
-                //REQUIRED START TIME
-                child: ListTile(
-                title: const Text('Start Time'),
-                subtitle: Text(formatTime(startTime)),
-                trailing: const Icon(Icons.access_time),
-                onTap: () => _selectTime('start'),
-                ),
-              ),
-              Card(
-              //REQUIRED END TIME
-              child: ListTile(
+                ? 'Selected Date: ${scheduleDate!.day}/${scheduleDate!.month}/${scheduleDate!.year}'
+                : 'No date selected',
+          ),
+          const SizedBox(height: 10),
+          OutlinedButton(
+            onPressed: _selectDate,
+            child: const Text('Select Date'),
+          ),
+          const SizedBox(height: 20),
+          Card(
+            //REQUIRED START TIME
+            child: ListTile(
+              title: const Text('Start Time'),
+              subtitle: Text(formatTime(startTime)),
+              trailing: const Icon(Icons.access_time),
+              onTap: () => _selectTime('start'),
+            ),
+          ),
+          Card(
+            //REQUIRED END TIME
+            child: ListTile(
               title: const Text('End Time'),
               subtitle: Text(formatTime(endTime)),
               trailing: const Icon(Icons.access_time),
               onTap: () => _selectTime('end'),
-              ),
-              ),
-              Card(
-                //CALULATE TOTAL WORKING HOURS (START TIME - END TIME)
-                child: ListTile(
-                  title: const Text('Total Hours'),
-                  subtitle: (startTime != null && endTime != null)
-                    ? Text(
+            ),
+          ),
+          Card(
+            //CALULATE TOTAL WORKING HOURS (START TIME - END TIME)
+            child: ListTile(
+              title: const Text('Total Hours'),
+              subtitle:
+                  (startTime != null && endTime != null)
+                      ? Text(
                         '${_calculateTotalHours(startTime!, endTime!).toStringAsFixed(2)} h',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: const Color.fromARGB(255, 245, 0, 0),
                         ),
-                    )
-                  : const Text('Not set'),
-                  trailing: const Icon(Icons.access_time),
+                      )
+                      : const Text('Not set'),
+              trailing: const Icon(Icons.access_time),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              title: const Text('Salary Rate (Per Hour)'),
+              subtitle: TextFormField(
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Enter salary rate',
                 ),
+                onChanged: (value) {
+                  setState(() {
+                    salaryRate = int.tryParse(value);
+                  });
+                },
               ),
-              Card(
-                child: ListTile(
-                  title: const Text('Salary Rate (Per Hour)'),
-                  subtitle: TextFormField(
-                    decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'Enter salary rate',
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        salaryRate = int.tryParse(value);
-                      });
-                    },
-                  ),
-                  trailing: const Icon(Icons.attach_money),
+              trailing: const Icon(Icons.attach_money),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              title: const Text('Job Task Description'),
+              subtitle: TextFormField(
+                decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: 'Enter job details',
                 ),
+                onChanged: (value) {
+                setState(() {
+                    jobDescription = value;
+                  });
+                },
               ),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  OutlinedButton.icon(
-                    onPressed: _onCancel,
-                    label: Text('Cancel', style: TextStyle(color: Colors.red)),
-                  ),
-                  OutlinedButton.icon(
-                    onPressed: _onSave,
-                    label: Text('Save', style: TextStyle(color: Colors.blue)),
-                  ),
-                ],
-              )
+              trailing: const Icon(Icons.note_add),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              OutlinedButton.icon(
+                onPressed: _onCancel,
+                label: Text('Cancel', style: TextStyle(color: Colors.red)),
+              ),
+              OutlinedButton.icon(
+                onPressed: _onSave,
+                label: Text('Save', style: TextStyle(color: Colors.blue)),
+              ),
             ],
           ),
-        );
+        ],
+      ),
+    );
   }
 
   //CALCULATE TOTAL HOURS AND RETURN
   double _calculateTotalHours(TimeOfDay start, TimeOfDay end) {
     final now = DateTime.now();
-    final startDateTime =
-    DateTime(now.year, now.month, now.day, start.hour, start.minute);
-    final endDateTime =
-    DateTime(now.year, now.month, now.day, end.hour, end.minute);
+    final startDateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      start.hour,
+      start.minute,
+    );
+    final endDateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      end.hour,
+      end.minute,
+    );
 
     // Handle overnight shifts (e.g., 10 PM to 6 AM)
-    final duration = endDateTime.isAfter(startDateTime)
-        ? endDateTime.difference(startDateTime)
-        : endDateTime.add(const Duration(days: 1)).difference(startDateTime);
+    final duration =
+        endDateTime.isAfter(startDateTime)
+            ? endDateTime.difference(startDateTime)
+            : endDateTime
+                .add(const Duration(days: 1))
+                .difference(startDateTime);
 
     // ignore: non_constant_identifier_names
     final TotalMinutes = duration.inMinutes;
@@ -206,14 +240,12 @@ class _DatePickerExampleState extends State<DatePickerExample> {
     final TotalHours = TotalMinutes / 60;
 
     return double.parse(TotalHours.toStringAsFixed(2));
-
   }
 
   //SAVE THE SCHEDULE
   void _onSave() {
     if (scheduleDate != null && startTime != null && endTime != null) {
-    //final now = DateTime.now();
-
+      //final now = DateTime.now();
 
       // Combine selected date with time of day
       final DateTime startDateTime = DateTime(
@@ -240,6 +272,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
         totalHours: _calculateTotalHours(startTime!, endTime!),
         docId: widget.schedule.docId, // Firestore will generate this
         //TotalHours: _calculateTotalHours(StartTime!, EndTime!),
+        jobDescription:jobDescription ?? '',
       );
 
       ScheduleController().editSchedule(schedule);
@@ -250,22 +283,20 @@ class _DatePickerExampleState extends State<DatePickerExample> {
 
       Navigator.pop(
         context,
-        MaterialPageRoute(builder: (context) => ListSchedulePage()),
+        MaterialPageRoute(builder: (context) => ListSchedulePage(workshopOwnerId: widget.currentUserId)),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please complete all fields')),
       );
     }
-
-
   }
 
   //CANCEL THE PROCESS
   void _onCancel() {
-    Navigator.pop(
-    context,
-    MaterialPageRoute(builder: (context) => ListSchedulePage()),
+     Navigator.pop(
+      context,
+      MaterialPageRoute(builder: (context) => ListSchedulePage(workshopOwnerId: widget.currentUserId,)),
     );
   }
 }

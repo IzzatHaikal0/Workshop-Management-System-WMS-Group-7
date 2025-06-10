@@ -8,7 +8,7 @@ import 'package:intl/intl.dart';
 
 
 class ListSchedulePage extends StatelessWidget {
-  ListSchedulePage({super.key});
+  ListSchedulePage({super.key, required String workshopOwnerId});
   final ScheduleController controller = ScheduleController();
 
   @override
@@ -80,7 +80,8 @@ class ListSchedulePage extends StatelessWidget {
                                   'Start Time: ${DateFormat('hh:mm a').format(schedule.startTime)}\n'
                                   'End Time: ${DateFormat('hh:mm a').format(schedule.endTime)}\n'
                                   'Total Hours: ${((schedule.endTime.difference(schedule.startTime).inMinutes) / 60).toStringAsFixed(2)} h\n'
-                                  'Salary Rate: RM ${schedule.salaryRate}',
+                                  'Salary Rate: RM ${schedule.salaryRate}\n'
+                                  'Job Description: ${schedule.jobDescription}',
                                   style: TextStyle(
                                     fontWeight: FontWeight.normal,
                                     color: Color.fromARGB(255, 8, 8, 8),

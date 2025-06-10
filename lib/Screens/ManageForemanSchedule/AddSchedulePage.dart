@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:workshop_management_system/Controllers/ScheduleController.dart';
 import 'package:workshop_management_system/Models/ScheduleModel.dart';
 import 'package:workshop_management_system/Screens/ManageForemanSchedule/ListSchedulePage.dart';
-//import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 /*void main() {
   runApp(const MaterialApp(home: AddSchedulePage()));
@@ -11,21 +11,25 @@ import 'package:workshop_management_system/Screens/ManageForemanSchedule/ListSch
 class AddSchedulePage extends StatelessWidget {
   AddSchedulePage({super.key});
   final ScheduleController controller = ScheduleController();
+  final String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Add New Schedule')),
-      body: const Padding(
+      body: Padding(
         padding: EdgeInsets.all(16.0),
-        child: DatePickerExample(),
+        child: DatePickerExample(currentUserId: currentUserId,),
       ),
     );
   }
 }
 
 class DatePickerExample extends StatefulWidget {
-  const DatePickerExample({super.key});
-
+  final String currentUserId;
+  const DatePickerExample({super.key, required this.currentUserId});
+    
+  
   @override
   State<DatePickerExample> createState() => _DatePickerExampleState();
 }
@@ -35,6 +39,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
   TimeOfDay? startTime;
   TimeOfDay? endTime;
   int? salaryRate;
+  String? jobDescription;
 
   Future<void> _selectDate() async {
     final DateTime? pickedDate = await showDatePicker(
@@ -139,7 +144,23 @@ class _DatePickerExampleState extends State<DatePickerExample> {
               trailing: const Icon(Icons.attach_money),
             ),
           ),
-
+          Card(
+            child: ListTile(
+              title: const Text('Job Task Description'),
+              subtitle: TextFormField(
+                decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: 'Enter job details',
+                ),
+                onChanged: (value) {
+                setState(() {
+                    jobDescription = value;
+                  });
+                },
+              ),
+              trailing: const Icon(Icons.note_add),
+            ),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -209,6 +230,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
         endTime: endDateTime,
         salaryRate: salaryRate ?? 0,
         totalHours: _calculateTotalHours(startTime!, endTime!),
+        jobDescription: jobDescription ?? '',
         docId: null, // Firestore will generate this
         //TotalHours: _calculateTotalHours(StartTime!, EndTime!),
       );
@@ -221,7 +243,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
 
       Navigator.pop(
         context,
-        MaterialPageRoute(builder: (context) => ListSchedulePage()),
+        MaterialPageRoute(builder: (context) => ListSchedulePage(workshopOwnerId: widget.currentUserId)),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -234,7 +256,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
   void _onCancel() {
     Navigator.pop(
       context,
-      MaterialPageRoute(builder: (context) => ListSchedulePage()),
+      MaterialPageRoute(builder: (context) => ListSchedulePage(workshopOwnerId: widget.currentUserId,)),
     );
   }
 }

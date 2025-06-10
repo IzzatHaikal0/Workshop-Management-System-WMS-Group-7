@@ -9,6 +9,8 @@ class Schedule {
   final double totalHours;
   final String? docId;
   final String status; // Default status
+  final String? workshopName;
+  final String? jobDescription;
 
   Schedule({
     //required this.ScheduleID,
@@ -19,11 +21,19 @@ class Schedule {
     required this.totalHours,
     required this.docId,
     this.status = 'pending', // Default to 'pending'
+    this.workshopName,
+    required this.jobDescription,
   });
 
   // Proper factory method
-  factory Schedule.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
-    final data = doc.data()!;
+  factory Schedule.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> doc, {
+    String? workshopName,
+  }) {
+    final data = doc.data();
+     if (data == null) {
+    throw StateError('Missing data for schedule: ${doc.id}');
+  }
     return Schedule(
       //ScheduleID: doc.ScheduleID,
       startTime: (data['startTime'] as Timestamp).toDate(),
@@ -34,7 +44,9 @@ class Schedule {
           (data['totalHours'] as num?)?.toDouble() ??
           0.0, // Default to 0 if not present
       docId: doc.id,
-      status:data['status'] ?? 'pending', // Default to 'pending' if not present
+      status: data['status'] ?? 'pending', // Default to 'pending' if not present
+      workshopName: workshopName, 
+      jobDescription: data['jobDescription'] ?? '', // Default to empty string if not present
     );
   }
 
@@ -46,7 +58,8 @@ class Schedule {
       salaryRate: map['salaryRate'] ?? 0,
       totalHours: (map['totalHours'] ?? 0).toDouble(),
       docId: docId,
-       status: map['status'] ?? 'pending',
+      status: map['status'] ?? 'pending',
+      jobDescription: map['jobDescription'] ?? '',
     );
   }
 
@@ -58,7 +71,8 @@ class Schedule {
       'scheduleDate': Timestamp.fromDate(scheduleDate),
       'salaryRate': salaryRate,
       'totalHours': totalHours,
-      'status': status, // Include status in the map
+      'status': status, 
+      'jobDescription': jobDescription ?? '', 
     };
   }
 }

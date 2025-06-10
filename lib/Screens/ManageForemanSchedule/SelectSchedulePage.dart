@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class SelectSchedulePage extends StatelessWidget {
-  SelectSchedulePage({super.key});
+  SelectSchedulePage({super.key, required String foremenId});
   final ScheduleController controller = ScheduleController();
 
   @override
@@ -29,7 +29,7 @@ class SelectSchedulePage extends StatelessWidget {
             StreamBuilder<List<Schedule>>(
               stream: controller.getAcceptedSchedules(
                 FirebaseAuth.instance.currentUser!.uid,
-              ), // You must implement this method
+              ),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
@@ -41,57 +41,63 @@ class SelectSchedulePage extends StatelessWidget {
                   List<Schedule> schedules = snapshot.data!;
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children:
-                        schedules.map((schedule) {
-                          String day = DateFormat(
-                            'EEEE',
-                          ).format(schedule.scheduleDate); // e.g., Tuesday
-                          String date = DateFormat('d MMMM yyyy').format(
-                            schedule.scheduleDate,
-                          ); // e.g., 1st January 2025
-                          String startTime = DateFormat(
-                            'HH:mm',
-                          ).format(schedule.startTime);
-                          String endTime = DateFormat(
-                            'HH:mm',
-                          ).format(schedule.endTime);
+                    children: schedules.map((schedule) {
+                      String day = DateFormat('EEEE').format(schedule.scheduleDate);
+                      String date = DateFormat('d MMMM yyyy').format(schedule.scheduleDate);
+                      String startTime = DateFormat('HH:mm').format(schedule.startTime);
+                      String endTime = DateFormat('HH:mm').format(schedule.endTime);
+                      String jobDescription = schedule.jobDescription ?? 'No description provided';
 
-                          return Container(
-                            width: double.infinity,
-                            margin: const EdgeInsets.only(bottom: 10),
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.teal.shade400,
-                              borderRadius: BorderRadius.circular(12),
+                      return Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.teal.shade400,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Workshop Name: ${schedule.workshopName ?? 'Unknown'}',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "$day, $startTime - $endTime",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  date,
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
+                            SizedBox(height: 8),
+                            Text(
+                              "$day, $startTime - $endTime",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
                             ),
-                          );
-                        }).toList(),
+                            SizedBox(height: 4),
+                            Text(
+                              date,
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
+                            ),
+                            Text(
+                              'Job Description: $jobDescription',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
                   );
                 }
               },
             ),
-            //FIX THIS --> ONLY SHOW ACCEPTED SCHEDULE BASED ON FOREMAN ID
-            //GOTTA WAIT FOR MANAGE PROFILE
 
             //START OF SELECT SCHEDULE
             Padding(
@@ -148,7 +154,9 @@ class SelectSchedulePage extends StatelessWidget {
                                       'Start Time: ${DateFormat('hh:mm a').format(schedule.startTime)}\n'
                                       'End Time: ${DateFormat('hh:mm a').format(schedule.endTime)}\n'
                                       'Total Hours: ${totalHours.toStringAsFixed(2)} h\n'
-                                      'Salary Rate: RM ${schedule.salaryRate}',
+                                      'Salary Rate: RM ${schedule.salaryRate} h\n'
+                                      'Job Description: ${schedule.jobDescription ?? 'No description provided'} \n'
+                                      'Workshop Name: ${schedule.workshopName ?? 'Unknown'}',
                                       style: TextStyle(
                                         fontWeight: FontWeight.normal,
                                         color: Color.fromARGB(255, 8, 8, 8),

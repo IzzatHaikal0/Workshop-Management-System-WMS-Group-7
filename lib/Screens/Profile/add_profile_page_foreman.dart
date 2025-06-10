@@ -7,88 +7,61 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-class EditProfilePageForeman extends StatefulWidget {
+class AddProfilePageForeman extends StatefulWidget {
   final String foremanId;
+  final Map<String, dynamic> existingProfile;
 
-  const EditProfilePageForeman({
+  const AddProfilePageForeman({
     super.key,
     required this.foremanId,
-    required Map<String, dynamic> existingProfile,
+    required this.existingProfile,
   });
 
   @override
-  State<EditProfilePageForeman> createState() => _EditProfilePageForemanState();
+  State<AddProfilePageForeman> createState() => _AddProfilePageForemanState();
 }
 
-class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
+class _AddProfilePageForemanState extends State<AddProfilePageForeman> {
   final _formKey = GlobalKey<FormState>();
 
-  late TextEditingController _firstNameController;
-  late TextEditingController _lastNameController;
-  late TextEditingController _emailController;
-  late TextEditingController _phoneNumberController;
-  late TextEditingController _foremanAddressController;
-  late TextEditingController _foremanSkillsController;
-  late TextEditingController _foremanWorkExperienceController;
+  late final TextEditingController _firstNameController;
+  late final TextEditingController _lastNameController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _phoneNumberController;
+  late final TextEditingController _foremanAddressController;
+  late final TextEditingController _foremanSkillsController;
+  late final TextEditingController _foremanWorkExperienceController;
 
   String? _profileImageUrl;
 
   File? _pickedImage; // For mobile
   Uint8List? _webImageBytes; // For web
 
-  bool _isLoading = true;
-  bool _isSaving = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _loadForemanData();
-  }
+    final data = widget.existingProfile;
 
-  Future<void> _loadForemanData() async {
-    try {
-      final doc =
-          await FirebaseFirestore.instance
-              .collection('foremen')
-              .doc(widget.foremanId)
-              .get();
-      final data = doc.data();
-
-      if (data == null) {
-        throw Exception('Foreman profile not found');
-      }
-
-      setState(() {
-        _firstNameController = TextEditingController(
-          text: data['first_name'] ?? '',
-        );
-        _lastNameController = TextEditingController(
-          text: data['last_name'] ?? '',
-        );
-        _emailController = TextEditingController(text: data['email'] ?? '');
-        _phoneNumberController = TextEditingController(
-          text: data['phone_number'] ?? '',
-        );
-        _foremanAddressController = TextEditingController(
-          text: data['foremanAddress'] ?? '',
-        );
-        _foremanSkillsController = TextEditingController(
-          text: data['foremanSkills'] ?? '',
-        );
-        _foremanWorkExperienceController = TextEditingController(
-          text: data['foremanWorkExperience'] ?? '',
-        );
-        _profileImageUrl = data['foremanProfilePicture'];
-        _isLoading = false;
-      });
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error loading profile: $e')));
-        setState(() => _isLoading = false);
-      }
-    }
+    _firstNameController = TextEditingController(
+      text: data['first_name'] ?? '',
+    );
+    _lastNameController = TextEditingController(text: data['last_name'] ?? '');
+    _emailController = TextEditingController(text: data['email'] ?? '');
+    _phoneNumberController = TextEditingController(
+      text: data['phone_number'] ?? '',
+    );
+    _foremanAddressController = TextEditingController(
+      text: data['foremanAddress'] ?? '',
+    );
+    _foremanSkillsController = TextEditingController(
+      text: data['foremanSkills'] ?? '',
+    );
+    _foremanWorkExperienceController = TextEditingController(
+      text: data['foremanWorkExperience'] ?? '',
+    );
+    _profileImageUrl = data['foremanProfilePicture'];
   }
 
   Future<void> _pickImage() async {
@@ -145,7 +118,7 @@ class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isSaving = true);
+    setState(() => _isLoading = true);
 
     try {
       final imageUrl = await _uploadProfileImage(widget.foremanId);
@@ -153,40 +126,42 @@ class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
           .collection('foremen')
           .doc(widget.foremanId)
           .update({
-        'first_name': _firstNameController.text.trim(),
-        'last_name': _lastNameController.text.trim(),
-        'email': _emailController.text.trim(),
-        'phone_number': _phoneNumberController.text.trim(),
-        'foremanAddress': _foremanAddressController.text.trim(),
-        'foremanSkills': _foremanSkillsController.text.trim(),
-        'foremanWorkExperience': _foremanWorkExperienceController.text.trim(),
-        'foremanProfilePicture': imageUrl,
-      });
+            'first_name': _firstNameController.text.trim(),
+            'last_name': _lastNameController.text.trim(),
+            'email': _emailController.text.trim(),
+            'phone_number': _phoneNumberController.text.trim(),
+            'foremanAddress': _foremanAddressController.text.trim(),
+            'foremanSkills': _foremanSkillsController.text.trim(),
+            'foremanWorkExperience':
+                _foremanWorkExperienceController.text.trim(),
+            'foremanProfilePicture': imageUrl,
+          });
 
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully')),
+        const SnackBar(content: Text('Profile has been successfully added')),
       );
-
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Failed to update profile: $e')));
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
-      if (mounted) setState(() => _isSaving = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
+  // Confirmation dialog method:
   Future<bool> _showConfirmationDialog() async {
     return await showDialog<bool>(
           context: context,
           builder:
               (context) => AlertDialog(
-                title: const Text('Confirm Update'),
-                content: const Text('Are you sure you want to save changes?'),
+                title: const Text('Confirm Add Profile'),
+                content: const Text(
+                  'Are you sure you want to add this profile?',
+                ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(false),
@@ -200,6 +175,18 @@ class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
               ),
         ) ??
         false;
+  }
+
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _emailController.dispose();
+    _phoneNumberController.dispose();
+    _foremanAddressController.dispose();
+    _foremanSkillsController.dispose();
+    _foremanWorkExperienceController.dispose();
+    super.dispose();
   }
 
   @override
@@ -221,7 +208,13 @@ class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
         _pickedImage != null || _webImageBytes != null;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Foreman Profile')),
+      appBar: AppBar(
+        title: Text(
+          widget.existingProfile.isEmpty
+              ? 'Add Foreman Profile'
+              : 'Add Foreman Profile',
+        ),
+      ),
       body:
           _isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -292,7 +285,7 @@ class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
                               child: Text(
                                 isNewImageSelected
                                     ? 'New image selected. Will be uploaded when you save.'
-                                    : 'Tap pencil icon to change profile picture',
+                                    : 'Tap pencil icon to add profile picture',
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontSize: 14,
@@ -380,9 +373,8 @@ class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
                               decoration: const InputDecoration(
                                 labelText: 'Address',
                                 border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.home),
+                                prefixIcon: Icon(Icons.location_on),
                               ),
-                              maxLines: 2,
                               validator:
                                   (value) =>
                                       value == null || value.isEmpty
@@ -397,13 +389,12 @@ class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
                               decoration: const InputDecoration(
                                 labelText: 'Skills',
                                 border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.handyman),
+                                prefixIcon: Icon(Icons.build),
                               ),
-                              maxLines: 2,
                             ),
                             const SizedBox(height: 16),
 
-                            // Work Experience
+                            // Foreman Work Experience
                             TextFormField(
                               controller: _foremanWorkExperienceController,
                               decoration: const InputDecoration(
@@ -411,13 +402,12 @@ class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
                                 border: OutlineInputBorder(),
                                 prefixIcon: Icon(Icons.work),
                               ),
-                              maxLines: 3,
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 32),
 
                             ElevatedButton.icon(
                               onPressed:
-                                  _isSaving
+                                  _isLoading
                                       ? null
                                       : () async {
                                         final confirmed =
@@ -426,14 +416,28 @@ class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
                                           await _saveProfile();
                                         }
                                       },
-                              icon: const Icon(Icons.save),
-                              label:
-                                  _isSaving
-                                      ? const Text('Saving...')
-                                      : const Text('Save Changes'),
+                              icon:
+                                  _isLoading
+                                      ? const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                      : const Icon(Icons.save),
+                              label: const Text('Add Profile'),
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                textStyle: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
