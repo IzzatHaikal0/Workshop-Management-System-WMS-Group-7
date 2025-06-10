@@ -82,7 +82,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
                     Icons.request_page,
                     color: Color(0xFF4169E1),
                   ),
-                  tooltip: 'View Requests',
+                  tooltip: 'Request Items',
                   onPressed: () {
                     Navigator.push(
                       context,
