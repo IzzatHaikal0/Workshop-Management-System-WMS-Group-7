@@ -147,9 +147,12 @@ class AuthGate extends StatelessWidget {
   }
 }
 
+// MyHomePage
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
+
   final String title;
+  //final Icon icon;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
