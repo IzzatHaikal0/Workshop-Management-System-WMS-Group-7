@@ -1,40 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../Screens/firebase_options.dart';
+
+// Registration and profile barrel imports
 import 'Screens/Registration/manage_registration_barrel.dart';
 import 'Screens/welcome_screen.dart';
 import 'Screens/Profile/manage_profile_barrel.dart';
 import 'Screens/workshop_homepage.dart'; // <-- NEW IMPORT
 import 'Screens/ManageForemanSchedule/manage_foreman_schedule_barrel.dart';
+import 'Screens/ManageInventory/inventory_barrel.dart';
 import 'Screens/ManageRating/manage_rating_barrel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  try {
-    if (kIsWeb) {
-      await Firebase.initializeApp(
-        options: FirebaseOptions(
-          apiKey: "AIzaSyDz7PsfXEAnJXY7Jc1cAq4ueKnbwZ2X9to",
-          authDomain: "workshopmanagementsystem-c80c6.firebaseapp.com",
-          projectId: "workshopmanagementsystem-c80c6",
-          storageBucket: "workshopmanagementsystem-c80c6.firebasestorage.app",
-          messagingSenderId: "189887749916",
-          appId: "1:189887749916:web:d0f9a9d2b4e009472ce4d9",
-          measurementId: "G-JJRY2VHEJX",
-        ),
-      );
-    } else {
-      await Firebase.initializeApp();
-    }
-    runApp(const MyApp());
-  } catch (e) {
-    debugPrint("Firebase initialization error: $e");
-    return;
-  }
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  runApp(const MyApp());
 }
 
 class AppRoutes {
@@ -51,11 +33,6 @@ class AppRoutes {
   static const String profileAddWorkshopOwner = '/profile/add/workshop_owner';
   static const String profileEditForeman = '/profile/edit/foreman';
   static const String profileEditWorkshopOwner = '/profile/edit/workshop_owner';
-
-  static const String scheduleList = '/schedule/list';
-  static const String scheduleSelect = '/schedule/select';
-  static const String scheduleAdd = '/schedule/add';
-  static const String scheduleEdit = '/schedule/edit';
 }
 
 class MyApp extends StatelessWidget {
@@ -120,7 +97,7 @@ class MyApp extends StatelessWidget {
           case AppRoutes.profileEditForeman:
             return MaterialPageRoute(
               builder:
-                  (_) => AddProfilePageForeman(
+                  (_) => EditProfilePageForeman(
                     existingProfile: args['existingProfile'] ?? {},
                     foremanId: args['foremanId'] ?? '',
                   ),
@@ -129,33 +106,11 @@ class MyApp extends StatelessWidget {
           case AppRoutes.profileEditWorkshopOwner:
             return MaterialPageRoute(
               builder:
-                  (_) => AddProfilePageWorkshopOwner(
+                  (_) => EditProfilePageWorkshopOwner(
                     existingProfile: args['existingProfile'] ?? {},
                     workshopOwnerId: args['workshopOwnerId'] ?? '',
                   ),
             );
-          /*
-          case AppRoutes.scheduleList:
-            return MaterialPageRoute(
-              builder: (_) => ListSchedulePage(),
-            );
-
-          case AppRoutes.scheduleSelect:
-            return MaterialPageRoute(
-              builder: (_) => SelectSchedulePage(),
-            );
-
-          case AppRoutes.scheduleAdd:
-            return MaterialPageRoute(
-              builder: (_) => AddSchedulePage(),
-            );
-
-          case AppRoutes.scheduleEdit:
-            final scheduleId = args['scheduleId'] as String? ?? '';
-            return MaterialPageRoute(
-              builder: (_) => EditSchedulePage(docId: scheduleId),
-            );
-            */
           default:
             return MaterialPageRoute(
               builder:
@@ -171,6 +126,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// AuthGate
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
@@ -194,10 +150,13 @@ class AuthGate extends StatelessWidget {
   }
 }
 
+// MyHomePage
+// MyHomePage
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
   final String title;
+  //final Icon icon;
   //final Icon icon;
 
   @override
@@ -261,11 +220,11 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  // Pages
   List<Widget> get _pages {
     if (currentUserRole == null) {
       return [const Center(child: CircularProgressIndicator())];
     }
-
     return [
       const WorkshopHomePage(),
       currentUserRole == 'foreman'
@@ -274,8 +233,7 @@ class _MyHomePageState extends State<MyHomePage> {
       currentUserRole == 'foreman'
           ? ViewProfilePageForeman(foremanId: currentUserId)
           : ViewProfilePageWorkshopOwner(workshopOwnerId: currentUserId),
-      const Center(child: Text('Inventory Page')),
-      
+      const ItemListScreen(),
     ];
   }
 

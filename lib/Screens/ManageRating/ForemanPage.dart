@@ -29,6 +29,8 @@ class _ForemanPageState extends State<ForemanPage> {
   Future<void> _loadData() async {
     final result = await controller.loadRatingsForForeman(widget.foremanId);
     final profile = await controller.getForemanProfile(widget.foremanId);
+    
+    debugPrint("Loaded profile: ${profile?.firstName} ${profile?.lastName}, ${profile?.email}, ${profile?.phoneNumber}");
 
     setState(() {
       pastRatings = result['ratings'];
@@ -89,7 +91,9 @@ class _ForemanPageState extends State<ForemanPage> {
                                         ),
                                         const SizedBox(height: 12),
                                         Text(
-                                          "${foremanProfile!.firstName} ${foremanProfile!.lastName}",
+                                          (foremanProfile!.firstName.isNotEmpty || foremanProfile!.lastName.isNotEmpty)
+                                              ? "${foremanProfile!.firstName} ${foremanProfile!.lastName}"
+                                              : "No name available",
                                           textAlign: TextAlign.center,
                                           style: const TextStyle(
                                             fontWeight: FontWeight.bold,
@@ -97,17 +101,18 @@ class _ForemanPageState extends State<ForemanPage> {
                                           ),
                                         ),
                                         Text(
-                                          foremanProfile!.email,
+                                          foremanProfile!.email.isNotEmpty ? foremanProfile!.email : "No email provided",
                                           textAlign: TextAlign.center,
                                           overflow: TextOverflow.ellipsis,
                                           maxLines: 1,
                                         ),
                                         Text(
-                                          foremanProfile!.phoneNumber,
+                                          foremanProfile!.phoneNumber.isNotEmpty ? foremanProfile!.phoneNumber : "No phone number",
                                           textAlign: TextAlign.center,
                                           overflow: TextOverflow.ellipsis,
                                           maxLines: 1,
                                         ),
+
                                       ],
                                     ),
                                   ),

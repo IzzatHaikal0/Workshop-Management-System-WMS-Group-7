@@ -60,6 +60,10 @@ class _DatePickerExampleState extends State<DatePickerExample> {
   int? scheduleID;
   String? jobDescription;
 
+  
+    late TextEditingController salaryRateController;
+    late TextEditingController jobDescriptionController;
+
   @override
   void initState() {
     super.initState();
@@ -67,7 +71,12 @@ class _DatePickerExampleState extends State<DatePickerExample> {
     startTime = TimeOfDay.fromDateTime(widget.schedule.startTime);
     endTime = TimeOfDay.fromDateTime(widget.schedule.endTime);
     salaryRate = widget.schedule.salaryRate;
+    jobDescription = widget.schedule.jobDescription;
+
+    salaryRateController = TextEditingController(text: salaryRate?.toString() ?? '');
+    jobDescriptionController = TextEditingController(text: jobDescription ?? '');
   }
+
 
   Future<void> _selectTime(String type) async {
     final TimeOfDay? picked = await showTimePicker(
@@ -160,6 +169,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
             child: ListTile(
               title: const Text('Salary Rate (Per Hour)'),
               subtitle: TextFormField(
+                controller: salaryRateController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
                   hintText: 'Enter salary rate',
@@ -177,6 +187,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
             child: ListTile(
               title: const Text('Job Task Description'),
               subtitle: TextFormField(
+                controller: jobDescriptionController,
                 decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 hintText: 'Enter job details',
