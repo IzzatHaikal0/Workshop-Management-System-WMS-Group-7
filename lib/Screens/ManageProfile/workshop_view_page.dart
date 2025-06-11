@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:workshop_management_system/Screens/Profile/add_profile_page_workshop_owner.dart';
-import 'package:workshop_management_system/Screens/Profile/edit_profile_page_workshop_owner.dart';
+import 'package:workshop_management_system/Screens/ManageProfile/workshop_add_page.dart';
+import 'package:workshop_management_system/Screens/ManageProfile/workshop_edit_page.dart';
+import 'package:workshop_management_system/main.dart'; // Import MyApp here
 import '../welcome_screen.dart';
 
 class ViewProfilePageWorkshopOwner extends StatefulWidget {
@@ -92,7 +93,7 @@ class _ViewProfilePageWorkshopOwnerState
           (context) => AlertDialog(
             title: const Text('Delete Profile'),
             content: const Text(
-              'Are you sure you want to delete this profile?',
+              'Are you sure you want to delete this profile? This action cannot be undone.',
             ),
             actions: [
               TextButton(
@@ -101,20 +102,14 @@ class _ViewProfilePageWorkshopOwnerState
               ),
               ElevatedButton(
                 onPressed: () async {
-                  // Perform delete operation here
                   try {
                     await FirebaseFirestore.instance
                         .collection('workshop_owner')
                         .doc(widget.workshopOwnerId)
                         .delete();
-
-                    // After delete, close dialog with true
-                    // ignore: use_build_context_synchronously
                     Navigator.pop(context, true);
                   } catch (e) {
-                    // ignore: use_build_context_synchronously
                     Navigator.pop(context, false);
-                    // ignore: use_build_context_synchronously
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Delete failed: $e')),
                     );
@@ -128,9 +123,7 @@ class _ViewProfilePageWorkshopOwnerState
     );
 
     if (confirmed == true) {
-      // Navigate to WelcomeScreen and clear all previous routes
       Navigator.pushAndRemoveUntil(
-        // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(builder: (_) => WelcomeScreen()),
         (route) => false,
@@ -142,60 +135,21 @@ class _ViewProfilePageWorkshopOwnerState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Workshop Owner Profile'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            tooltip: 'Add Profile',
-            onPressed: () async {
-              final userData = await fetchUserData();
-              if (userData != null) {
-                final updated = await Navigator.push(
-                  // ignore: use_build_context_synchronously
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (_) => AddProfilePageWorkshopOwner(
-                          workshopOwnerId: widget.workshopOwnerId,
-                          existingProfile: userData,
-                        ),
-                  ),
-                );
-                if (updated == true) {
-                  _loadUserData();
-                }
-              }
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.edit),
-            tooltip: 'Edit Profile',
-            onPressed: () async {
-              final userData = await fetchUserData();
-              if (userData != null) {
-                final updated = await Navigator.push(
-                  // ignore: use_build_context_synchronously
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (_) => EditProfilePageWorkshopOwner(
-                          workshopOwnerId: widget.workshopOwnerId,
-                          existingProfile: userData,
-                        ),
-                  ),
-                );
-                if (updated == true) {
-                  _loadUserData();
-                }
-              }
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete),
-            tooltip: 'Delete Profile',
-            onPressed: _confirmDelete,
-          ),
-        ],
+        centerTitle: true,
+        title: const Text(
+          'Profile',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF4169E1)),
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => MyApp()),
+              (route) => false,
+            );
+          },
+        ),
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -224,13 +178,23 @@ class _ViewProfilePageWorkshopOwnerState
               child: Column(
                 children: [
                   CircleAvatar(
-                    radius: 55,
-                    backgroundImage:
+                    radius: 50,
+                    backgroundColor: Colors.blue.shade100,
+                    child:
                         profileImageUrl.isNotEmpty
-                            ? NetworkImage(profileImageUrl)
-                            : const AssetImage('assets/foreman.png')
-                                as ImageProvider,
-                    backgroundColor: Colors.grey.shade200,
+                            ? ClipOval(
+                              child: Image.network(
+                                profileImageUrl,
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                            : const Icon(
+                              Icons.person,
+                              size: 50,
+                              color: Colors.blue,
+                            ),
                   ),
                   const SizedBox(height: 24),
                   _buildProfileSection("Personal Info", [
@@ -250,7 +214,7 @@ class _ViewProfilePageWorkshopOwnerState
                       Icons.email,
                     ),
                     _buildInfoTile(
-                      "Phone",
+                      "Owner Phone Number",
                       userData['phoneNumber'] ?? '',
                       Icons.phone,
                     ),
@@ -259,34 +223,104 @@ class _ViewProfilePageWorkshopOwnerState
                     _buildInfoTile(
                       "Workshop Name",
                       userData['workshopName'] ?? '',
-                      Icons.business,
+                      Icons.home_repair_service,
                     ),
                     _buildInfoTile(
-                      "Address",
+                      "Workshop Address",
                       userData['workshopAddress'] ?? '',
                       Icons.location_on,
                     ),
                     _buildInfoTile(
-                      "Phone",
+                      "Workshop Phone",
                       userData['workshopPhone'] ?? '',
                       Icons.phone_android,
                     ),
                     _buildInfoTile(
-                      "Email",
+                      "Workshop Email",
                       userData['workshopEmail'] ?? '',
                       Icons.email_outlined,
                     ),
                     _buildInfoTile(
-                      "Operation Hours",
+                      "Workshop Operation Hours",
                       userData['workshopOperationHour'] ?? '',
                       Icons.access_time,
                     ),
                     _buildInfoTile(
-                      "Description",
+                      "Workshop Detail",
                       userData['workshopDetail'] ?? '',
                       Icons.description,
                     ),
                   ]),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () async {
+                          final userData = await fetchUserData();
+                          if (userData != null) {
+                            final updated = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (_) => AddProfilePageWorkshopOwner(
+                                      workshopOwnerId: widget.workshopOwnerId,
+                                      existingProfile: userData,
+                                    ),
+                              ),
+                            );
+                            if (updated == true) {
+                              _loadUserData();
+                            }
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: const Text('Add Profile'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () async {
+                          final userData = await fetchUserData();
+                          if (userData != null) {
+                            final updated = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (_) => EditProfilePageWorkshopOwner(
+                                      workshopOwnerId: widget.workshopOwnerId,
+                                      existingProfile: userData,
+                                    ),
+                              ),
+                            );
+                            if (updated == true) {
+                              _loadUserData();
+                            }
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: const Text('Edit Profile'),
+                      ),
+                      ElevatedButton(
+                        onPressed: _confirmDelete,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: const Text('Delete Profile'),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             );

@@ -1,16 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'view_profile_page_workshop_owner.dart'; // Make sure this file exists
+import 'foreman_view_page.dart'; // Make sure this file exists
 
-class WorkshopOwnerProfileLoader extends StatelessWidget {
-  const WorkshopOwnerProfileLoader({super.key});
+class ForemanProfileLoader extends StatelessWidget {
+  const ForemanProfileLoader({super.key});
 
-  Future<Map<String, dynamic>?> fetchWorkshopOwnerData(String ownerId) async {
+  Future<Map<String, dynamic>?> fetchForemanData(String foremanId) async {
     final doc =
         await FirebaseFirestore.instance
-            .collection('workshop_owner')
-            .doc(ownerId)
+            .collection('foremen')
+            .doc(foremanId)
             .get();
     return doc.exists ? doc.data() : null;
   }
@@ -24,7 +24,7 @@ class WorkshopOwnerProfileLoader extends StatelessWidget {
     }
 
     return FutureBuilder<Map<String, dynamic>?>(
-      future: fetchWorkshopOwnerData(userId),
+      future: fetchForemanData(userId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
@@ -37,7 +37,7 @@ class WorkshopOwnerProfileLoader extends StatelessWidget {
             body: Center(child: Text("Failed to load profile.")),
           );
         } else {
-          return ViewProfilePageWorkshopOwner(workshopOwnerId: userId);
+          return ViewProfilePageForeman(foremanId: userId);
         }
       },
     );

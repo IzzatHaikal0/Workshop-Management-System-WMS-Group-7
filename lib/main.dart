@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../Screens/firebase_options.dart';
 
 // Registration and profile barrel imports
-import 'Screens/Registration/manage_registration_barrel.dart';
+import 'Screens/ManageRegistration/manage_registration_barrel.dart';
 import 'Screens/welcome_screen.dart';
-import 'Screens/Profile/manage_profile_barrel.dart';
+import 'Screens/ManageProfile/manage_profile_barrel.dart';
 import 'Screens/workshop_homepage.dart'; // <-- NEW IMPORT
 import 'Screens/ManageForemanSchedule/manage_foreman_schedule_barrel.dart';
 import 'Screens/ManageInventory/inventory_barrel.dart';
@@ -15,8 +15,28 @@ import 'Screens/ManageRating/manage_rating_barrel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MyApp());
+
+  try {
+    if (kIsWeb) {
+      await Firebase.initializeApp(
+        options: FirebaseOptions(
+          apiKey: "AIzaSyDz7PsfXEAnJXY7Jc1cAq4ueKnbwZ2X9to",
+          authDomain: "workshopmanagementsystem-c80c6.firebaseapp.com",
+          projectId: "workshopmanagementsystem-c80c6",
+          storageBucket: "workshopmanagementsystem-c80c6.firebasestorage.app",
+          messagingSenderId: "189887749916",
+          appId: "1:189887749916:web:d0f9a9d2b4e009472ce4d9",
+          measurementId: "G-JJRY2VHEJX",
+        ),
+      );
+    } else {
+      await Firebase.initializeApp();
+    }
+    runApp(const MyApp());
+  } catch (e) {
+    debugPrint("Firebase initialization error: $e");
+    return;
+  }
 }
 
 class AppRoutes {
@@ -190,7 +210,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (foremanDoc.exists) {
       setState(() {
         currentUserRole = 'foreman';
-        userName = foremanDoc.data()?['first_name'] ?? 'Foreman';
+        userName = foremanDoc.data()?['firstName'] ?? 'Foreman';
       });
     } else if (workshopOwnerDoc.exists) {
       setState(() {

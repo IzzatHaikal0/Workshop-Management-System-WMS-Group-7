@@ -7,61 +7,86 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-class AddProfilePageForeman extends StatefulWidget {
+class EditProfilePageForeman extends StatefulWidget {
   final String foremanId;
-  final Map<String, dynamic> existingProfile;
 
-  const AddProfilePageForeman({
+  const EditProfilePageForeman({
     super.key,
     required this.foremanId,
-    required this.existingProfile,
+    required Map<String, dynamic> existingProfile,
   });
 
   @override
-  State<AddProfilePageForeman> createState() => _AddProfilePageForemanState();
+  State<EditProfilePageForeman> createState() => _EditProfilePageForemanState();
 }
 
-class _AddProfilePageForemanState extends State<AddProfilePageForeman> {
+class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
   final _formKey = GlobalKey<FormState>();
 
-  late final TextEditingController _firstNameController;
-  late final TextEditingController _lastNameController;
-  late final TextEditingController _emailController;
-  late final TextEditingController _phoneNumberController;
-  late final TextEditingController _foremanAddressController;
-  late final TextEditingController _foremanSkillsController;
-  late final TextEditingController _foremanWorkExperienceController;
+  late TextEditingController _firstNameController;
+  late TextEditingController _lastNameController;
+  late TextEditingController _emailController;
+  late TextEditingController _phoneNumberController;
+  late TextEditingController _foremanAddressController;
+  late TextEditingController _foremanSkillsController;
+  late TextEditingController _foremanWorkExperienceController;
 
   String? _profileImageUrl;
 
-  File? _pickedImage; // For mobile
-  Uint8List? _webImageBytes; // For web
+  File? _pickedImage;
+  Uint8List? _webImageBytes;
 
-  bool _isLoading = false;
+  bool _isLoading = true;
+  bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
-    final data = widget.existingProfile;
+    _loadForemanData();
+  }
 
-    _firstNameController = TextEditingController(
-      text: data['first_name'] ?? '',
-    );
-    _lastNameController = TextEditingController(text: data['last_name'] ?? '');
-    _emailController = TextEditingController(text: data['email'] ?? '');
-    _phoneNumberController = TextEditingController(
-      text: data['phone_number'] ?? '',
-    );
-    _foremanAddressController = TextEditingController(
-      text: data['foremanAddress'] ?? '',
-    );
-    _foremanSkillsController = TextEditingController(
-      text: data['foremanSkills'] ?? '',
-    );
-    _foremanWorkExperienceController = TextEditingController(
-      text: data['foremanWorkExperience'] ?? '',
-    );
-    _profileImageUrl = data['foremanProfilePicture'];
+  Future<void> _loadForemanData() async {
+    try {
+      final doc =
+          await FirebaseFirestore.instance
+              .collection('foremen')
+              .doc(widget.foremanId)
+              .get();
+      final data = doc.data();
+
+      if (data == null) throw Exception('Foreman profile not found');
+
+      setState(() {
+        _firstNameController = TextEditingController(
+          text: data['firstName'] ?? '',
+        );
+        _lastNameController = TextEditingController(
+          text: data['lastName'] ?? '',
+        );
+        _emailController = TextEditingController(text: data['email'] ?? '');
+        _phoneNumberController = TextEditingController(
+          text: data['phoneNumber'] ?? '',
+        );
+        _foremanAddressController = TextEditingController(
+          text: data['foremanAddress'] ?? '',
+        );
+        _foremanSkillsController = TextEditingController(
+          text: data['foremanSkills'] ?? '',
+        );
+        _foremanWorkExperienceController = TextEditingController(
+          text: data['foremanWorkExperience'] ?? '',
+        );
+        _profileImageUrl = data['foremanProfilePicture'];
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading profile: $e')));
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   Future<void> _pickImage() async {
@@ -118,7 +143,7 @@ class _AddProfilePageForemanState extends State<AddProfilePageForeman> {
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+    setState(() => _isSaving = true);
 
     try {
       final imageUrl = await _uploadProfileImage(widget.foremanId);
@@ -126,10 +151,10 @@ class _AddProfilePageForemanState extends State<AddProfilePageForeman> {
           .collection('foremen')
           .doc(widget.foremanId)
           .update({
-            'first_name': _firstNameController.text.trim(),
-            'last_name': _lastNameController.text.trim(),
+            'firstName': _firstNameController.text.trim(),
+            'lastName': _lastNameController.text.trim(),
             'email': _emailController.text.trim(),
-            'phone_number': _phoneNumberController.text.trim(),
+            'phoneNumber': _phoneNumberController.text.trim(),
             'foremanAddress': _foremanAddressController.text.trim(),
             'foremanSkills': _foremanSkillsController.text.trim(),
             'foremanWorkExperience':
@@ -139,29 +164,26 @@ class _AddProfilePageForemanState extends State<AddProfilePageForeman> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile has been successfully added')),
+        const SnackBar(content: Text('Profile has been updated successfully')),
       );
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      ).showSnackBar(SnackBar(content: Text('Failed to update profile: $e')));
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
-  // Confirmation dialog method:
   Future<bool> _showConfirmationDialog() async {
     return await showDialog<bool>(
           context: context,
           builder:
               (context) => AlertDialog(
-                title: const Text('Confirm Add Profile'),
-                content: const Text(
-                  'Are you sure you want to add this profile?',
-                ),
+                title: const Text('Confirm Update'),
+                content: const Text('Are you sure you want to save changes?'),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(false),
@@ -178,20 +200,8 @@ class _AddProfilePageForemanState extends State<AddProfilePageForeman> {
   }
 
   @override
-  void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _emailController.dispose();
-    _phoneNumberController.dispose();
-    _foremanAddressController.dispose();
-    _foremanSkillsController.dispose();
-    _foremanWorkExperienceController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final ImageProvider<Object>? profileImage =
+    final profileImage =
         kIsWeb
             ? (_webImageBytes != null
                 ? MemoryImage(_webImageBytes!)
@@ -204,16 +214,21 @@ class _AddProfilePageForemanState extends State<AddProfilePageForeman> {
                     ? NetworkImage(_profileImageUrl!)
                     : null));
 
-    final bool isNewImageSelected =
-        _pickedImage != null || _webImageBytes != null;
+    final isNewImageSelected = _pickedImage != null || _webImageBytes != null;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.existingProfile.isEmpty
-              ? 'Add Foreman Profile'
-              : 'Add Foreman Profile',
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.blue),
+          onPressed: () => Navigator.of(context).pop(),
         ),
+        title: const Text(
+          'Edit Foreman Profile',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
       ),
       body:
           _isLoading
@@ -239,14 +254,13 @@ class _AddProfilePageForemanState extends State<AddProfilePageForeman> {
                                 children: [
                                   CircleAvatar(
                                     radius: 60,
-                                    backgroundColor: Colors.grey[300],
-                                    backgroundImage: profileImage,
+                                    backgroundColor: Colors.blue[100],
                                     child:
                                         profileImage == null
                                             ? const Icon(
                                               Icons.person,
                                               size: 60,
-                                              color: Colors.white70,
+                                              color: Colors.blue,
                                             )
                                             : null,
                                   ),
@@ -258,10 +272,7 @@ class _AddProfilePageForemanState extends State<AddProfilePageForeman> {
                                       borderRadius: BorderRadius.circular(30),
                                       child: Container(
                                         decoration: BoxDecoration(
-                                          color:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.primary,
+                                          color: Colors.blue,
                                           shape: BoxShape.circle,
                                           border: Border.all(
                                             color: Colors.white,
@@ -270,7 +281,7 @@ class _AddProfilePageForemanState extends State<AddProfilePageForeman> {
                                         ),
                                         padding: const EdgeInsets.all(6),
                                         child: const Icon(
-                                          Icons.add,
+                                          Icons.edit,
                                           color: Colors.white,
                                           size: 20,
                                         ),
@@ -285,7 +296,7 @@ class _AddProfilePageForemanState extends State<AddProfilePageForeman> {
                               child: Text(
                                 isNewImageSelected
                                     ? 'New image selected. Will be uploaded when you save.'
-                                    : 'Tap pencil icon to add profile picture',
+                                    : 'Tap pencil icon to change profile picture',
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontSize: 14,
@@ -293,8 +304,6 @@ class _AddProfilePageForemanState extends State<AddProfilePageForeman> {
                               ),
                             ),
                             const SizedBox(height: 24),
-
-                            // First Name
                             TextFormField(
                               controller: _firstNameController,
                               decoration: const InputDecoration(
@@ -309,8 +318,6 @@ class _AddProfilePageForemanState extends State<AddProfilePageForeman> {
                                           : null,
                             ),
                             const SizedBox(height: 16),
-
-                            // Last Name
                             TextFormField(
                               controller: _lastNameController,
                               decoration: const InputDecoration(
@@ -325,8 +332,6 @@ class _AddProfilePageForemanState extends State<AddProfilePageForeman> {
                                           : null,
                             ),
                             const SizedBox(height: 16),
-
-                            // Email
                             TextFormField(
                               controller: _emailController,
                               keyboardType: TextInputType.emailAddress,
@@ -342,15 +347,12 @@ class _AddProfilePageForemanState extends State<AddProfilePageForeman> {
                                 final emailRegex = RegExp(
                                   r'^[^@]+@[^@]+\.[^@]+',
                                 );
-                                if (!emailRegex.hasMatch(value)) {
-                                  return 'Invalid email';
-                                }
-                                return null;
+                                return !emailRegex.hasMatch(value)
+                                    ? 'Invalid email'
+                                    : null;
                               },
                             ),
                             const SizedBox(height: 16),
-
-                            // Phone Number
                             TextFormField(
                               controller: _phoneNumberController,
                               keyboardType: TextInputType.phone,
@@ -366,15 +368,14 @@ class _AddProfilePageForemanState extends State<AddProfilePageForeman> {
                                           : null,
                             ),
                             const SizedBox(height: 16),
-
-                            // Foreman Address
                             TextFormField(
                               controller: _foremanAddressController,
                               decoration: const InputDecoration(
                                 labelText: 'Address',
                                 border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.location_on),
+                                prefixIcon: Icon(Icons.home),
                               ),
+                              maxLines: 2,
                               validator:
                                   (value) =>
                                       value == null || value.isEmpty
@@ -382,62 +383,43 @@ class _AddProfilePageForemanState extends State<AddProfilePageForeman> {
                                           : null,
                             ),
                             const SizedBox(height: 16),
-
-                            // Foreman Skills
                             TextFormField(
                               controller: _foremanSkillsController,
                               decoration: const InputDecoration(
                                 labelText: 'Skills',
                                 border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.build),
+                                prefixIcon: Icon(Icons.handyman),
                               ),
+                              maxLines: 2,
                             ),
                             const SizedBox(height: 16),
-
-                            // Foreman Work Experience
                             TextFormField(
                               controller: _foremanWorkExperienceController,
                               decoration: const InputDecoration(
                                 labelText: 'Work Experience',
                                 border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.work),
+                                prefixIcon: Icon(Icons.work_history),
                               ),
+                              maxLines: 3,
                             ),
-                            const SizedBox(height: 32),
-
+                            const SizedBox(height: 24),
                             ElevatedButton.icon(
                               onPressed:
-                                  _isLoading
+                                  _isSaving
                                       ? null
                                       : () async {
                                         final confirmed =
                                             await _showConfirmationDialog();
-                                        if (confirmed) {
-                                          await _saveProfile();
-                                        }
+                                        if (confirmed) await _saveProfile();
                                       },
-                              icon:
-                                  _isLoading
-                                      ? const SizedBox(
-                                        width: 18,
-                                        height: 18,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                      : const Icon(Icons.save),
-                              label: const Text('Add Profile'),
+                              icon: const Icon(Icons.save),
+                              label:
+                                  _isSaving
+                                      ? const Text('Saving...')
+                                      : const Text('Save Changes'),
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 14,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                textStyle: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
