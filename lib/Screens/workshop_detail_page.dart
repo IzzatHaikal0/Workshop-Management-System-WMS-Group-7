@@ -70,7 +70,15 @@ class WorkshopDetailPage extends StatelessWidget {
     final String? profilePictureUrl = data['workshopProfilePicture'];
 
     return Scaffold(
-      appBar: AppBar(title: Text(workshopName), centerTitle: true),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          color: Color(0xFF4169E1), // Custom royal blue color
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(workshopName),
+        centerTitle: true,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(

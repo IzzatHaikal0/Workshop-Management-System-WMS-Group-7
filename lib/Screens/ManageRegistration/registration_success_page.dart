@@ -7,27 +7,43 @@ class RegistrationSuccessPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Registration Successful')),
+      appBar: AppBar(title: const Text('Registration Successful')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.check_circle_outline, size: 100, color: Colors.green),
-              SizedBox(height: 20),
-              Text(
+              const Icon(
+                Icons.check_circle_outline,
+                size: 100,
+                color: Colors.green,
+              ),
+              const SizedBox(height: 20),
+              const Text(
                 'You have successfully registered!',
                 style: TextStyle(fontSize: 20),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 40),
-              ElevatedButton(
-                onPressed: () {
-                  // Navigate to Login page directly
-                  Navigator.pushReplacementNamed(context, AppRoutes.login);
-                },
-                child: Text('Go to Login'),
+              const SizedBox(height: 40),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushReplacementNamed(context, AppRoutes.login);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    minimumSize: const Size(double.infinity, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'Go to Login',
+                    style: TextStyle(fontSize: 16, color: Colors.black87),
+                  ),
+                ),
               ),
             ],
           ),

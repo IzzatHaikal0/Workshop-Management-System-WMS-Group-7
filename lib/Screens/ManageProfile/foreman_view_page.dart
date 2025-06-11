@@ -117,7 +117,6 @@ class _ViewProfilePageForemanState extends State<ViewProfilePageForeman> {
             ),
           );
           Future.delayed(const Duration(seconds: 1), () {
-            // ignore: use_build_context_synchronously
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (_) => const WelcomeScreen()),
               (route) => false,
@@ -282,14 +281,19 @@ class _ViewProfilePageForemanState extends State<ViewProfilePageForeman> {
                                 borderRadius: BorderRadius.circular(20),
                               ),
                             ),
-                            child: const Text('Add Profile'),
+                            child: const Text(
+                              'Add Profile',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black87,
+                              ),
+                            ),
                           ),
                           ElevatedButton(
                             onPressed: () async {
                               final userData = await fetchUserData();
                               if (userData != null) {
                                 final updated = await Navigator.push(
-                                  // ignore: use_build_context_synchronously
                                   context,
                                   MaterialPageRoute(
                                     builder:
@@ -310,7 +314,13 @@ class _ViewProfilePageForemanState extends State<ViewProfilePageForeman> {
                                 borderRadius: BorderRadius.circular(20),
                               ),
                             ),
-                            child: const Text('Edit Profile'),
+                            child: const Text(
+                              'Edit Profile',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black87,
+                              ),
+                            ),
                           ),
                           ElevatedButton(
                             onPressed: _handleDelete,
@@ -320,7 +330,13 @@ class _ViewProfilePageForemanState extends State<ViewProfilePageForeman> {
                                 borderRadius: BorderRadius.circular(20),
                               ),
                             ),
-                            child: const Text('Delete Profile'),
+                            child: const Text(
+                              'Delete Profile',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black87,
+                              ),
+                            ),
                           ),
                         ],
                       ),

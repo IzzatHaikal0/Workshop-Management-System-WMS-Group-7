@@ -42,39 +42,65 @@ class _AddProfilePageWorkshopOwnerState
   File? _pickedImage;
   Uint8List? _webImageBytes;
 
-  bool _isLoading = false;
-
+  bool _isLoading = true;
   @override
   void initState() {
     super.initState();
-    final data = widget.existingProfile;
+    _loadWorkshopOwnerData();
+  }
 
-    _firstNameController = TextEditingController(text: data['firstName'] ?? '');
-    _lastNameController = TextEditingController(text: data['lastName'] ?? '');
-    _emailController = TextEditingController(text: data['email'] ?? '');
-    _phoneNumberController = TextEditingController(
-      text: data['phoneNumber'] ?? '',
-    );
-    _workshopNameController = TextEditingController(
-      text: data['workshopName'] ?? '',
-    );
-    _workshopAddressController = TextEditingController(
-      text: data['workshopAddress'] ?? '',
-    );
-    _workshopPhoneController = TextEditingController(
-      text: data['workshopPhone'] ?? '',
-    );
-    _workshopEmailController = TextEditingController(
-      text: data['workshopEmail'] ?? '',
-    );
-    _workshopOperationHourController = TextEditingController(
-      text: data['workshopOperationHour'] ?? '',
-    );
-    _workshopDetailController = TextEditingController(
-      text: data['workshopDetail'] ?? '',
-    );
+  Future<void> _loadWorkshopOwnerData() async {
+    try {
+      final doc =
+          await FirebaseFirestore.instance
+              .collection('workshop_owner')
+              .doc(widget.workshopOwnerId)
+              .get();
+      final data = doc.data();
 
-    _profileImageUrl = data['workshopProfilePicture'];
+      if (data == null) throw Exception('Workshop Owner Profile Not Found');
+
+      setState(() {
+        _firstNameController = TextEditingController(
+          text: data['firstName'] ?? '',
+        );
+        _lastNameController = TextEditingController(
+          text: data['lastName'] ?? '',
+        );
+        _emailController = TextEditingController(text: data['email'] ?? '');
+        _phoneNumberController = TextEditingController(
+          text: data['phoneNumber'] ?? '',
+        );
+        _workshopNameController = TextEditingController(
+          text: data['workshopName'] ?? '',
+        );
+        _workshopAddressController = TextEditingController(
+          text: data['workshopAddress'] ?? '',
+        );
+        _workshopPhoneController = TextEditingController(
+          text: data['workshopPhone'] ?? '',
+        );
+        _workshopEmailController = TextEditingController(
+          text: data['workshopEmail'] ?? '',
+        );
+        _workshopOperationHourController = TextEditingController(
+          text: data['workshopOperationHour'] ?? '',
+        );
+        _workshopDetailController = TextEditingController(
+          text: data['workshopDetail'] ?? '',
+        );
+
+        _profileImageUrl = data['workshopProfilePicture'];
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading profile: $e')));
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   Future<void> _pickImage() async {
@@ -210,7 +236,7 @@ class _AddProfilePageWorkshopOwnerState
 
   @override
   Widget build(BuildContext context) {
-    final ImageProvider<Object>? profileImage =
+    final profileImage =
         kIsWeb
             ? (_webImageBytes != null
                 ? MemoryImage(_webImageBytes!)
@@ -223,16 +249,21 @@ class _AddProfilePageWorkshopOwnerState
                     ? NetworkImage(_profileImageUrl!)
                     : null));
 
-    final bool isNewImageSelected =
-        _pickedImage != null || _webImageBytes != null;
+    final isNewImageSelected = _pickedImage != null || _webImageBytes != null;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.existingProfile.isEmpty
-              ? 'Add Workshop Owner Profile'
-              : 'Add Workshop Owner Profile',
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF4169E1)),
+          onPressed: () => Navigator.of(context).pop(),
         ),
+        title: const Text(
+          'Add Workshop Owner Profile',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
       ),
       body:
           _isLoading
@@ -258,14 +289,13 @@ class _AddProfilePageWorkshopOwnerState
                                 children: [
                                   CircleAvatar(
                                     radius: 60,
-                                    backgroundColor: Colors.grey[300],
-                                    backgroundImage: profileImage,
+                                    backgroundColor: Colors.blue[100],
                                     child:
                                         profileImage == null
                                             ? const Icon(
                                               Icons.person,
                                               size: 60,
-                                              color: Colors.white70,
+                                              color: Colors.blue,
                                             )
                                             : null,
                                   ),
@@ -277,10 +307,7 @@ class _AddProfilePageWorkshopOwnerState
                                       borderRadius: BorderRadius.circular(30),
                                       child: Container(
                                         decoration: BoxDecoration(
-                                          color:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.primary,
+                                          color: Colors.blue,
                                           shape: BoxShape.circle,
                                           border: Border.all(
                                             color: Colors.white,
@@ -289,7 +316,7 @@ class _AddProfilePageWorkshopOwnerState
                                         ),
                                         padding: const EdgeInsets.all(6),
                                         child: const Icon(
-                                          Icons.add,
+                                          Icons.edit,
                                           color: Colors.white,
                                           size: 20,
                                         ),
@@ -312,7 +339,6 @@ class _AddProfilePageWorkshopOwnerState
                               ),
                             ),
                             const SizedBox(height: 24),
-
                             TextFormField(
                               controller: _firstNameController,
                               decoration: const InputDecoration(

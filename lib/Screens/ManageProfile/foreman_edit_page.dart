@@ -37,7 +37,7 @@ class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
   Uint8List? _webImageBytes;
 
   bool _isLoading = true;
-  bool _isSaving = false;
+  final bool _isSaving = false;
 
   @override
   void initState() {
@@ -143,7 +143,7 @@ class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isSaving = true);
+    setState(() => _isLoading = true);
 
     try {
       final imageUrl = await _uploadProfileImage(widget.foremanId);
@@ -164,16 +164,16 @@ class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile has been updated successfully')),
+        const SnackBar(content: Text('Profile has been successfully updated')),
       );
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Failed to update profile: $e')));
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
-      if (mounted) setState(() => _isSaving = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -219,7 +219,7 @@ class _EditProfilePageForemanState extends State<EditProfilePageForeman> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.blue),
+          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF4169E1)),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:workshop_management_system/Screens/ManageProfile/workshop_add_page.dart';
 import 'package:workshop_management_system/Screens/ManageProfile/workshop_edit_page.dart';
-import 'package:workshop_management_system/main.dart'; // Import MyApp here
+import 'package:workshop_management_system/main.dart';
 import '../welcome_screen.dart';
 
 class ViewProfilePageWorkshopOwner extends StatefulWidget {
@@ -280,7 +280,10 @@ class _ViewProfilePageWorkshopOwnerState
                             borderRadius: BorderRadius.circular(20),
                           ),
                         ),
-                        child: const Text('Add Profile'),
+                        child: const Text(
+                          'Add Profile',
+                          style: TextStyle(fontSize: 16, color: Colors.black87),
+                        ),
                       ),
                       ElevatedButton(
                         onPressed: () async {
@@ -307,7 +310,10 @@ class _ViewProfilePageWorkshopOwnerState
                             borderRadius: BorderRadius.circular(20),
                           ),
                         ),
-                        child: const Text('Edit Profile'),
+                        child: const Text(
+                          'Edit Profile',
+                          style: TextStyle(fontSize: 16, color: Colors.black87),
+                        ),
                       ),
                       ElevatedButton(
                         onPressed: _confirmDelete,
@@ -317,7 +323,10 @@ class _ViewProfilePageWorkshopOwnerState
                             borderRadius: BorderRadius.circular(20),
                           ),
                         ),
-                        child: const Text('Delete Profile'),
+                        child: const Text(
+                          'Delete Profile',
+                          style: TextStyle(fontSize: 16, color: Colors.black87),
+                        ),
                       ),
                     ],
                   ),

@@ -42,38 +42,66 @@ class _EditProfilePageWorkshopOwnerState
   File? _pickedImage;
   Uint8List? _webImageBytes;
 
-  bool _isLoading = false;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    final data = widget.existingProfile;
+    _loadWorkshopOwnerData();
+  }
 
-    _firstNameController = TextEditingController(text: data['firstName'] ?? '');
-    _lastNameController = TextEditingController(text: data['lastName'] ?? '');
-    _emailController = TextEditingController(text: data['email'] ?? '');
-    _phoneNumberController = TextEditingController(
-      text: data['phoneNumber'] ?? '',
-    );
-    _workshopNameController = TextEditingController(
-      text: data['workshopName'] ?? '',
-    );
-    _workshopAddressController = TextEditingController(
-      text: data['workshopAddress'] ?? '',
-    );
-    _workshopPhoneController = TextEditingController(
-      text: data['workshopPhone'] ?? '',
-    );
-    _workshopEmailController = TextEditingController(
-      text: data['workshopEmail'] ?? '',
-    );
-    _workshopOperationHourController = TextEditingController(
-      text: data['workshopOperationHour'] ?? '',
-    );
-    _workshopDetailController = TextEditingController(
-      text: data['workshopDetail'] ?? '',
-    );
-    _profileImageUrl = data['workshopProfilePicture'];
+  Future<void> _loadWorkshopOwnerData() async {
+    try {
+      final doc =
+          await FirebaseFirestore.instance
+              .collection('workshop_owner')
+              .doc(widget.workshopOwnerId)
+              .get();
+      final data = doc.data();
+
+      if (data == null) throw Exception('Workshop Owner Profile Not Found');
+
+      setState(() {
+        _firstNameController = TextEditingController(
+          text: data['firstName'] ?? '',
+        );
+        _lastNameController = TextEditingController(
+          text: data['lastName'] ?? '',
+        );
+        _emailController = TextEditingController(text: data['email'] ?? '');
+        _phoneNumberController = TextEditingController(
+          text: data['phoneNumber'] ?? '',
+        );
+        _workshopNameController = TextEditingController(
+          text: data['workshopName'] ?? '',
+        );
+        _workshopAddressController = TextEditingController(
+          text: data['workshopAddress'] ?? '',
+        );
+        _workshopPhoneController = TextEditingController(
+          text: data['workshopPhone'] ?? '',
+        );
+        _workshopEmailController = TextEditingController(
+          text: data['workshopEmail'] ?? '',
+        );
+        _workshopOperationHourController = TextEditingController(
+          text: data['workshopOperationHour'] ?? '',
+        );
+        _workshopDetailController = TextEditingController(
+          text: data['workshopDetail'] ?? '',
+        );
+
+        _profileImageUrl = data['workshopProfilePicture'];
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading profile: $e')));
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   Future<void> _pickImage() async {
@@ -129,8 +157,6 @@ class _EditProfilePageWorkshopOwnerState
 
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isLoading = true);
 
     try {
       final imageUrl = await _uploadProfileImage(widget.workshopOwnerId);
@@ -209,7 +235,7 @@ class _EditProfilePageWorkshopOwnerState
 
   @override
   Widget build(BuildContext context) {
-    final ImageProvider<Object>? profileImage =
+    final profileImage =
         kIsWeb
             ? (_webImageBytes != null
                 ? MemoryImage(_webImageBytes!)
@@ -222,21 +248,20 @@ class _EditProfilePageWorkshopOwnerState
                     ? NetworkImage(_profileImageUrl!)
                     : null));
 
-    final bool isNewImageSelected =
-        _pickedImage != null || _webImageBytes != null;
+    final isNewImageSelected = _pickedImage != null || _webImageBytes != null;
 
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.blue),
-          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF4169E1)),
+          onPressed: () => Navigator.of(context).pop(),
         ),
-        centerTitle: true,
         title: const Text(
           'Edit Workshop Owner Profile',
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(fontWeight: FontWeight.w600),
         ),
-        backgroundColor: Colors.transparent,
+        centerTitle: true,
+        backgroundColor: Colors.white,
         elevation: 0,
       ),
       body:
@@ -263,8 +288,7 @@ class _EditProfilePageWorkshopOwnerState
                                 children: [
                                   CircleAvatar(
                                     radius: 60,
-                                    backgroundColor: Colors.blue.shade100,
-                                    backgroundImage: profileImage,
+                                    backgroundColor: Colors.blue[100],
                                     child:
                                         profileImage == null
                                             ? const Icon(
@@ -282,17 +306,17 @@ class _EditProfilePageWorkshopOwnerState
                                       borderRadius: BorderRadius.circular(30),
                                       child: Container(
                                         decoration: BoxDecoration(
-                                          color: Colors.white,
+                                          color: Colors.blue,
                                           shape: BoxShape.circle,
                                           border: Border.all(
-                                            color: Colors.blue,
+                                            color: Colors.white,
                                             width: 2,
                                           ),
                                         ),
                                         padding: const EdgeInsets.all(6),
                                         child: const Icon(
                                           Icons.edit,
-                                          color: Colors.blue,
+                                          color: Colors.white,
                                           size: 20,
                                         ),
                                       ),
@@ -314,11 +338,175 @@ class _EditProfilePageWorkshopOwnerState
                               ),
                             ),
                             const SizedBox(height: 24),
-                            // The rest of the TextFormFields remain unchanged
-                            // (Omitted here for brevity, but they are exactly as in your original code)
-                            // Include all TextFormFields as before
-                            // ...
+                            TextFormField(
+                              controller: _firstNameController,
+                              decoration: const InputDecoration(
+                                labelText: 'First Name',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.person),
+                              ),
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
+                            ),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _lastNameController,
+                              decoration: const InputDecoration(
+                                labelText: 'Last Name',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.person_outline),
+                              ),
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
+                            ),
+                            const SizedBox(height: 16),
+
+                            TextFormField(
+                              controller: _emailController,
+                              decoration: const InputDecoration(
+                                labelText: 'Email',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.email),
+                              ),
+                              keyboardType: TextInputType.emailAddress,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Required';
+                                }
+                                final emailRegex = RegExp(
+                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                );
+                                if (!emailRegex.hasMatch(value)) {
+                                  return 'Invalid email format';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+
+                            TextFormField(
+                              controller: _phoneNumberController,
+                              decoration: const InputDecoration(
+                                labelText: 'Owner Phone Number',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.phone),
+                              ),
+                              keyboardType: TextInputType.phone,
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
+                            ),
+                            const SizedBox(height: 16),
+
+                            TextFormField(
+                              controller: _workshopNameController,
+                              decoration: const InputDecoration(
+                                labelText: 'Workshop Name',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.home_repair_service),
+                              ),
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
+                            ),
+                            const SizedBox(height: 16),
+
+                            TextFormField(
+                              controller: _workshopAddressController,
+                              decoration: const InputDecoration(
+                                labelText: 'Workshop Address',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.location_on),
+                              ),
+                              maxLines: 2,
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
+                            ),
+                            const SizedBox(height: 16),
+
+                            TextFormField(
+                              controller: _workshopPhoneController,
+                              decoration: const InputDecoration(
+                                labelText: 'Workshop Phone',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.phone_android),
+                              ),
+                              keyboardType: TextInputType.phone,
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
+                            ),
+                            const SizedBox(height: 16),
+
+                            TextFormField(
+                              controller: _workshopEmailController,
+                              decoration: const InputDecoration(
+                                labelText: 'Workshop Email',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.email_outlined),
+                              ),
+                              keyboardType: TextInputType.emailAddress,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Required';
+                                }
+                                final emailRegex = RegExp(
+                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                );
+                                if (!emailRegex.hasMatch(value)) {
+                                  return 'Invalid email format';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+
+                            TextFormField(
+                              controller: _workshopOperationHourController,
+                              decoration: const InputDecoration(
+                                labelText: 'Workshop Operation Hours',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.access_time),
+                              ),
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
+                            ),
+                            const SizedBox(height: 16),
+
+                            TextFormField(
+                              controller: _workshopDetailController,
+                              decoration: const InputDecoration(
+                                labelText: 'Workshop Detail',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.description),
+                              ),
+                              maxLines: 3,
+                              validator:
+                                  (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
+                            ),
                             const SizedBox(height: 30),
+
                             ElevatedButton.icon(
                               onPressed:
                                   _isLoading ? null : _confirmAndSaveProfile,

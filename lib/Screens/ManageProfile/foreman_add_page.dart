@@ -36,29 +36,58 @@ class _AddProfilePageForemanState extends State<AddProfilePageForeman> {
   String? _profileImageUrl;
   File? _pickedImage;
   Uint8List? _webImageBytes;
-  bool _isLoading = false;
+
+  bool _isLoading = true;
+  bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
-    final data = widget.existingProfile;
+    _loadForemanData();
+  }
 
-    _firstNameController = TextEditingController(text: data['firstName'] ?? '');
-    _lastNameController = TextEditingController(text: data['lastName'] ?? '');
-    _emailController = TextEditingController(text: data['email'] ?? '');
-    _phoneNumberController = TextEditingController(
-      text: data['phoneNumber'] ?? '',
-    );
-    _foremanAddressController = TextEditingController(
-      text: data['foremanAddress'] ?? '',
-    );
-    _foremanSkillsController = TextEditingController(
-      text: data['foremanSkills'] ?? '',
-    );
-    _foremanWorkExperienceController = TextEditingController(
-      text: data['foremanWorkExperience'] ?? '',
-    );
-    _profileImageUrl = data['foremanProfilePicture'];
+  Future<void> _loadForemanData() async {
+    try {
+      final doc =
+          await FirebaseFirestore.instance
+              .collection('foremen')
+              .doc(widget.foremanId)
+              .get();
+      final data = doc.data();
+
+      if (data == null) throw Exception('Foreman profile not found');
+
+      setState(() {
+        _firstNameController = TextEditingController(
+          text: data['firstName'] ?? '',
+        );
+        _lastNameController = TextEditingController(
+          text: data['lastName'] ?? '',
+        );
+        _emailController = TextEditingController(text: data['email'] ?? '');
+        _phoneNumberController = TextEditingController(
+          text: data['phoneNumber'] ?? '',
+        );
+        _foremanAddressController = TextEditingController(
+          text: data['foremanAddress'] ?? '',
+        );
+        _foremanSkillsController = TextEditingController(
+          text: data['foremanSkills'] ?? '',
+        );
+        _foremanWorkExperienceController = TextEditingController(
+          text: data['foremanWorkExperience'] ?? '',
+        );
+        _profileImageUrl = data['foremanProfilePicture'];
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading profile: $e')));
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   Future<void> _pickImage() async {
@@ -95,8 +124,8 @@ class _AddProfilePageForemanState extends State<AddProfilePageForeman> {
     final ref = FirebaseStorage.instance.ref().child(
       'foremen/$userId/profile.jpg',
     );
-    UploadTask uploadTask;
 
+    UploadTask uploadTask;
     if (kIsWeb && _webImageBytes != null) {
       uploadTask = ref.putData(
         _webImageBytes!,

@@ -9,7 +9,6 @@ class RegisterForm extends StatefulWidget {
   const RegisterForm({super.key, required this.userRole});
 
   @override
-  // ignore: library_private_types_in_public_api
   _RegisterFormState createState() => _RegisterFormState();
 }
 
@@ -17,12 +16,13 @@ class _RegisterFormState extends State<RegisterForm> {
   final _formKey = GlobalKey<FormState>();
   final RegistrationController _controller = RegistrationController();
 
-  final TextEditingController _firstNameCtrl = TextEditingController();
-  final TextEditingController _lastNameCtrl = TextEditingController();
-  final TextEditingController _emailCtrl = TextEditingController();
-  final TextEditingController _phoneCtrl = TextEditingController();
-  final TextEditingController _passwordCtrl = TextEditingController();
-  final TextEditingController _confirmPasswordCtrl = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -30,12 +30,12 @@ class _RegisterFormState extends State<RegisterForm> {
 
   @override
   void dispose() {
-    _firstNameCtrl.dispose();
-    _lastNameCtrl.dispose();
-    _emailCtrl.dispose();
-    _phoneCtrl.dispose();
-    _passwordCtrl.dispose();
-    _confirmPasswordCtrl.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -61,11 +61,11 @@ class _RegisterFormState extends State<RegisterForm> {
 
         final user = _controller.createUser(
           role: widget.userRole,
-          firstName: _firstNameCtrl.text.trim(),
-          lastName: _lastNameCtrl.text.trim(),
-          email: _emailCtrl.text.trim(),
-          phoneNumber: _phoneCtrl.text.trim(),
-          password: _passwordCtrl.text.trim(),
+          firstName: _firstNameController.text.trim(),
+          lastName: _lastNameController.text.trim(),
+          email: _emailController.text.trim(),
+          phoneNumber: _phoneController.text.trim(),
+          password: _passwordController.text.trim(),
         );
 
         bool saved = await _controller.saveUser(user);
@@ -123,7 +123,22 @@ class _RegisterFormState extends State<RegisterForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Register as ${widget.userRole}')),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF4169E1)),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(
+          'Register as ${widget.userRole}',
+          style: const TextStyle(
+            color: Colors.black87,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 1,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -132,21 +147,21 @@ class _RegisterFormState extends State<RegisterForm> {
           child: Column(
             children: [
               _buildTextField(
-                controller: _firstNameCtrl,
+                controller: _firstNameController,
                 label: 'First Name *',
                 validator:
                     (value) =>
                         value == null || value.isEmpty ? 'Required' : null,
               ),
               _buildTextField(
-                controller: _lastNameCtrl,
+                controller: _lastNameController,
                 label: 'Last Name *',
                 validator:
                     (value) =>
                         value == null || value.isEmpty ? 'Required' : null,
               ),
               _buildTextField(
-                controller: _emailCtrl,
+                controller: _emailController,
                 label: 'Email *',
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
@@ -157,7 +172,7 @@ class _RegisterFormState extends State<RegisterForm> {
                 },
               ),
               _buildTextField(
-                controller: _phoneCtrl,
+                controller: _phoneController,
                 label: 'Phone Number *',
                 keyboardType: TextInputType.phone,
                 validator:
@@ -165,7 +180,7 @@ class _RegisterFormState extends State<RegisterForm> {
                         value == null || value.isEmpty ? 'Required' : null,
               ),
               _buildTextField(
-                controller: _passwordCtrl,
+                controller: _passwordController,
                 label: 'Password *',
                 obscureText: _obscurePassword,
                 validator: (value) {
@@ -185,12 +200,12 @@ class _RegisterFormState extends State<RegisterForm> {
                 ),
               ),
               _buildTextField(
-                controller: _confirmPasswordCtrl,
+                controller: _confirmPasswordController,
                 label: 'Confirm Password *',
                 obscureText: _obscureConfirmPassword,
                 validator: (value) {
                   if (value == null || value.isEmpty) return 'Required';
-                  if (value != _passwordCtrl.text) {
+                  if (value != _passwordController.text) {
                     return 'Passwords do not match';
                   }
                   return null;
@@ -212,15 +227,31 @@ class _RegisterFormState extends State<RegisterForm> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 33, 150, 243),
+                    minimumSize: const Size(double.infinity, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                   onPressed: _isSubmitting ? null : _submitForm,
                   child:
                       _isSubmitting
                           ? const SizedBox(
                             width: 24,
                             height: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
                           )
-                          : const Text('Submit Registration'),
+                          : const Text(
+                            'Submit Registration',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black87,
+                            ),
+                          ),
                 ),
               ),
             ],

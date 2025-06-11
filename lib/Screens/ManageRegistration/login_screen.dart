@@ -20,7 +20,6 @@ class _LoginScreenState extends State<LoginScreen> {
   void _loginUser() async {
     if (_formKey.currentState!.validate()) {
       try {
-        // Step 1: Authenticate the user
         final userCredential = await FirebaseAuth.instance
             .signInWithEmailAndPassword(
               email: _emailController.text.trim(),
@@ -28,37 +27,33 @@ class _LoginScreenState extends State<LoginScreen> {
             );
 
         final uid = userCredential.user?.uid;
-
-        // Step 2: Check the role
         final firestore = FirebaseFirestore.instance;
 
         final foremanDoc = await firestore.collection('foremen').doc(uid).get();
         final ownerDoc =
             await firestore.collection('workshop_owner').doc(uid).get();
 
-        if (foremanDoc.exists) {
-          // Step 3A: Navigate to Foreman loader
+        if (foremanDoc.exists || ownerDoc.exists) {
           Navigator.pushReplacement(
-            // ignore: use_build_context_synchronously
-            context,
-            MaterialPageRoute(builder: (_) => const MyApp()),
-          );
-        } else if (ownerDoc.exists) {
-          // Step 3B: Navigate to Workshop Owner loader
-          Navigator.pushReplacement(
-            // ignore: use_build_context_synchronously
             context,
             MaterialPageRoute(builder: (_) => const MyApp()),
           );
         } else {
-          // Not found in either collection
           ScaffoldMessenger.of(
-            // ignore: use_build_context_synchronously
             context,
           ).showSnackBar(const SnackBar(content: Text("Profile not found.")));
         }
+      } on FirebaseAuthException catch (e) {
+        String message;
+        if (e.code == 'user-not-found' || e.code == 'wrong-password') {
+          message = "Incorrect email or password.";
+        } else {
+          message = "Login failed: ${e.message}";
+        }
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
       } catch (e) {
-        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Login failed: ${e.toString()}")),
         );
@@ -78,14 +73,12 @@ class _LoginScreenState extends State<LoginScreen> {
               key: _formKey,
               child: Column(
                 children: [
-                  // 🔽 LOGO ADDED HERE
                   Image.asset(
                     'assets/images/workshop_logo.webp',
                     width: 150,
                     height: 150,
                   ),
                   const SizedBox(height: 20),
-
                   const Text(
                     "Welcome Back!",
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -140,9 +133,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   ElevatedButton(
                     onPressed: _loginUser,
                     style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
                       minimumSize: const Size(double.infinity, 48),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
-                    child: const Text("Login"),
+                    child: const Text(
+                      "Login",
+                      style: TextStyle(fontSize: 16, color: Colors.black87),
+                    ),
                   ),
                   const SizedBox(height: 20),
 
@@ -150,7 +150,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () {
                       Navigator.pushNamed(context, AppRoutes.registerType);
                     },
-                    child: const Text("Don't have an account? Register"),
+                    child: const Text(
+                      "Don't have an account? Register",
+                      style: TextStyle(fontSize: 16, color: Colors.black87),
+                    ),
                   ),
                 ],
               ),

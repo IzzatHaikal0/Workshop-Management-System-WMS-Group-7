@@ -164,7 +164,7 @@ class _WorkshopHomePageState extends State<WorkshopHomePage> {
                                     child: const Text(
                                       'See More',
                                       style: TextStyle(
-                                        color: Colors.blue,
+                                        color: Color(0xFF4169E1),
                                         decoration: TextDecoration.underline,
                                         fontWeight: FontWeight.w500,
                                       ),
