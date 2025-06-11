@@ -62,8 +62,8 @@ class Ratingcontroller {
 
       if (foremanData == null) continue; // just in case
 
-      final firstName = foremanData['first_name'] ?? '';
-      final lastName = foremanData['last_name'] ?? '';
+      final firstName = foremanData['firstName'] ?? '';
+      final lastName = foremanData['lastName'] ?? '';
       final foremanName =
           ('$firstName $lastName').trim().isNotEmpty
               ? ('$firstName $lastName').trim()
@@ -75,7 +75,7 @@ class Ratingcontroller {
         'foremanId': foremanId,
         'foremanName': foremanName,
         'foremanEmail': foremanData['email'] ?? '',
-        'foremanPhoneNumber': foremanData['phone_number'] ?? '',
+        'foremanPhoneNumber': foremanData['phoneNumber'] ?? '',
         'foremanData': foremanData,
         'jobDescription': scheduleData['jobDescription'] ?? 'No Description',
       });

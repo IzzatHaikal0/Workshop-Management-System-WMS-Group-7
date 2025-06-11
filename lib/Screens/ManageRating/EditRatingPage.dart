@@ -93,8 +93,8 @@ class _EditRatingPageState extends State<EditRatingPage> {
                           backgroundColor: const Color.fromARGB(255, 25, 148, 111),
                           radius: 70,
                           child: Text(
-                            (foremanData!['first_name'] as String).isNotEmpty
-                                ? (foremanData!['first_name'][0] as String).toUpperCase()
+                            (foremanData!['firstName'] as String).isNotEmpty
+                                ? (foremanData!['firstName'][0] as String).toUpperCase()
                                 : '?',
                             style: const TextStyle(color: Colors.white, fontSize: 50),
                           ),
@@ -109,7 +109,7 @@ class _EditRatingPageState extends State<EditRatingPage> {
                         ),
                         SizedBox(height: 8),
                         Text(
-                          'Name: ${foremanData!['first_name']} ${foremanData!['last_name']}',
+                          'Name: ${foremanData!['firstName']} ${foremanData!['lastName']}',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -123,7 +123,7 @@ class _EditRatingPageState extends State<EditRatingPage> {
                           ),
                         ),
                         Text(
-                          'Phone: ${foremanData!['phone_number']}',
+                          'Phone: ${foremanData!['phoneNumber']}',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,

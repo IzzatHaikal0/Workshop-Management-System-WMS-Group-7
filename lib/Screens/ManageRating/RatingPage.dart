@@ -188,7 +188,7 @@ class _RatingPageState extends State<RatingPage> {
                             itemBuilder: (ctx, i) {
                               final f = ratedForemen[i];
                               final name =
-                                  '${(f['first_name'] ?? '').toString().trim()} ${(f['last_name'] ?? '').toString().trim()}'
+                                  '${(f['firstName'] ?? '').toString().trim()} ${(f['lastName'] ?? '').toString().trim()}'
                                       .trim();
                               final ratingScore = f['ratingScore'] ?? '0';
                               final foremanId = f['foremanId'] ?? '';
