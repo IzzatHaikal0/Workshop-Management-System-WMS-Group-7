@@ -4,14 +4,14 @@ import 'package:workshop_management_system/Models/ManageInventory/request_model.
 import 'package:workshop_management_system/Screens/ManageInventory/widgets/custom_text.dart';
 import 'package:workshop_management_system/Screens/ManageInventory/widgets/request_card.dart';
 
-class RequestApprovalScreen extends StatefulWidget {
-  const RequestApprovalScreen({super.key});
+class RequestIncomingScreen extends StatefulWidget {
+  const RequestIncomingScreen({super.key});
 
   @override
-  State<RequestApprovalScreen> createState() => _RequestApprovalScreenState();
+  State<RequestIncomingScreen> createState() => _RequestIncomingScreenState();
 }
 
-class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
+class _RequestIncomingScreenState extends State<RequestIncomingScreen> {
   final RequestController _requestController = RequestController();
   final TextEditingController _searchController = TextEditingController();
   String _searchText = '';
@@ -30,7 +30,8 @@ class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
     }).toList();
   }
 
-  Future<void> _handleApproval(Request request, bool isApproved) async {
+  /// HANDLE APPROVAL ACCEPT OR REJECT
+  Future<void> _handleApproval(Request request, bool isAccepted) async {
     final TextEditingController notesController = TextEditingController();
 
     final result = await showDialog<bool>(
@@ -38,7 +39,7 @@ class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
       builder:
           (context) => AlertDialog(
             title: Text(
-              isApproved ? 'Approve Request' : 'Reject Request',
+              isAccepted ? 'Accept Request' : 'Reject Request',
               style: MyTextStyles.medium,
             ),
             content: Column(
@@ -69,9 +70,9 @@ class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
                 style: TextButton.styleFrom(
-                  foregroundColor: isApproved ? Colors.green : Colors.red,
+                  foregroundColor: isAccepted ? Color(0xFF4169E1) : Colors.red,
                 ),
-                child: Text(isApproved ? 'Approve' : 'Reject'),
+                child: Text(isAccepted ? 'Accept' : 'Reject'),
               ),
             ],
           ),
@@ -79,8 +80,8 @@ class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
 
     if (result == true && request.id != null) {
       try {
-        if (isApproved) {
-          await _requestController.approveRequest(
+        if (isAccepted) {
+          await _requestController.acceptRequest(
             request.id!,
             notesController.text,
           );
@@ -88,7 +89,7 @@ class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text(
-                  'Request approved successfully',
+                  'Request accepted successfully',
                   style: MyTextStyles.regular,
                 ),
               ),
@@ -127,7 +128,7 @@ class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
 
       body: Column(
         children: [
-          // search
+          /**SEARCH SECTION */
           Container(
             padding: const EdgeInsets.all(16.0),
             color: const Color.fromARGB(255, 250, 250, 250),
@@ -160,7 +161,7 @@ class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
               },
             ),
           ),
-          // list
+          /**STREAM FIRESTORE GET THE PENDING REQUEST TO ACCEPT */
           Expanded(
             child: StreamBuilder<List<Request>>(
               stream: _requestController.getPendingApprovalsStream(),
@@ -168,7 +169,7 @@ class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
-
+                /**HANDLE ERRORS */
                 if (snapshot.hasError) {
                   return Center(
                     child: Column(
@@ -196,7 +197,7 @@ class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
 
                 final allRequests = snapshot.data ?? [];
                 final filteredRequests = _filterBySearch(allRequests);
-
+                /**IF THERE IS NO MATCHING RESULTS */
                 if (filteredRequests.isEmpty) {
                   return Center(
                     child: Column(
@@ -243,7 +244,7 @@ class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
                           onApprove: () => _handleApproval(request, true),
                           onReject: () => _handleApproval(request, false),
                           onTap: () {
-                            // Show request details
+                            /**SHOW DIALOG FOR DETAILS */
                             showDialog(
                               context: context,
                               builder:
@@ -273,6 +274,7 @@ class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
                                           ),
                                       ],
                                     ),
+                                    /**CLOSE BUTTON ACTION */
                                     actions: [
                                       TextButton(
                                         onPressed: () => Navigator.pop(context),

@@ -13,9 +13,18 @@ class RequestListScreen extends StatefulWidget {
 
 class _RequestListScreenState extends State<RequestListScreen> {
   final RequestController _requestController = RequestController();
+  String _selectedStatus = 'All';
   final TextEditingController _searchController = TextEditingController();
   String _searchText = '';
   int _selectedSegment = 0;
+
+  /// STATUS OPTIONS LISTS
+  final List<String> _statusOptions = [
+    'All',
+    'pending',
+    'accepted',
+    'rejected',
+  ];
 
   @override
   void dispose() {
@@ -24,14 +33,21 @@ class _RequestListScreenState extends State<RequestListScreen> {
   }
 
   Stream<List<Request>> _getFilteredRequests() {
-    return _requestController.getMyRequestsStream();
+    if (_selectedStatus == 'All') {
+      return _requestController.getMyRequestsStream();
+    } else {
+      return _requestController.getRequestsByStatusStream(_selectedStatus);
+    }
   }
 
   List<Request> _filterBySearch(List<Request> requests) {
+    if (_searchText.isEmpty) return requests;
+
     return requests.where((request) {
       return request.itemName.toLowerCase().contains(_searchText.toLowerCase());
     }).toList();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -41,24 +57,12 @@ class _RequestListScreenState extends State<RequestListScreen> {
           _buildTopBar(),
           _buildSegmentedHeader(),
           if (_selectedSegment == 0) ...[
-            _buildSearchSection(),
+            _buildSearchAndFilterSection(),
             Expanded(child: _buildMyRequestsView()),
           ] else if (_selectedSegment == 1) ...[
-            Expanded(child: const RequestApprovalScreen()),
+            Expanded(child: const RequestIncomingScreen()),
           ],
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const RequestCreateScreen(),
-            ),
-          );
-        },
-        backgroundColor: const Color.fromARGB(255, 233, 238, 249),
-        child: const Icon(Icons.add),
       ),
     );
   }
@@ -87,7 +91,7 @@ class _RequestListScreenState extends State<RequestListScreen> {
       ),
     );
   }
-
+  ///WIDGET FOR SEGMENTED BUTTON
   Widget _buildSegmentedHeader() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -125,7 +129,7 @@ class _RequestListScreenState extends State<RequestListScreen> {
                 isSelected
                     ? [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withAlpha(25),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -147,16 +151,17 @@ class _RequestListScreenState extends State<RequestListScreen> {
     );
   }
 
-  Widget _buildSearchSection() {
+  Widget _buildSearchAndFilterSection() {
     return Container(
       padding: const EdgeInsets.all(16.0),
       color: Colors.grey[50],
       child: Column(
         children: [
+         /**SEARCH SECTION */
           TextField(
             controller: _searchController,
             decoration: InputDecoration(
-              hintText: 'Search items...',
+              hintText: 'Search requests...',
               prefixIcon: const Icon(Icons.search),
               filled: true,
               fillColor: const Color.fromARGB(255, 250, 250, 250),
@@ -166,7 +171,9 @@ class _RequestListScreenState extends State<RequestListScreen> {
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFDBE1F4)),
+                borderSide: const BorderSide(
+                  color: Color.fromARGB(255, 219, 225, 244),
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -180,6 +187,75 @@ class _RequestListScreenState extends State<RequestListScreen> {
             },
           ),
           const SizedBox(height: 12),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              /**STATUS FILTER DROPDOWN */
+              Container(
+                height: 40,
+                width: 150,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFAFAFA),
+                  border: Border.all(color: const Color(0xFFDBE1F4)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _selectedStatus,
+                    icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                    style: MyTextStyles.medium.copyWith(
+                      color: const Color(0xFF006FFD),
+                      fontSize: 12,
+                    ),
+                    items:
+                        _statusOptions.map((String category) {
+                          return DropdownMenuItem<String>(
+                            value: category,
+                            child: Text(category),
+                          );
+                        }).toList(),
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          _selectedStatus = newValue;
+                        });
+                      }
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              SizedBox(
+                height: 40,
+                width: 80,
+                child: ElevatedButton(
+                  /**ADD BUTTON */
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const RequestCreateScreen(),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    backgroundColor: const Color(0xFFFAFAFA),
+                    foregroundColor: const Color(0xFF006FFD),
+                    side: const BorderSide(color: Color(0xFFDBE1F4)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    'Add',
+                    style: MyTextStyles.medium.copyWith(fontSize: 12),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -256,6 +332,7 @@ class _RequestListScreenState extends State<RequestListScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
+            /**SHOW DIALOG TO DISPLAY REQUEST DETAILS */
             backgroundColor: Colors.white,
             title: Text(request.itemName, style: MyTextStyles.semiBold),
             content: Column(
@@ -289,17 +366,15 @@ class _RequestListScreenState extends State<RequestListScreen> {
                 ),
               ],
             ),
-            actionsAlignment: MainAxisAlignment.center,
-
             actions: [
+              /**CAN DELETE OR CLOSE THE DIALOG AS LONG*/
               TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                style: TextButton.styleFrom(foregroundColor: Color(0xFF006FFD)),
-                child: const Text(('Close'), style: MyTextStyles.regular),
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close', style: MyTextStyles.regular),
               ),
               if (request.status == 'pending' ||
                   request.status == 'rejected' ||
-                  request.status == 'approved')
+                  request.status == 'accepted')
                 TextButton(
                   onPressed: () async {
                     Navigator.pop(context);
@@ -318,10 +393,7 @@ class _RequestListScreenState extends State<RequestListScreen> {
                       );
                     }
                   },
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Color(0xFF006FFD),
-                  ),
+                  style: TextButton.styleFrom(foregroundColor: Colors.red),
                   child: const Text('Delete', style: MyTextStyles.regular),
                 ),
             ],

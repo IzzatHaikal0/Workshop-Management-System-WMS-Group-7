@@ -72,6 +72,7 @@ class _ItemEditScreenState extends State<ItemEditScreen> {
           _isLoading
               ? const Center(child: CircularProgressIndicator())
               : ItemForm(
+                /** EDIT ITEM BUTTON, USE ITEM FORM WIDGET */
                 initialItem: widget.item,
                 onSubmit: _updateItem,
                 submitButtonText: 'Update Item',

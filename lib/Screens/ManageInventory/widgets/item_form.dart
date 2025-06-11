@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:workshop_management_system/Models/ManageInventory/item_model.dart';
 import 'package:workshop_management_system/Screens/ManageInventory/widgets/custom_text.dart';
 
+/* FORM WIDGET TO CREATE AND EDIT ITEM */
 class ItemForm extends StatefulWidget {
   final Item? initialItem;
   final Function(String, String, int, double) onSubmit;
@@ -20,11 +21,13 @@ class ItemForm extends StatefulWidget {
 }
 
 class _ItemFormState extends State<ItemForm> {
+  /* CONTROLLER FOR EACH FORM*/
   final _formKey = GlobalKey<FormState>();
   final _itemNameController = TextEditingController();
   final _quantityController = TextEditingController();
   final _unitPriceController = TextEditingController();
 
+  /* CATEFORY LISTS */
   String _selectedCategory = 'Tools';
 
   final _categories = [
@@ -36,6 +39,7 @@ class _ItemFormState extends State<ItemForm> {
     'Other',
   ];
 
+  /* Populate fields if editing an existing item */
   @override
   void initState() {
     super.initState();
@@ -48,6 +52,7 @@ class _ItemFormState extends State<ItemForm> {
     }
   }
 
+  /* CLEAN UP */
   @override
   void dispose() {
     _itemNameController.dispose();
@@ -56,6 +61,7 @@ class _ItemFormState extends State<ItemForm> {
     super.dispose();
   }
 
+  /* RESET FORM */
   void _resetForm() {
     _formKey.currentState?.reset();
     _itemNameController.clear();
@@ -64,6 +70,7 @@ class _ItemFormState extends State<ItemForm> {
     setState(() => _selectedCategory = 'Tools');
   }
 
+  /* VALIDATE AND SUBMIT FORM*/
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       final name = _itemNameController.text.trim();
@@ -73,6 +80,7 @@ class _ItemFormState extends State<ItemForm> {
     }
   }
 
+  /* HEADER*/
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
@@ -100,6 +108,7 @@ class _ItemFormState extends State<ItemForm> {
     );
   }
 
+  /* REUSABLE FORMS FOR CREATE AND EDIT */
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -122,6 +131,7 @@ class _ItemFormState extends State<ItemForm> {
     );
   }
 
+  /* CALC TOTAL PRICE (PRICE PER UNIT * QTY) */
   Widget _buildTotalValue() {
     return ValueListenableBuilder<TextEditingValue>(
       valueListenable: _quantityController,
@@ -133,7 +143,6 @@ class _ItemFormState extends State<ItemForm> {
             final price = double.tryParse(priceVal.text) ?? 0.0;
             final total = (qty * price).toStringAsFixed(2);
 
-            /// to
             return Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -169,6 +178,7 @@ class _ItemFormState extends State<ItemForm> {
     );
   }
 
+  /* MAIN WIDGET BUILD CONTEXT*/
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -202,6 +212,8 @@ class _ItemFormState extends State<ItemForm> {
                   },
                 ),
                 const SizedBox(height: 16),
+
+                /* CATEGORY DROPDOWN FIELD */
                 DropdownButtonFormField<String>(
                   value: _selectedCategory,
                   items:
@@ -231,6 +243,8 @@ class _ItemFormState extends State<ItemForm> {
                               : null,
                 ),
                 const SizedBox(height: 16),
+
+                /* QUANTITY AND PRICE SIDE BY SIDE*/
                 Row(
                   children: [
                     Expanded(
@@ -258,7 +272,7 @@ class _ItemFormState extends State<ItemForm> {
                     Expanded(
                       child: _buildTextField(
                         controller: _unitPriceController,
-                        label: 'Unit Price (RM)',
+                        label: 'Price per Unit (RM)',
                         hint: '0.00',
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
@@ -283,8 +297,12 @@ class _ItemFormState extends State<ItemForm> {
                   ],
                 ),
                 const SizedBox(height: 16),
+
+                /* CALL TOTAL VALUE*/
                 _buildTotalValue(),
                 const SizedBox(height: 24),
+
+                /* BUTTON */
                 ElevatedButton(
                   onPressed: _submitForm,
                   style: ElevatedButton.styleFrom(

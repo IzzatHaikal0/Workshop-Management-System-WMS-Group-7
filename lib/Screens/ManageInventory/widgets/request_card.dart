@@ -17,7 +17,7 @@ class RequestCard extends StatelessWidget {
     this.onApprove,
     this.onReject,
   });
-
+  /* RETURN DATE FORMAT (dd,mm,yyyy) */
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
@@ -38,10 +38,9 @@ class RequestCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // icon
                   const SizedBox(width: 12),
 
-                  // request details
+                  /* REQUEST DETAILS */
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,14 +67,12 @@ class RequestCard extends StatelessWidget {
                       ],
                     ),
                   ),
-
-                  // status
                 ],
               ),
 
               const SizedBox(height: 12),
 
-              // date and notes
+              /* REQUESTED DATE, APPROVED DATE */
               Row(
                 children: [
                   Icon(Icons.calendar_today, size: 14, color: Colors.grey[600]),
@@ -106,14 +103,14 @@ class RequestCard extends StatelessWidget {
                 ],
               ),
 
-              // notes
+              /* NOTES */
               if (request.notes != null && request.notes!.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 248, 248, 248),
+                    color: const Color(0xFF4169E1).withAlpha(25),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
@@ -125,7 +122,7 @@ class RequestCard extends StatelessWidget {
                 ),
               ],
 
-              // approval action
+              /* ACCEPT/APPROVE ACTION */
               if (showApprovalActions && request.status == 'pending') ...[
                 const SizedBox(height: 12),
                 const Divider(height: 1),
