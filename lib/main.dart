@@ -4,14 +4,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-//import '../Screens/firebase_options.dart';
-
-// Registration and profile barrel imports
 import 'Screens/Registration/manage_registration_barrel.dart';
 import 'Screens/welcome_screen.dart';
 import 'Screens/Profile/manage_profile_barrel.dart';
 import 'Screens/workshop_homepage.dart'; // <-- NEW IMPORT
-
 import 'Screens/ManageForemanSchedule/manage_foreman_schedule_barrel.dart';
 import 'Screens/ManageRating/manage_rating_barrel.dart';
 
@@ -279,6 +275,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ? ViewProfilePageForeman(foremanId: currentUserId)
           : ViewProfilePageWorkshopOwner(workshopOwnerId: currentUserId),
       const Center(child: Text('Inventory Page')),
+      
     ];
   }
 
@@ -329,7 +326,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       (context) =>
                           currentUserRole == 'workshop_owner'
                               ? RatingPage()
-                              : ForemanPage(),
+                              : ForemanPage(foremanId: currentUserId),
                 ),
               );
             },

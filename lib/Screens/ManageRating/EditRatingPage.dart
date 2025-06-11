@@ -5,8 +5,8 @@ import 'package:workshop_management_system/Screens/ManageRating/RatingPage.dart'
 
 class EditRatingPage extends StatefulWidget {
   final String foremanId;
-
-  const EditRatingPage({super.key, required this.foremanId});
+  final String docId;
+  const EditRatingPage({super.key, required this.foremanId, required this.docId});
 
   @override
   State<EditRatingPage> createState() => _EditRatingPageState();
@@ -39,7 +39,7 @@ class _EditRatingPageState extends State<EditRatingPage> {
     final foreman = await controller.getForemanWithSchedule(widget.foremanId);
 
     // Fetch rating data
-    final rating = await controller.getRatingById(widget.foremanId);
+    final rating = await controller.getRatingById(widget.docId);
 
     setState(() {
       foremanData = foreman;
@@ -229,9 +229,10 @@ class _EditRatingPageState extends State<EditRatingPage> {
         reviewComment: reviewComment,
         serviceType: serviceType,
         ratingDate: DateTime.now().toIso8601String(),
+        docId: widget.docId, // Include the document ID for updates
       );
 
-      await controller.addRating(rating, widget.foremanId);
+      await controller.editRating(rating);
 
       Navigator.pop(context, true); // Pass true to indicate saved/updated
     }

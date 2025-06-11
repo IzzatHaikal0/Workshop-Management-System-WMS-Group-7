@@ -10,6 +10,7 @@ class RatingPage extends StatefulWidget {
   @override
   State<RatingPage> createState() => _RatingPageState();
 }
+
 class _RatingPageState extends State<RatingPage> {
   final Ratingcontroller controller = Ratingcontroller();
   bool isNewSelected = true;
@@ -57,140 +58,196 @@ class _RatingPageState extends State<RatingPage> {
 
             // Display either workshops or foremen
             Expanded(
-                        child: isNewSelected
-                            // === Foreman Ratings List ===
-                            ? FutureBuilder<List<Map<String, dynamic>>>(
-                                future: controller.getForemenByWorkshopOwner(),
-                                builder: (ctx, snap) {
-                                  if (snap.connectionState == ConnectionState.waiting) {
-                                    return const Center(child: CircularProgressIndicator());
-                                  }
-                                  if (snap.hasError) {
-                                    return Center(child: Text('Error: ${snap.error}'));
-                                  }
-            
-                                  final foremen = snap.data ?? [];
-                                  if (foremen.isEmpty) {
-                                    return const Center(child: Text('No foremen found.'));
-                                  }
-            
-                                  return ListView.builder(
-                                    itemCount: foremen.length,
-                                    itemBuilder: (ctx, i) {
-                                      final f = foremen[i];
-            
-                                      final foremanName = f['foremanName'] as String? ?? 'Unknown';
-                                      final foremanEmail = f['foremanEmail'] as String? ?? 'No Email';
-                                      final foremanPhoneNumber = f['foremanPhoneNumber'] as String? ?? 'No Phone';
-                                      final foremanId = f['foremanId'] as String? ?? '';
-                                      final ratingMap = f['rating'] as Map<String, dynamic>? ?? {};
-                                      final ratingScore = ratingMap['ratingScore'] as int? ?? 0;
-                                      final jobDescription = f['jobDescription'] ?? 'No Description';
-                                      final scheduleDocId = f['scheduleId'] ?? '';  
+              child:
+                  isNewSelected
+                      // === Foreman Ratings List ===
+                      ? FutureBuilder<List<Map<String, dynamic>>>(
+                        future: controller.getForemenByWorkshopOwner(),
+                        builder: (ctx, snap) {
+                          if (snap.connectionState == ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                          if (snap.hasError) {
+                            return Center(child: Text('Error: ${snap.error}'));
+                          }
 
-                                      
-                                      return Card(
-                                        color: Colors.purple.shade50,
-                                        child: ListTile(
-                                          leading: CircleAvatar(
-                                            backgroundColor: const Color.fromARGB(255, 25, 148, 111),
-                                            child: Text(
-                                              foremanName.isNotEmpty ? foremanName[0].toUpperCase() : '?',
-                                              style: const TextStyle(color: Colors.white),
+                          final foremen = snap.data ?? [];
+                          if (foremen.isEmpty) {
+                            return const Center(
+                              child: Text('No foremen found.'),
+                            );
+                          }
+
+                          return ListView.builder(
+                            itemCount: foremen.length,
+                            itemBuilder: (ctx, i) {
+                              final f = foremen[i];
+
+                              final foremanName =
+                                  f['foremanName'] as String? ?? 'Unknown';
+                              final foremanEmail =
+                                  f['foremanEmail'] as String? ?? 'No Email';
+                              final foremanPhoneNumber =
+                                  f['foremanPhoneNumber'] as String? ??
+                                  'No Phone';
+                              final foremanId = f['foremanId'] as String? ?? '';
+                              final ratingMap =
+                                  f['rating'] as Map<String, dynamic>? ?? {};
+                              final ratingScore =
+                                  ratingMap['ratingScore'] as int? ?? 0;
+                              final jobDescription =
+                                  f['jobDescription'] ?? 'No Description';
+                              final scheduleDocId = f['scheduleId'] ?? '';
+
+                              return Card(
+                                color: Colors.purple.shade50,
+                                child: ListTile(
+                                  leading: CircleAvatar(
+                                    backgroundColor: const Color.fromARGB(
+                                      255,
+                                      25,
+                                      148,
+                                      111,
+                                    ),
+                                    child: Text(
+                                      foremanName.isNotEmpty
+                                          ? foremanName[0].toUpperCase()
+                                          : '?',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                  title: Text(foremanName),
+                                  subtitle: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(foremanEmail),
+                                      Text(foremanPhoneNumber),
+                                      Text(jobDescription),
+                                    ],
+                                  ),
+                                  trailing:
+                                      ratingScore == 0
+                                          ? FilledButton(
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder:
+                                                      (_) => AddRatingPage(
+                                                        foremanId: foremanId,
+                                                        scheduleDocId:
+                                                            scheduleDocId,
+                                                      ),
+                                                ),
+                                              ).then(
+                                                (_) => setState(() {}),
+                                              ); // refresh after rating
+                                            },
+                                            child: const Text('Rate'),
+                                          )
+                                          : Text(
+                                            '$ratingScore ★',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
                                             ),
                                           ),
-                                          title: Text(foremanName),
-                                          subtitle: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(foremanEmail),
-                                              Text(foremanPhoneNumber),
-                                              Text(jobDescription),
-                                            ],
-                                          ),
-                                          trailing: ratingScore == 0
-                                              ? FilledButton(
-                                                  onPressed: () {
-                                                    Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                        builder: (_) => AddRatingPage(foremanId: foremanId, scheduleDocId: scheduleDocId),
-                                                      ),
-                                                    ).then((_) => setState(() {})); // refresh after rating
-                                                  },
-                                                  child: const Text('Rate'),
-                                                )
-                                              : Text(
-                                                  '$ratingScore ★',
-                                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                                ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      )
+                      // === Workshop Ratings List ===
+                      : FutureBuilder<List<Map<String, dynamic>>>(
+                        future: controller.getRatedForeman(),
+                        builder: (ctx, snap) {
+                          if (snap.connectionState == ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                          if (snap.hasError) {
+                            return Center(child: Text('Error: ${snap.error}'));
+                          }
+
+                          final ratedForemen = snap.data ?? [];
+
+                          if (ratedForemen.isEmpty) {
+                            return const Center(
+                              child: Text('No rated foremen found.'),
+                            );
+                          }
+
+                          return ListView.builder(
+                            itemCount: ratedForemen.length,
+                            itemBuilder: (ctx, i) {
+                              final f = ratedForemen[i];
+                              final name =
+                                  '${(f['first_name'] ?? '').toString().trim()} ${(f['last_name'] ?? '').toString().trim()}'
+                                      .trim();
+                              final ratingScore = f['ratingScore'] ?? '0';
+                              final foremanId = f['foremanId'] ?? '';
+
+                              return Card(
+                                color: Colors.blue.shade50,
+                                child: ListTile(
+                                  leading: CircleAvatar(
+                                    child: Text(
+                                      name.isNotEmpty ? name[0] : '?',
+                                    ),
+                                  ),
+                                  title: Text(
+                                    name.isNotEmpty ? name : 'Unknown Foreman',
+                                  ),
+                                  subtitle: Text('Given Rating: $ratingScore '),
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      FilledButton(
+                                        child: const Text('Edit'),
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder:
+                                                  (_) => EditRatingPage(
+                                                    foremanId: foremanId,
+                                                    docId: f['docId'] ?? '',
+                                                  ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      SizedBox(width: 8),
+                                      FilledButton(
+                                        onPressed: () async {
+                                          Navigator.of(context).pop(); // Close the dialog
+                                          debugPrint('Delete confirmed');
+                                          controller.deleteRating(f['docId']);
+                                        },
+                                        style: FilledButton.styleFrom(
+                                          backgroundColor: Colors.red, // Set button background to red
                                         ),
-                                      );
-                                    },
-                                  );
-                                },
-                              )
-                            // === Workshop Ratings List ===
-                            : FutureBuilder<List<Map<String, dynamic>>>(
-                                future: controller.getRatedForeman(),
-                                builder: (ctx, snap) {
-                                  if (snap.connectionState == ConnectionState.waiting) {
-                                    return const Center(child: CircularProgressIndicator());
-                                  }
-                                  if (snap.hasError) {
-                                    return Center(child: Text('Error: ${snap.error}'));
-                                  }
-
-                                  final ratedForemen = snap.data ?? [];
-
-                                  if (ratedForemen.isEmpty) {
-                                    return const Center(child: Text('No rated foremen found.'));
-                                  }
-
-                                  return ListView.builder(
-                                    itemCount: ratedForemen.length,
-                                    itemBuilder: (ctx, i) {
-                                      final f = ratedForemen[i];
-                                      final name = '${(f['first_name'] ?? '').toString().trim()} ${(f['last_name'] ?? '').toString().trim()}'.trim();
-                                      final ratingScore = f['ratingScore'] ?? '0';
-                                      final foremanId = f['foremanId'] ?? '';
-                                      
-                                    
-                                      return Card(
-                                        color: Colors.blue.shade50,
-                                        child: ListTile(
-                                          leading: CircleAvatar(
-                                            child: Text(name.isNotEmpty ? name[0] : '?'),
-                                          ),
-                                          title: Text(name.isNotEmpty ? name : 'Unknown Foreman'),
-                                          subtitle: Text('Given Rating: $ratingScore '),
-                                          trailing: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                 
-                                              FilledButton(
-                                                child: const Text('Edit'),
-                                                onPressed: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (_) => EditRatingPage(
-                                                        foremanId: foremanId,
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
-                                              ),
-                                            ],
-                                          ),
+                                        child: Text(
+                                          'Delete',
+                                          style: TextStyle(color: Colors.white), // Optional: Set text color to white for contrast
                                         ),
-                                      );
-                                    },
-                                  );
-                                },
-                              ),
+                                      ),
 
-                        )
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+            ),
           ],
         ),
       ),

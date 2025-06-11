@@ -99,7 +99,8 @@ class ListSchedulePage extends StatelessWidget {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  OutlinedButton.icon(
+                                  
+                                  FilledButton.icon(
                                     onPressed: () {
                                       Navigator.push(
                                         context,
@@ -110,10 +111,15 @@ class ListSchedulePage extends StatelessWidget {
                                         ), // Navigate to edit page
                                       );
                                     },
+                                    style: FilledButton.styleFrom(
+                                      padding: EdgeInsets.all(1),
+                                      foregroundColor: Colors.blue,
+                                    ),
                                     label: Text('Edit',
-                                        style: TextStyle(color: Colors.blue)),
+                                        style: TextStyle(color: Colors.white)),
                                   ),
-                                  OutlinedButton.icon(
+                                  SizedBox(width: 8),
+                                  FilledButton.icon(
                                     onPressed: () {
                                       showDialog(
                                         context: context,
@@ -148,7 +154,12 @@ class ListSchedulePage extends StatelessWidget {
                                       );
                                     },
                                     label: Text('Delete',
-                                        style: TextStyle(color: Colors.red)),
+                                        style: TextStyle(color: Colors.white)),
+                                    
+                                    style: FilledButton.styleFrom(
+                                      padding: EdgeInsets.all(1),
+                                      backgroundColor: Colors.red,
+                                    ),
                                   ),
                                 ],
                               )

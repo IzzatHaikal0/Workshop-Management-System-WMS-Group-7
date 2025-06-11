@@ -7,6 +7,8 @@ class Rating {
   final String ratingDate;
   final String serviceType;
   final String foremanId; 
+  final String? docId; 
+  
 
   Rating({
     required this.ratingScore,
@@ -15,6 +17,7 @@ class Rating {
     required this.ratingDate,
     required this.serviceType,
     required this.foremanId,
+    required this.docId,
   });
 
   factory Rating.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -27,6 +30,7 @@ class Rating {
       serviceType: data['serviceType'] ?? '', 
       foremanId:
           data['foremanId'] ?? '', 
+      docId: doc.id, 
     );
   }
 
@@ -39,6 +43,7 @@ class Rating {
       serviceType: map['serviceType'] ?? '', 
       foremanId:
           map['foremanId'] ?? '', 
+      docId: docId
     );
   }
 

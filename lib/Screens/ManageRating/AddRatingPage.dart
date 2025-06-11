@@ -195,7 +195,8 @@ class _AddRatingPageState extends State<AddRatingPage> {
           reviewComment: reviewComment,
           serviceType: serviceType,
           ratingDate: DateTime.now().toIso8601String(),
-
+          docId: null,
+  
         );
 
         await controller.addRating(rating, widget.scheduleDocId);
