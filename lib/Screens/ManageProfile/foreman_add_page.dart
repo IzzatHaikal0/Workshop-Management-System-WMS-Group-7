@@ -38,7 +38,6 @@ class _AddProfilePageForemanState extends State<AddProfilePageForeman> {
   Uint8List? _webImageBytes;
 
   bool _isLoading = true;
-  bool _isSaving = false;
 
   @override
   void initState() {
