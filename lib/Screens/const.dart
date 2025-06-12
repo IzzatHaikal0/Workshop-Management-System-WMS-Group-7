@@ -1,6 +1,5 @@
-const String stripePublishableKey = "";
-const String stripeSecretKey = "";
+const String stripePublishableKey = "pk_test_51RNyHfGbuWKzGS66vOYDvmSEmJcVQwy77rBO3NOnKV93WoCWMsE6U1wZnoBzpP7UZToZJTdR99F8jF1VtVGTFCCX0043UHfCxo";
+const String stripeSecretKey = "sk_test_51RNyHfGbuWKzGS66mCHcSsSRkzBa8zJqMVcs472I7S0d0JkrHoKAWXuspyJv0JyXe4uxuROrxq6OtqXYKvwNTntX00DW0pFK8q";
 
-//pk_test_51RNyHfGbuWKzGS66vOYDvmSEmJcVQwy77rBO3NOnKV93WoCWMsE6U1wZnoBzpP7UZToZJTdR99F8jF1VtVGTFCCX0043UHfCxo
 
-//sk_test_51RNyHfGbuWKzGS66mCHcSsSRkzBa8zJqMVcs472I7S0d0JkrHoKAWXuspyJv0JyXe4uxuROrxq6OtqXYKvwNTntX00DW0pFK8q
+
