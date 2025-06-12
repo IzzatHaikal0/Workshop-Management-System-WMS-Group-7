@@ -7,6 +7,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:workshop_management_system/Screens/ManageReport/GenerateReportPage.dart';
 //import '../Screens/firebase_options.dart';
 import 'Screens/ManagePayment/ListOfPayment.dart';
+import 'package:workshop_management_system/services/stripe_service.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 
 
 // Registration and profile barrel imports
@@ -20,6 +22,9 @@ import 'Screens/ManageRating/manage_rating_barrel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+
+
 
   try {
     if (kIsWeb) {
@@ -37,6 +42,10 @@ void main() async {
     } else {
       await Firebase.initializeApp();
     }
+
+  Stripe.publishableKey = 'pk_test_51RNyHfGbuWKzGS66vOYDvmSEmJcVQwy77rBO3NOnKV93WoCWMsE6U1wZnoBzpP7UZToZJTdR99F8jF1VtVGTFCCX0043UHfCxo'; // YOUR STRIPE PUBLISHABLE KEY
+  await Stripe.instance.applySettings(); // This is important!
+  
     runApp(const MyApp());
   } catch (e) {
     debugPrint("Firebase initialization error: $e");
