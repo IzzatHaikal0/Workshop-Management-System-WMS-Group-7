@@ -5,277 +5,249 @@ import 'package:workshop_management_system/Screens/ManageRating/AddRatingPage.da
 import 'package:workshop_management_system/Screens/ManageRating/EditRatingPage.dart';
 
 class RatingPage extends StatefulWidget {
-  RatingPage({super.key});
+  const RatingPage({super.key});
 
   @override
   State<RatingPage> createState() => _RatingPageState();
 }
 
-//DUMMY DELETE LATER
-class Rating {
-  final String? foremanName;
-  final String? workshopName;
-  final String? comment;
-  final int score;
-
-  Rating(
-      {this.foremanName, this.workshopName, this.comment, required this.score});
-}
-
 class _RatingPageState extends State<RatingPage> {
   final Ratingcontroller controller = Ratingcontroller();
-  String searchQuery = '';
   bool isNewSelected = true;
-
-  //DUMMY DELETE LATER
-  final List<Rating> ratedRatings = [
-    Rating(
-        foremanName: "Ahmad Albab bin Mahmud",
-        workshopName: "Jeng Jeng Jeng Workshop",
-        comment: "Very good",
-        score: 5),
-    Rating(
-        foremanName: "Ali Haidar bin Ali Baba",
-        workshopName: "Brother Motorworks",
-        comment: "Average service",
-        score: 3),
-    Rating(
-        foremanName: "Wong Sing Kio",
-        workshopName: "Brother Motorworks",
-        comment: "",
-        score: 4),
-  ];
-
-  final List<Rating> unratedRatings = [
-    Rating(
-        foremanName: "Ahmad Albab bin Mahmud",
-        workshopName: "Foreman",
-        score: 0,
-        comment: ""),
-    Rating(
-        foremanName: "ali haidar bin ali baba",
-        workshopName: "Foreman",
-        score: 0,
-        comment: ""),
-    Rating(
-        foremanName: "Jeng Jeng Jeng Workshop Sdn Bhd",
-        workshopName: "Workshop",
-        score: 0,
-        comment: ""),
-    Rating(
-        foremanName: "Brother Motorworks Sdn Bhd",
-        workshopName: "Workshop",
-        score: 0,
-        comment: ""),
-  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Rating Page')),
-      body: Container(
-        color: Colors.white,
-        padding: EdgeInsets.all(10),
+      body: Padding(
+        padding: const EdgeInsets.all(10),
         child: Column(
           children: [
-            // Search Bar
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search foreman and workshop name..',
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    searchQuery = value.trim().toLowerCase();
-                  });
-                },
-              ),
-            ),
-
-            //TOGGLE BUTTON TO VIEW NEW
+            // Toggle buttons
             Row(
               children: [
                 Expanded(
                   child: TextButton(
-                    onPressed: () {
-                      setState(() => isNewSelected = true);
-                    },
+                    onPressed: () => setState(() => isNewSelected = true),
                     style: TextButton.styleFrom(
                       backgroundColor:
                           isNewSelected ? Colors.blue : Colors.grey[300],
                       foregroundColor:
                           isNewSelected ? Colors.white : Colors.black,
                     ),
-                    child: Text("New"),
+                    child: const Text("Foremen Ratings"),
                   ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Expanded(
                   child: TextButton(
-                    onPressed: () {
-                      setState(() => isNewSelected = false);
-                    },
+                    onPressed: () => setState(() => isNewSelected = false),
                     style: TextButton.styleFrom(
                       backgroundColor:
                           !isNewSelected ? Colors.blue : Colors.grey[300],
                       foregroundColor:
                           !isNewSelected ? Colors.white : Colors.black,
                     ),
-                    child: Text("Rating History"),
+                    child: const Text("Past Ratings"),
                   ),
                 ),
               ],
             ),
 
+            const SizedBox(height: 8),
+
+            // Display either workshops or foremen
             Expanded(
-              child: Builder(
-                builder: (context) {
-                  // Choose which list based on the toggle
-                  final List<Rating> selectedRatings =
-                      isNewSelected ? unratedRatings : ratedRatings;
+              child:
+                  isNewSelected
+                      // === Foreman Ratings List ===
+                      ? FutureBuilder<List<Map<String, dynamic>>>(
+                        future: controller.getForemenByWorkshopOwner(),
+                        builder: (ctx, snap) {
+                          if (snap.connectionState == ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                          if (snap.hasError) {
+                            return Center(child: Text('Error: ${snap.error}'));
+                          }
 
-                  // Then apply your search filter
-                  List<Rating> filteredRatings =
-                      selectedRatings.where((rating) {
-                    final foreman = rating.foremanName?.toLowerCase() ?? '';
-                    final workshop = rating.workshopName?.toLowerCase() ?? '';
-                    final comment = rating.comment?.toLowerCase() ?? '';
-                    return foreman.contains(searchQuery) ||
-                        workshop.contains(searchQuery) ||
-                        comment.contains(searchQuery);
-                  }).toList();
+                          final foremen = snap.data ?? [];
+                          if (foremen.isEmpty) {
+                            return const Center(
+                              child: Text('No foremen found.'),
+                            );
+                          }
 
-                  if (filteredRatings.isEmpty) {
-                    return Center(child: Text('No matching ratings found.'));
-                  }
+                          return ListView.builder(
+                            itemCount: foremen.length,
+                            itemBuilder: (ctx, i) {
+                              final f = foremen[i];
 
-                  return ListView.builder(
-                    itemCount: filteredRatings.length,
-                    itemBuilder: (context, index) {
-                      final r = filteredRatings[index];
-                      return Card(
-                        margin: EdgeInsets.symmetric(vertical: 6),
-                        color: Colors.purple.shade50,
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: Colors.purple,
-                            child: Text(
-                              r.foremanName![0].toUpperCase(),
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                          title: Text(r.foremanName!),
-                          subtitle: Text(r.workshopName!),
-                          trailing: isNewSelected
-                              // “New” tab shows the rate button
-                              ? FilledButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => AddRatingPage(),
-                                      ),
-                                    );
-                                  },
-                                  child: Text('rate'),
-                                )
-                              // “History” tab shows the score
-                              : Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      '${r.score} ★',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
+                              final foremanName =
+                                  f['foremanName'] as String? ?? 'Unknown';
+                              final foremanEmail =
+                                  f['foremanEmail'] as String? ?? 'No Email';
+                              final foremanPhoneNumber =
+                                  f['foremanPhoneNumber'] as String? ??
+                                  'No Phone';
+                              final foremanId = f['foremanId'] as String? ?? '';
+                              final ratingMap =
+                                  f['rating'] as Map<String, dynamic>? ?? {};
+                              final ratingScore =
+                                  ratingMap['ratingScore'] as int? ?? 0;
+                              final jobDescription =
+                                  f['jobDescription'] ?? 'No Description';
+                              final scheduleDocId = f['scheduleId'] ?? '';
+
+                              return Card(
+                                color: Colors.purple.shade50,
+                                child: ListTile(
+                                  leading: CircleAvatar(
+                                    backgroundColor: const Color.fromARGB(
+                                      255,
+                                      25,
+                                      148,
+                                      111,
+                                    ),
+                                    child: Text(
+                                      foremanName.isNotEmpty
+                                          ? foremanName[0].toUpperCase()
+                                          : '?',
+                                      style: const TextStyle(
+                                        color: Colors.white,
                                       ),
                                     ),
-                                    SizedBox(width: 8),
-                                    FilledButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) =>
-                                                EditRatingPage(), // Reuse or create edit version
+                                  ),
+                                  title: Text(foremanName),
+                                  subtitle: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(foremanEmail),
+                                      Text(foremanPhoneNumber),
+                                      Text(jobDescription),
+                                    ],
+                                  ),
+                                  trailing:
+                                      ratingScore == 0
+                                          ? FilledButton(
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder:
+                                                      (_) => AddRatingPage(
+                                                        foremanId: foremanId,
+                                                        scheduleDocId:
+                                                            scheduleDocId,
+                                                      ),
+                                                ),
+                                              ).then(
+                                                (_) => setState(() {}),
+                                              ); // refresh after rating
+                                            },
+                                            child: const Text('Rate'),
+                                          )
+                                          : Text(
+                                            '$ratingScore ★',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
-                                        );
-                                      },
-                                      child: Text('Edit'),
-                                    ),
-                                  ],
                                 ),
-                          isThreeLine: true,
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-            /*
-            // Ratings List
-            Expanded(
-              child: StreamBuilder<List<Rating>>(
-                stream: controller.getUser(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Center(child: Text('No ratings available.'));
-                  } else {
-                    // Filter ratings by search query on foreman or workshop or comment
-                    List<Rating> filteredRatings = snapshot.data!.where((rating) {
-                      final foreman = rating.foremanName?.toLowerCase() ?? '';
-                      final workshop = rating.workshopName?.toLowerCase() ?? '';
-                      final comment = rating.comment?.toLowerCase() ?? '';
-                      return foreman.contains(searchQuery) || workshop.contains(searchQuery) || comment.contains(searchQuery);
-                    }).toList();
+                              );
+                            },
+                          );
+                        },
+                      )
+                      // === Workshop Ratings List ===
+                      : FutureBuilder<List<Map<String, dynamic>>>(
+                        future: controller.getRatedForeman(),
+                        builder: (ctx, snap) {
+                          if (snap.connectionState == ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                          if (snap.hasError) {
+                            return Center(child: Text('Error: ${snap.error}'));
+                          }
 
-                    if (filteredRatings.isEmpty) {
-                      return Center(child: Text('No matching ratings found.'));
-                    }
+                          final ratedForemen = snap.data ?? [];
 
-                    return ListView.builder(
-                      itemCount: filteredRatings.length,
-                      itemBuilder: (context, index) {
-                        final rating = filteredRatings[index];
-                        return Card(
-                          margin: EdgeInsets.symmetric(vertical: 6),
-                          child: ListTile(
-                            leading: Icon(Icons.star, color: Colors.amber),
-                            title: Text(rating.foremanName ?? 'Unknown Foreman'),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Workshop: ${rating.workshopName ?? 'Unknown Workshop'}'),
-                                if ((rating.comment ?? '').isNotEmpty) Text('Comment: ${rating.comment}'),
-                              ],
-                            ),
-                            trailing: Text(
-                              rating.score.toString(),
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            isThreeLine: true,
-                          ),
-                        );
-                      },
-                    );
-                  }
-                },
-              ),
+                          if (ratedForemen.isEmpty) {
+                            return const Center(
+                              child: Text('No rated foremen found.'),
+                            );
+                          }
+
+                          return ListView.builder(
+                            itemCount: ratedForemen.length,
+                            itemBuilder: (ctx, i) {
+                              final f = ratedForemen[i];
+                              final name =
+                                  '${(f['firstName'] ?? '').toString().trim()} ${(f['lastName'] ?? '').toString().trim()}'
+                                      .trim();
+                              final ratingScore = f['ratingScore'] ?? '0';
+                              final foremanId = f['foremanId'] ?? '';
+
+                              return Card(
+                                color: Colors.blue.shade50,
+                                child: ListTile(
+                                  leading: CircleAvatar(
+                                    child: Text(
+                                      name.isNotEmpty ? name[0] : '?',
+                                    ),
+                                  ),
+                                  title: Text(
+                                    name.isNotEmpty ? name : 'Unknown Foreman',
+                                  ),
+                                  subtitle: Text('Given Rating: $ratingScore '),
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      FilledButton(
+                                        child: const Text('Edit'),
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder:
+                                                  (_) => EditRatingPage(
+                                                    foremanId: foremanId,
+                                                    docId: f['docId'] ?? '',
+                                                  ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      SizedBox(width: 8),
+                                      FilledButton(
+                                        onPressed: () async {
+                                          Navigator.of(context).pop(); // Close the dialog
+                                          debugPrint('Delete confirmed');
+                                          controller.deleteRating(f['docId']);
+                                        },
+                                        style: FilledButton.styleFrom(
+                                          backgroundColor: Colors.red, // Set button background to red
+                                        ),
+                                        child: Text(
+                                          'Delete',
+                                          style: TextStyle(color: Colors.white), // Optional: Set text color to white for contrast
+                                        ),
+                                      ),
+
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
             ),
-            */
           ],
         ),
       ),
