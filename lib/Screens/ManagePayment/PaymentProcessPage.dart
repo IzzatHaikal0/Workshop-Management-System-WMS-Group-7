@@ -1,101 +1,75 @@
 import 'package:flutter/material.dart';
-import 'package:workshop_management_system/Controllers/PaymentController.dart';
+import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PaymentProcessPage extends StatelessWidget {
-  final String name;
-  final int workingHours;
-  final double ratePerHour;
+  final Map<String, dynamic> paymentData;
 
-  const PaymentProcessPage({
-    super.key,
-    required this.name,
-    required this.workingHours,
-    required this.ratePerHour,
-  });
+  const PaymentProcessPage({super.key, required this.paymentData});
 
   @override
   Widget build(BuildContext context) {
-    final PaymentController controller = PaymentController();
-    final double totalPayment = controller.calculateTotalPayment(workingHours, ratePerHour);
+    final String foremanName = paymentData['foremanName'];
+    final String jobDescription = paymentData['jobDescription'];
+    final double totalHours = paymentData['totalHours']?.toDouble() ?? 0;
+    final double salaryRate = paymentData['salaryRate']?.toDouble() ?? 0;
+    final double totalPay = totalHours * salaryRate;
+
+    final Timestamp? scheduleDate = paymentData['scheduleDate'];
+    final Timestamp? startTime = paymentData['startTime'];
+    final Timestamp? endTime = paymentData['endTime'];
+
+    final dateFormat = DateFormat('yyyy-MM-dd HH:mm');
 
     return Scaffold(
       appBar: AppBar(
-        leading: const BackButton(color: Colors.black),
-        title: const Text('Payment', style: TextStyle(color: Colors.black)),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 16.0),
-            child: Icon(Icons.notifications_none, color: Colors.black),
-          ),
-        ],
+        title: const Text('Payment Details'),
       ),
-      body: Column(
-        children: [
-          const SizedBox(height: 32),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.grey,
-                    blurRadius: 6,
-                    offset: Offset(0, 2),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Card(
+          elevation: 4,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Foreman Name: $foremanName', style: TextStyle(fontSize: 16)),
+                const SizedBox(height: 10),
+                Text('Job Description: $jobDescription'),
+                const SizedBox(height: 10),
+                if (scheduleDate != null)
+                  Text('Schedule Date: ${dateFormat.format(scheduleDate.toDate())}'),
+                const SizedBox(height: 10),
+                if (startTime != null)
+                  Text('Start Time: ${dateFormat.format(startTime.toDate())}'),
+                if (endTime != null)
+                  Text('End Time: ${dateFormat.format(endTime.toDate())}'),
+                const SizedBox(height: 10),
+                Text('Total Hours: $totalHours'),
+                Text('Pay Rate: RM $salaryRate'),
+                const Divider(height: 20),
+                Text(
+                  'Total Payment: RM ${totalPay.toStringAsFixed(2)}',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+                const SizedBox(height: 30),
+                Center(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      // handle payment confirmation here
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Payment process not implemented")),
+                      );
+                    },
+                    icon: const Icon(Icons.payment),
+                    label: const Text("Confirm Payment"),
                   ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Center(
-                    child: Text(
-                      'Payment Details',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(name.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 16),
-                  _buildRow('Working hour', '$workingHours hours'),
-                  _buildRow('Rate per hour', 'RM ${ratePerHour.toStringAsFixed(2)}'),
-                  const Divider(),
-                  _buildRow('Total payment', 'RM ${totalPayment.toStringAsFixed(2)}'),
-                ],
-              ),
+                )
+              ],
             ),
           ),
-          const SizedBox(height: 30),
-          ElevatedButton(
-            onPressed: () {
-              controller.confirmPayment(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            child: const Text('Confirm payment', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
-        ],
+        ),
       ),
     );
   }

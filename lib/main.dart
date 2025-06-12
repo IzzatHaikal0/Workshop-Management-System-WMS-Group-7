@@ -1,14 +1,13 @@
-<<<<<<< HEAD
-import 'package:firebase_core/firebase_core.dart'; 
-=======
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
->>>>>>> origin/ManageForemanSchedule
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:workshop_management_system/Screens/ManageReport/GenerateReportPage.dart';
 //import '../Screens/firebase_options.dart';
+import 'Screens/ManagePayment/ListOfPayment.dart';
+
 
 // Registration and profile barrel imports
 import 'Screens/Registration/manage_registration_barrel.dart';
@@ -17,16 +16,7 @@ import 'Screens/Profile/manage_profile_barrel.dart';
 import 'Screens/workshop_homepage.dart'; // <-- NEW IMPORT
 
 import 'Screens/ManageForemanSchedule/manage_foreman_schedule_barrel.dart';
-<<<<<<< HEAD
-import 'Screens/ManagePayment/ListOfPayment.dart';
-//import 'package:workshop_management_system/Screens/ManageForemanSchedule/ListSchedulePage.dart';
-//import 'package:workshop_management_system/Screens/ManageForemanSchedule/SelectSchedulePage.dart';
-//import 'package:workshop_management_system/Screens/ManageForemanSchedule/AddSchedulePage.dart';
-//import 'package:workshop_management_system/Screens/ManageForemanSchedule/EditSchedulePage.dart';
-//import 'package:workshop_management_system/Screens/ManageRating/RatingPage.dart';
-=======
 import 'Screens/ManageRating/manage_rating_barrel.dart';
->>>>>>> origin/ManageForemanSchedule
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -232,18 +222,6 @@ class _MyHomePageState extends State<MyHomePage> {
     fetchUserRoleAndName();
   }
 
-<<<<<<< HEAD
-  List<Widget> get _pages => [
-    const Center(child: Text('Workshop Management System App Home Page')),
-    //SelectSchedulePage(),
-    ListSchedulePage(),
-    currentUserRole == 'workshop_owner'
-        ? ViewProfilePageForeman(foremanId: currentUserId)
-        : ViewProfilePageWorkshopOwner(workshopOwnerId: currentUserId),
-    const Center(child: Text('Inventory Page')),
-    ListOfPayment()
-  ];
-=======
   Future<void> fetchUserRoleAndName() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
@@ -268,7 +246,6 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     }
   }
->>>>>>> origin/ManageForemanSchedule
 
   void _onItemTapped(int index) {
     setState(() {
@@ -300,7 +277,15 @@ class _MyHomePageState extends State<MyHomePage> {
       currentUserRole == 'foreman'
           ? ViewProfilePageForeman(foremanId: currentUserId)
           : ViewProfilePageWorkshopOwner(workshopOwnerId: currentUserId),
-      const Center(child: Text('Inventory Page')),
+   
+      currentUserRole == 'workshop_owner'
+          ? ListOfPayment(workshopOwnerId: currentUserId)
+          : ListSchedulePage(workshopOwnerId: currentUserId),
+
+            currentUserRole == 'workshop_owner'
+          ? GenerateReportPage(workshopOwnerId: currentUserId)
+          : ListSchedulePage(workshopOwnerId: currentUserId),
+      
     ];
   }
 
@@ -373,20 +358,10 @@ class _MyHomePageState extends State<MyHomePage> {
         onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.schedule),
-            label: 'Schedule',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.schedule),label: 'Schedule'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.inventory),
-            label: 'Inventory',
-          ),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'payment'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.inventory),
-            label: 'payment',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.inventory),label: 'Inventory'),
+          BottomNavigationBarItem(icon: Icon(Icons.wallet), label: 'payment'),
         ],
       ),
     );
