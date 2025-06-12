@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:workshop_management_system/controllers/registration_controller.dart';
+import 'package:workshop_management_system/Controllers/registration_controller.dart';
 import 'widgets/confirmation_dialog.dart';
 import '../../main.dart'; // import AppRoutes
 

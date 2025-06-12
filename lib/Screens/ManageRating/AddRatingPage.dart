@@ -7,7 +7,11 @@ class AddRatingPage extends StatefulWidget {
   final String foremanId;
   final String scheduleDocId;
 
-  const AddRatingPage({super.key, required this.foremanId, required this.scheduleDocId});
+  const AddRatingPage({
+    super.key,
+    required this.foremanId,
+    required this.scheduleDocId,
+  });
 
   @override
   State<AddRatingPage> createState() => _AddRatingPageState();
@@ -58,13 +62,23 @@ class _AddRatingPageState extends State<AddRatingPage> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               CircleAvatar(
-                                backgroundColor: const Color.fromARGB(255, 25, 148, 111),
+                                backgroundColor: const Color.fromARGB(
+                                  255,
+                                  25,
+                                  148,
+                                  111,
+                                ),
                                 radius: 70,
                                 child: Text(
-                                  (foremanData!['firstName'] as String).isNotEmpty
-                                      ? (foremanData!['firstName'][0] as String).toUpperCase()
+                                  (foremanData!['firstName'] as String)
+                                          .isNotEmpty
+                                      ? (foremanData!['firstName'][0] as String)
+                                          .toUpperCase()
                                       : '?',
-                                  style: const TextStyle(color: Colors.white, fontSize: 50),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 50,
+                                  ),
                                 ),
                               ),
                               SizedBox(width: 16),
@@ -185,27 +199,23 @@ class _AddRatingPageState extends State<AddRatingPage> {
     Navigator.pop(context);
   }
 
-    void _onSave() async {
-      if (ratingScore > 0 && serviceType.isNotEmpty) {
-       
+  void _onSave() async {
+    if (ratingScore > 0 && serviceType.isNotEmpty) {
+      final rating = Rating(
+        foremanId: widget.foremanId,
+        ratingScore: ratingScore,
+        reviewComment: reviewComment,
+        serviceType: serviceType,
+        ratingDate: DateTime.now().toIso8601String(),
+        docId: null,
+      );
 
-        final rating = Rating(
-          foremanId: widget.foremanId,
-          ratingScore: ratingScore,
-          reviewComment: reviewComment,
-          serviceType: serviceType,
-          ratingDate: DateTime.now().toIso8601String(),
-          docId: null,
-  
-        );
+      await controller.addRating(rating, widget.scheduleDocId);
 
-        await controller.addRating(rating, widget.scheduleDocId);
-
-        Navigator.pop(
-          context, 
-          MaterialPageRoute(builder: (context) => RatingPage())); 
-      }
+      Navigator.pop(
+        context,
+        MaterialPageRoute(builder: (context) => RatingPage()),
+      );
     }
-
-
+  }
 }

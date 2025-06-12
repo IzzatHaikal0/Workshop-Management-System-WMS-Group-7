@@ -226,19 +226,24 @@ class _RatingPageState extends State<RatingPage> {
                                       SizedBox(width: 8),
                                       FilledButton(
                                         onPressed: () async {
-                                          Navigator.of(context).pop(); // Close the dialog
+                                          Navigator.of(
+                                            context,
+                                          ).pop(); // Close the dialog
                                           debugPrint('Delete confirmed');
                                           controller.deleteRating(f['docId']);
                                         },
                                         style: FilledButton.styleFrom(
-                                          backgroundColor: Colors.red, // Set button background to red
+                                          backgroundColor:
+                                              Colors
+                                                  .red, // Set button background to red
                                         ),
                                         child: Text(
                                           'Delete',
-                                          style: TextStyle(color: Colors.white), // Optional: Set text color to white for contrast
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                          ), // Optional: Set text color to white for contrast
                                         ),
                                       ),
-
                                     ],
                                   ),
                                 ),

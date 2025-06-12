@@ -29,8 +29,10 @@ class _ForemanPageState extends State<ForemanPage> {
   Future<void> _loadData() async {
     final result = await controller.loadRatingsForForeman(widget.foremanId);
     final profile = await controller.getForemanProfile(widget.foremanId);
-    
-    debugPrint("Loaded profile: ${profile?.firstName} ${profile?.lastName}, ${profile?.email}, ${profile?.phoneNumber}");
+
+    debugPrint(
+      "Loaded profile: ${profile?.firstName} ${profile?.lastName}, ${profile?.email}, ${profile?.phoneNumber}",
+    );
 
     setState(() {
       pastRatings = result['ratings'];
@@ -66,59 +68,72 @@ class _ForemanPageState extends State<ForemanPage> {
                               ),
                               const SizedBox(height: 16),
 
-                             Center(
-                              child: Card(
-                                color: Colors.blue.shade100,
-                                elevation: 4,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: SizedBox(
-                                  width: constraints.maxHeight * 0.25, // Same as height for a square
-                                  height: constraints.maxHeight * 0.25,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        const CircleAvatar(
-                                          radius: 30,
-                                          backgroundColor: Colors.white,
-                                          child: Icon(
-                                            Icons.person,
-                                            color: Colors.grey,
+                              Center(
+                                child: Card(
+                                  color: Colors.blue.shade100,
+                                  elevation: 4,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: SizedBox(
+                                    width:
+                                        constraints.maxHeight *
+                                        0.25, // Same as height for a square
+                                    height: constraints.maxHeight * 0.25,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          const CircleAvatar(
+                                            radius: 30,
+                                            backgroundColor: Colors.white,
+                                            child: Icon(
+                                              Icons.person,
+                                              color: Colors.grey,
+                                            ),
                                           ),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        Text(
-                                          (foremanProfile!.firstName.isNotEmpty || foremanProfile!.lastName.isNotEmpty)
-                                              ? "${foremanProfile!.firstName} ${foremanProfile!.lastName}"
-                                              : "No name available",
-                                          textAlign: TextAlign.center,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
+                                          const SizedBox(height: 12),
+                                          Text(
+                                            (foremanProfile!
+                                                        .firstName
+                                                        .isNotEmpty ||
+                                                    foremanProfile!
+                                                        .lastName
+                                                        .isNotEmpty)
+                                                ? "${foremanProfile!.firstName} ${foremanProfile!.lastName}"
+                                                : "No name available",
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
                                           ),
-                                        ),
-                                        Text(
-                                          foremanProfile!.email.isNotEmpty ? foremanProfile!.email : "No email provided",
-                                          textAlign: TextAlign.center,
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                        ),
-                                        Text(
-                                          foremanProfile!.phoneNumber.isNotEmpty ? foremanProfile!.phoneNumber : "No phone number",
-                                          textAlign: TextAlign.center,
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                        ),
-
-                                      ],
+                                          Text(
+                                            foremanProfile!.email.isNotEmpty
+                                                ? foremanProfile!.email
+                                                : "No email provided",
+                                            textAlign: TextAlign.center,
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                          ),
+                                          Text(
+                                            foremanProfile!
+                                                    .phoneNumber
+                                                    .isNotEmpty
+                                                ? foremanProfile!.phoneNumber
+                                                : "No phone number",
+                                            textAlign: TextAlign.center,
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
 
                               const SizedBox(height: 16),
 

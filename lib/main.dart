@@ -183,10 +183,7 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-
-
 class _MyHomePageState extends State<MyHomePage> {
-  
   int _selectedIndex = 0;
   String? currentUserRole;
   String userName = '';

@@ -6,7 +6,11 @@ import 'package:workshop_management_system/Screens/ManageRating/RatingPage.dart'
 class EditRatingPage extends StatefulWidget {
   final String foremanId;
   final String docId;
-  const EditRatingPage({super.key, required this.foremanId, required this.docId});
+  const EditRatingPage({
+    super.key,
+    required this.foremanId,
+    required this.docId,
+  });
 
   @override
   State<EditRatingPage> createState() => _EditRatingPageState();
@@ -29,7 +33,7 @@ class _EditRatingPageState extends State<EditRatingPage> {
   void initState() {
     super.initState();
     reviewCommentController = TextEditingController();
-    serviceTypeController = TextEditingController(); 
+    serviceTypeController = TextEditingController();
 
     _loadData();
   }
@@ -90,13 +94,22 @@ class _EditRatingPageState extends State<EditRatingPage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         CircleAvatar(
-                          backgroundColor: const Color.fromARGB(255, 25, 148, 111),
+                          backgroundColor: const Color.fromARGB(
+                            255,
+                            25,
+                            148,
+                            111,
+                          ),
                           radius: 70,
                           child: Text(
                             (foremanData!['firstName'] as String).isNotEmpty
-                                ? (foremanData!['firstName'][0] as String).toUpperCase()
+                                ? (foremanData!['firstName'][0] as String)
+                                    .toUpperCase()
                                 : '?',
-                            style: const TextStyle(color: Colors.white, fontSize: 50),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 50,
+                            ),
                           ),
                         ),
                         SizedBox(width: 16),
@@ -195,18 +208,12 @@ class _EditRatingPageState extends State<EditRatingPage> {
               children: [
                 OutlinedButton.icon(
                   onPressed: _onCancel,
-                  label: Text(
-                    'Cancel',
-                    style: TextStyle(color: Colors.red),
-                  ),
+                  label: Text('Cancel', style: TextStyle(color: Colors.red)),
                   icon: Icon(Icons.cancel, color: Colors.red),
                 ),
                 OutlinedButton.icon(
                   onPressed: _onSave,
-                  label: Text(
-                    'Save',
-                    style: TextStyle(color: Colors.blue),
-                  ),
+                  label: Text('Save', style: TextStyle(color: Colors.blue)),
                   icon: Icon(Icons.save, color: Colors.blue),
                 ),
               ],
