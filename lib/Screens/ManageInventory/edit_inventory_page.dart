@@ -1,56 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:workshop_management_system/Controllers/ManageInventory/item_controller.dart';
+import 'package:workshop_management_system/Models/ManageInventory/item_model.dart';
 import 'package:workshop_management_system/Screens/ManageInventory/widgets/custom_text.dart';
-import 'package:workshop_management_system/Screens/ManageInventory/widgets/item_form.dart';
+import 'package:workshop_management_system/Screens/ManageInventory/widgets/inventory_form.dart';
 
-class ItemCreateScreen extends StatefulWidget {
-  const ItemCreateScreen({super.key});
+class EditInventoryPage extends StatefulWidget {
+  final Item item;
+
+  const EditInventoryPage({super.key, required this.item});
 
   @override
-  State<ItemCreateScreen> createState() => _ItemCreateScreenState();
+  State<EditInventoryPage> createState() => _EditInventoryPageState();
 }
 
-class _ItemCreateScreenState extends State<ItemCreateScreen> {
+class _EditInventoryPageState extends State<EditInventoryPage> {
   final ItemController _itemController = ItemController();
   bool _isLoading = false;
 
-  Future<void> _createItem(
+  Future<void> _updateItem(
     String itemName,
     String itemCategory,
     int quantity,
     double unitPrice,
   ) async {
+    if (widget.item.id == null) return;
+
     setState(() => _isLoading = true);
 
     try {
-      final newItem = await _itemController.createItem(
+      final updatedItem = await _itemController.updateItem(
+        widget.item.id!,
         itemName,
         itemCategory,
         quantity,
         unitPrice,
       );
 
-      if (mounted) {
+      if (mounted && updatedItem != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Item created successfully',
-              style: MyTextStyles.regular,
-            ),
-          ),
+          const SnackBar(content: Text('Item updated successfully')),
         );
-        Navigator.pop(context, newItem);
+        Navigator.pop(context, updatedItem);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              ('Error creating item: $e'),
-              style: MyTextStyles.regular,
-            ),
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error updating item: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -62,9 +58,9 @@ class _ItemCreateScreenState extends State<ItemCreateScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'New Item',
+          'Edit Item',
           style: MyTextStyles.bold.copyWith(
-            fontSize: 16,
+            fontSize: 14,
             color: Color.fromARGB(255, 0, 0, 0),
           ),
         ),
@@ -75,7 +71,12 @@ class _ItemCreateScreenState extends State<ItemCreateScreen> {
       body:
           _isLoading
               ? const Center(child: CircularProgressIndicator())
-              : ItemForm(onSubmit: _createItem, submitButtonText: 'Save'),
+              : InventoryForm(
+                /** SUBMIT EDIT FORM */
+                initialItem: widget.item,
+                onSubmit: _updateItem,
+                submitButtonText: 'Update Item',
+              ),
     );
   }
 }

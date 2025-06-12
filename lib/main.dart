@@ -12,7 +12,7 @@ import 'package:workshop_management_system/Screens/workshop_homepage.dart';
 // Registration and profile barrel imports
 import 'Screens/Registration/manage_registration_barrel.dart';
 import 'Screens/Profile/manage_profile_barrel.dart';
-import 'Screens/workshop_homepage.dart'; // <-- NEW IMPORT
+//import 'Screens/workshop_homepage.dart'; // <-- NEW IMPORT
 
 import 'Screens/ManageForemanSchedule/manage_foreman_schedule_barrel.dart';
 import 'Screens/ManageRating/manage_rating_barrel.dart';
@@ -192,7 +192,6 @@ class AuthGate extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
-
   final String title;
   //final Icon icon;
 
@@ -259,7 +258,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (currentUserRole == null) {
       return [const Center(child: CircularProgressIndicator())];
     }
-    return [
+    List<Widget> pages = [
       const WorkshopHomePage(),
       currentUserRole == 'foreman'
           ? SelectSchedulePage(foremenId: currentUserId)
@@ -267,8 +266,13 @@ class _MyHomePageState extends State<MyHomePage> {
       currentUserRole == 'foreman'
           ? ViewProfilePageForeman(foremanId: currentUserId)
           : ViewProfilePageWorkshopOwner(workshopOwnerId: currentUserId),
-      const ItemListScreen(),
     ];
+
+    /// Manage Inventory only accessible for workshop owner
+    if (currentUserRole != null && currentUserRole == 'workshop_owner') {
+      pages.add(ListInventoryPage(currentUserRole: currentUserRole!));
+    }
+    return pages;
   }
 
   Future<void> _confirmLogout() async {
@@ -332,17 +336,23 @@ class _MyHomePageState extends State<MyHomePage> {
         unselectedItemColor: Colors.grey,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
+        items: [
+          const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          const BottomNavigationBarItem(
             icon: Icon(Icons.schedule),
             label: 'Schedule',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.inventory),
-            label: 'Inventory',
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
           ),
+
+          /// MANAGE INVENTORY ONLY WORKSHOP OWNER CAN ACCESS
+          if (currentUserRole == 'workshop_owner')
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.inventory),
+              label: 'Inventory',
+            ),
         ],
       ),
     );

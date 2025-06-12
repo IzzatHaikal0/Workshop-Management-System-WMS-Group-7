@@ -5,7 +5,7 @@ import 'package:workshop_management_system/Models/ManageInventory/request_model.
 class RequestController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // create request
+  /// CREATE NEW INVENTORY REQUEST BY CURRENT USER
   Future<Request> createRequest({
     required String itemName,
     required int quantity,
@@ -32,7 +32,7 @@ class RequestController {
     }
   }
 
-  //Stream all requests - current user
+  /// STREAM ALL REQUESTS CREATED BY CURRENT USER
   Stream<List<Request>> getMyRequestsStream() {
     final String? uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return Stream.value([]);
@@ -47,7 +47,7 @@ class RequestController {
         );
   }
 
-  //Stream pending approvals - other user
+  /// STREAM ALL PENDING REQUESTS FOR APPROVAL (EXCLUDING CURRENT USER)
   Stream<List<Request>> getPendingApprovalsStream() {
     return _firestore
         .collection('InventoryRequest')
@@ -59,7 +59,7 @@ class RequestController {
         );
   }
 
-  // Stream requests by status - current user
+  /// STREAM USER'S REQUESTS FILTERED BY STATUS (E.G., PENDING, ACCEPTED)
   Stream<List<Request>> getRequestsByStatusStream(String status) {
     final String? uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return Stream.value([]);
@@ -75,7 +75,7 @@ class RequestController {
         );
   }
 
-  // approve request
+  /// APPROVE REQUEST IF NOT REQUESTED BY THE SAME USER
   Future<Request?> acceptRequest(String requestId, String? notes) async {
     final String? uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) throw Exception('User not authenticated');
@@ -112,7 +112,7 @@ class RequestController {
     }
   }
 
-  // reject request
+  /// REJECT REQUEST IF NOT CREATED BY SAME USER
   Future<Request?> rejectRequest(String requestId, String? notes) async {
     final String? uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) throw Exception('User not authenticated');
@@ -141,7 +141,7 @@ class RequestController {
     }
   }
 
-  // Delete pending request by current user
+  /// DELETE USER'S OWN REQUEST IF STATUS IS PENDING / REJECTED / ACCEPTED
   Future<bool> deleteRequest(String requestId) async {
     final String? uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) throw Exception('User not authenticated');
@@ -165,7 +165,7 @@ class RequestController {
     }
   }
 
-  // get request by id
+  /// FETCH SINGLE REQUEST BY ID
   Future<Request?> getRequest(String requestId) async {
     try {
       final doc =

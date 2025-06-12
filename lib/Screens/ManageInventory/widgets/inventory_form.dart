@@ -4,12 +4,12 @@ import 'package:workshop_management_system/Models/ManageInventory/item_model.dar
 import 'package:workshop_management_system/Screens/ManageInventory/widgets/custom_text.dart';
 
 /* FORM WIDGET TO CREATE AND EDIT ITEM */
-class ItemForm extends StatefulWidget {
+class InventoryForm extends StatefulWidget {
   final Item? initialItem;
   final Function(String, String, int, double) onSubmit;
   final String submitButtonText;
 
-  const ItemForm({
+  const InventoryForm({
     super.key,
     this.initialItem,
     required this.onSubmit,
@@ -17,10 +17,10 @@ class ItemForm extends StatefulWidget {
   });
 
   @override
-  State<ItemForm> createState() => _ItemFormState();
+  State<InventoryForm> createState() => _InventoryFormState();
 }
 
-class _ItemFormState extends State<ItemForm> {
+class _InventoryFormState extends State<InventoryForm> {
   /* CONTROLLER FOR EACH FORM*/
   final _formKey = GlobalKey<FormState>();
   final _itemNameController = TextEditingController();

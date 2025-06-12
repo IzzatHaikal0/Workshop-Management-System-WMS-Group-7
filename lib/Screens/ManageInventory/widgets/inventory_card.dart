@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:workshop_management_system/Models/ManageInventory/item_model.dart';
 import 'package:workshop_management_system/Screens/ManageInventory/widgets/custom_text.dart';
 
-class ItemCard extends StatelessWidget {
+class InventoryCard extends StatelessWidget {
   final Item item;
   final VoidCallback onTap;
 
-  const ItemCard({super.key, required this.item, required this.onTap});
+  const InventoryCard({super.key, required this.item, required this.onTap});
   /*  RETURN STOCK COLOR BASED ON QUANTITY LEVEL*/
   Color _getStockStatusColor() {
     if (item.quantity == 0) return Colors.red;
@@ -104,7 +104,7 @@ class ItemCard extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: _getStockStatusColor().withOpacity(0.1),
+                            color: _getStockStatusColor().withAlpha(25),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(

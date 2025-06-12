@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// REPRESENTS AN ITEM REQUEST RECORD IN THE SYSTEM
 class Request {
   final String? id;
   final String itemName;
@@ -25,6 +26,7 @@ class Request {
     this.shippedDate,
   });
 
+  /// CONVERTS REQUEST OBJECT INTO A MAP FOR FIRESTORE
   Map<String, dynamic> toJson() {
     return {
       'itemName': itemName,
@@ -39,6 +41,7 @@ class Request {
     };
   }
 
+  /// CREATES A REQUEST OBJECT FROM A FIRESTORE DOCUMENT SNAPSHOT
   factory Request.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return Request(
@@ -55,6 +58,7 @@ class Request {
     );
   }
 
+  /// CREATES A REQUEST OBJECT FROM A RAW MAP AND A GIVEN ID
   factory Request.fromMap(Map<String, dynamic> data, String id) {
     return Request(
       id: id,
@@ -70,6 +74,7 @@ class Request {
     );
   }
 
+  /// RETURNS A NEW REQUEST OBJECT WITH UPDATED VALUES
   Request copyWith({
     String? id,
     String? itemName,

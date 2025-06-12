@@ -4,14 +4,14 @@ import 'package:workshop_management_system/Models/ManageInventory/inventory_barr
 import 'package:workshop_management_system/Screens/ManageInventory/inventory_barrel.dart';
 import 'package:workshop_management_system/Screens/ManageInventory/widgets/custom_text.dart';
 
-class RequestListScreen extends StatefulWidget {
-  const RequestListScreen({super.key});
+class ListRequestPage extends StatefulWidget {
+  const ListRequestPage({super.key});
 
   @override
-  State<RequestListScreen> createState() => _RequestListScreenState();
+  State<ListRequestPage> createState() => _ListRequestPageState();
 }
 
-class _RequestListScreenState extends State<RequestListScreen> {
+class _ListRequestPageState extends State<ListRequestPage> {
   final RequestController _requestController = RequestController();
   String _selectedStatus = 'All';
   final TextEditingController _searchController = TextEditingController();
@@ -48,7 +48,6 @@ class _RequestListScreenState extends State<RequestListScreen> {
     }).toList();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,7 +59,7 @@ class _RequestListScreenState extends State<RequestListScreen> {
             _buildSearchAndFilterSection(),
             Expanded(child: _buildMyRequestsView()),
           ] else if (_selectedSegment == 1) ...[
-            Expanded(child: const RequestIncomingScreen()),
+            Expanded(child: const IncomingRequestPage()),
           ],
         ],
       ),
@@ -91,6 +90,7 @@ class _RequestListScreenState extends State<RequestListScreen> {
       ),
     );
   }
+
   ///WIDGET FOR SEGMENTED BUTTON
   Widget _buildSegmentedHeader() {
     return Padding(
@@ -157,7 +157,7 @@ class _RequestListScreenState extends State<RequestListScreen> {
       color: Colors.grey[50],
       child: Column(
         children: [
-         /**SEARCH SECTION */
+          /**SEARCH SECTION */
           TextField(
             controller: _searchController,
             decoration: InputDecoration(
@@ -234,9 +234,7 @@ class _RequestListScreenState extends State<RequestListScreen> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => const RequestCreateScreen(),
-                      ),
+                      MaterialPageRoute(builder: (_) => const AddRequestPage()),
                     );
                   },
                   style: ElevatedButton.styleFrom(

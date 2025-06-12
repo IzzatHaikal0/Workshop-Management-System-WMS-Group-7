@@ -4,20 +4,22 @@ import 'package:workshop_management_system/Models/ManageInventory/item_model.dar
 import 'package:workshop_management_system/Screens/ManageInventory/inventory_barrel.dart';
 import 'package:workshop_management_system/Screens/ManageInventory/widgets/custom_text.dart';
 
-class ItemListScreen extends StatefulWidget {
-  const ItemListScreen({super.key});
+/// Inventory listing screen, accessible only to users with the 'workshop_owner' role.
+class ListInventoryPage extends StatefulWidget {
+  final String currentUserRole;
+  const ListInventoryPage({super.key, required this.currentUserRole});
 
   @override
-  State<ItemListScreen> createState() => _ItemListScreenState();
+  State<ListInventoryPage> createState() => _ListInventoryPageState();
 }
 
-class _ItemListScreenState extends State<ItemListScreen> {
+class _ListInventoryPageState extends State<ListInventoryPage> {
   final ItemController _itemController = ItemController();
   final TextEditingController _searchController = TextEditingController();
   String _searchText = '';
   String _selectedCategory = 'All';
 
-  /// CATEGORY LISTS
+  /// CATEGORY LISTS FOR FILTER DROPDOWN
   final List<String> _categories = [
     'All',
     'Tools',
@@ -34,6 +36,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
     super.dispose();
   }
 
+  /// Returns a stream of items, filtered by selected category
   Stream<List<Item>> _getFilteredItems() {
     if (_selectedCategory == 'All') {
       return _itemController.getItemsStream();
@@ -42,6 +45,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
     }
   }
 
+  /// Filters a list of items by the search text
   List<Item> _filterBySearch(List<Item> items) {
     if (_searchText.isEmpty) return items;
 
@@ -51,6 +55,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
     }).toList();
   }
 
+  /// Builds the UI for search bar, category filter, and Add button
   Widget _buildSearchAndFilterSection() {
     return Container(
       padding: const EdgeInsets.all(16.0),
@@ -58,7 +63,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /**SEARCH SECTION */
+          /**SEARCH BAR*/
           TextField(
             controller: _searchController,
             onChanged: (value) {
@@ -133,7 +138,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const ItemCreateScreen(),
+                        builder: (_) => const AddInventoryPage(),
                       ),
                     );
                   },
@@ -161,6 +166,18 @@ class _ItemListScreenState extends State<ItemListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    /// Restrict access to workshop owner role only
+    if (widget.currentUserRole != 'workshop_owner') {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            'Access denied.Only Workshop Owners can view this screen.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 16, color: Colors.redAccent),
+          ),
+        ),
+      );
+    }
     return Scaffold(
       body: Column(
         children: [
@@ -197,7 +214,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const RequestListScreen(),
+                        builder: (_) => const ListRequestPage(),
                       ),
                     );
                   },
@@ -281,13 +298,13 @@ class _ItemListScreenState extends State<ItemListScreen> {
                       final item = filteredItems[index];
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12.0),
-                        child: ItemCard(
+                        child: InventoryCard(
                           item: item,
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => ItemDetailScreen(item: item),
+                                builder: (_) => DetailInventoryPage(item: item),
                               ),
                             );
                           },

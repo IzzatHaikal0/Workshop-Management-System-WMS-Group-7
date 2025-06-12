@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:workshop_management_system/Controllers/ManageInventory/item_controller.dart';
 import 'package:workshop_management_system/Models/ManageInventory/item_model.dart';
-import 'package:workshop_management_system/Screens/ManageInventory/item_edit_screen.dart';
+import 'package:workshop_management_system/Screens/ManageInventory/edit_inventory_page.dart';
 import 'package:workshop_management_system/Screens/ManageInventory/widgets/custom_text.dart';
 
-class ItemDetailScreen extends StatefulWidget {
+class DetailInventoryPage extends StatefulWidget {
   final Item item;
 
-  const ItemDetailScreen({super.key, required this.item});
+  const DetailInventoryPage({super.key, required this.item});
 
   @override
-  State<ItemDetailScreen> createState() => _ItemDetailScreenState();
+  State<DetailInventoryPage> createState() => _DetailInventoryPageState();
 }
 
-class _ItemDetailScreenState extends State<ItemDetailScreen> {
+class _DetailInventoryPageState extends State<DetailInventoryPage> {
   final ItemController _itemController = ItemController();
   late Item _currentItem;
   bool _isLoading = false;
@@ -134,7 +134,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                         context,
                         MaterialPageRoute(
                           builder:
-                              (context) => ItemEditScreen(item: _currentItem),
+                              (context) => EditInventoryPage(item: _currentItem),
                         ),
                       );
                       if (updatedItem != null) {
