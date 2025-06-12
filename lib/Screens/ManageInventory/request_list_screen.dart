@@ -18,10 +18,11 @@ class _RequestListScreenState extends State<RequestListScreen> {
   String _searchText = '';
   int _selectedSegment = 0;
 
+  /// STATUS OPTIONS LISTS
   final List<String> _statusOptions = [
     'All',
     'pending',
-    'approved',
+    'accepted',
     'rejected',
   ];
 
@@ -47,18 +48,6 @@ class _RequestListScreenState extends State<RequestListScreen> {
     }).toList();
   }
 
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'pending':
-        return Colors.orange;
-      case 'approved':
-        return Colors.blue;
-      case 'rejected':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,21 +60,9 @@ class _RequestListScreenState extends State<RequestListScreen> {
             _buildSearchAndFilterSection(),
             Expanded(child: _buildMyRequestsView()),
           ] else if (_selectedSegment == 1) ...[
-            Expanded(child: const RequestApprovalScreen()),
+            Expanded(child: const RequestIncomingScreen()),
           ],
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const RequestCreateScreen(),
-            ),
-          );
-        },
-        backgroundColor: const Color.fromARGB(255, 233, 238, 249),
-        child: const Icon(Icons.add),
       ),
     );
   }
@@ -114,7 +91,7 @@ class _RequestListScreenState extends State<RequestListScreen> {
       ),
     );
   }
-
+  ///WIDGET FOR SEGMENTED BUTTON
   Widget _buildSegmentedHeader() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -152,7 +129,7 @@ class _RequestListScreenState extends State<RequestListScreen> {
                 isSelected
                     ? [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withAlpha(25),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -180,11 +157,11 @@ class _RequestListScreenState extends State<RequestListScreen> {
       color: Colors.grey[50],
       child: Column(
         children: [
-          // search
+         /**SEARCH SECTION */
           TextField(
             controller: _searchController,
             decoration: InputDecoration(
-              hintText: 'Search items...',
+              hintText: 'Search requests...',
               prefixIcon: const Icon(Icons.search),
               filled: true,
               fillColor: const Color.fromARGB(255, 250, 250, 250),
@@ -210,36 +187,74 @@ class _RequestListScreenState extends State<RequestListScreen> {
             },
           ),
           const SizedBox(height: 12),
-          SizedBox(
-            height: 40,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: _statusOptions.length,
-              itemBuilder: (context, index) {
-                final status = _statusOptions[index];
-                final isSelected = _selectedStatus == status;
-
-                /// status filter
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: FilterChip(
-                    label: Text(
-                      status == 'All' ? 'All' : status,
-                      style: MyTextStyles.regular,
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              /**STATUS FILTER DROPDOWN */
+              Container(
+                height: 40,
+                width: 150,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFAFAFA),
+                  border: Border.all(color: const Color(0xFFDBE1F4)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _selectedStatus,
+                    icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                    style: MyTextStyles.medium.copyWith(
+                      color: const Color(0xFF006FFD),
+                      fontSize: 12,
                     ),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() {
-                        _selectedStatus = status;
-                      });
+                    items:
+                        _statusOptions.map((String category) {
+                          return DropdownMenuItem<String>(
+                            value: category,
+                            child: Text(category),
+                          );
+                        }).toList(),
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          _selectedStatus = newValue;
+                        });
+                      }
                     },
-                    backgroundColor: Colors.white,
-                    selectedColor: _getStatusColor(status).withAlpha(50),
-                    checkmarkColor: _getStatusColor(status),
                   ),
-                );
-              },
-            ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              SizedBox(
+                height: 40,
+                width: 80,
+                child: ElevatedButton(
+                  /**ADD BUTTON */
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const RequestCreateScreen(),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    backgroundColor: const Color(0xFFFAFAFA),
+                    foregroundColor: const Color(0xFF006FFD),
+                    side: const BorderSide(color: Color(0xFFDBE1F4)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    'Add',
+                    style: MyTextStyles.medium.copyWith(fontSize: 12),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -317,6 +332,7 @@ class _RequestListScreenState extends State<RequestListScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
+            /**SHOW DIALOG TO DISPLAY REQUEST DETAILS */
             backgroundColor: Colors.white,
             title: Text(request.itemName, style: MyTextStyles.semiBold),
             content: Column(
@@ -351,13 +367,14 @@ class _RequestListScreenState extends State<RequestListScreen> {
               ],
             ),
             actions: [
+              /**CAN DELETE OR CLOSE THE DIALOG AS LONG*/
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: const Text('Close', style: MyTextStyles.regular),
               ),
               if (request.status == 'pending' ||
                   request.status == 'rejected' ||
-                  request.status == 'approved')
+                  request.status == 'accepted')
                 TextButton(
                   onPressed: () async {
                     Navigator.pop(context);

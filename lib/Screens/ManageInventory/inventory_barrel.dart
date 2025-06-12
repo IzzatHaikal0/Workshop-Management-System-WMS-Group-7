@@ -7,6 +7,6 @@ export '../ManageInventory/widgets/item_card.dart';
 
 export 'request_list_screen.dart';
 export 'request_create_screen.dart';
-export 'request_approval_screen.dart';
+export 'request_incoming_screen.dart';
 export '../ManageInventory/widgets/request_card.dart';
 export '../ManageInventory/widgets/request_form.dart';

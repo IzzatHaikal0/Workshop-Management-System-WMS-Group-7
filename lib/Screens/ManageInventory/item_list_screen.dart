@@ -13,10 +13,11 @@ class ItemListScreen extends StatefulWidget {
 
 class _ItemListScreenState extends State<ItemListScreen> {
   final ItemController _itemController = ItemController();
-  String _selectedCategory = 'All';
   final TextEditingController _searchController = TextEditingController();
   String _searchText = '';
+  String _selectedCategory = 'All';
 
+  /// CATEGORY LISTS
   final List<String> _categories = [
     'All',
     'Tools',
@@ -50,11 +51,120 @@ class _ItemListScreenState extends State<ItemListScreen> {
     }).toList();
   }
 
+  Widget _buildSearchAndFilterSection() {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      color: Colors.grey[50],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          /**SEARCH SECTION */
+          TextField(
+            controller: _searchController,
+            onChanged: (value) {
+              setState(() {
+                _searchText = value;
+              });
+            },
+            decoration: InputDecoration(
+              hintText: 'Search items...',
+              prefixIcon: const Icon(Icons.search),
+              filled: true,
+              fillColor: const Color(0xFFFAFAFA),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Color(0xFFDBE1F4)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Colors.grey, width: 1.5),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              /**CATEGORY FILTER DROPDOWN */
+              Container(
+                height: 40,
+                width: 150,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFAFAFA),
+                  border: Border.all(color: const Color(0xFFDBE1F4)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _selectedCategory,
+                    icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                    style: MyTextStyles.medium.copyWith(
+                      color: const Color(0xFF006FFD),
+                      fontSize: 12,
+                    ),
+                    items:
+                        _categories.map((String category) {
+                          return DropdownMenuItem<String>(
+                            value: category,
+                            child: Text(category),
+                          );
+                        }).toList(),
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          _selectedCategory = newValue;
+                        });
+                      }
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              SizedBox(
+                height: 40,
+                width: 80,
+                child: ElevatedButton(
+                  /**ADD BUTTON */
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ItemCreateScreen(),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    backgroundColor: const Color(0xFFFAFAFA),
+                    foregroundColor: const Color(0xFF006FFD),
+                    side: const BorderSide(color: Color(0xFFDBE1F4)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    'Add',
+                    style: MyTextStyles.medium.copyWith(fontSize: 12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
+          /**HEADER */
           Container(
             padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
             child: Row(
@@ -72,7 +182,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
                       'Inventory',
                       style: MyTextStyles.bold.copyWith(
                         fontSize: 16,
-                        color: Color.fromARGB(255, 0, 0, 0),
+                        color: Colors.black,
                       ),
                     ),
                   ),
@@ -82,12 +192,12 @@ class _ItemListScreenState extends State<ItemListScreen> {
                     Icons.request_page,
                     color: Color(0xFF4169E1),
                   ),
-                  tooltip: 'View Requests',
+                  tooltip: 'Request Items',
                   onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const RequestListScreen(),
+                        builder: (_) => const RequestListScreen(),
                       ),
                     );
                   },
@@ -95,84 +205,11 @@ class _ItemListScreenState extends State<ItemListScreen> {
               ],
             ),
           ),
-          // search
-          Container(
-            padding: const EdgeInsets.all(16.0),
-            color: Colors.grey[50],
-            child: Column(
-              children: [
-                // search
-                TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search items...',
-                    prefixIcon: const Icon(Icons.search),
-                    filled: true,
-                    fillColor: const Color.fromARGB(255, 250, 250, 250),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: Color.fromARGB(255, 219, 225, 244),
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: Colors.grey,
-                        width: 1.5,
-                      ),
-                    ),
-                  ),
-                  onChanged: (value) {
-                    setState(() {
-                      _searchText = value;
-                    });
-                  },
-                ),
 
-                const SizedBox(height: 12),
-                // category filter
-                SizedBox(
-                  height: 40,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _categories.length,
-                    itemBuilder: (context, index) {
-                      final category = _categories[index];
-                      final isSelected = _selectedCategory == category;
+          /** CALL WIDGET SEARCH, FILTER AND ADD BUTTON*/
+          _buildSearchAndFilterSection(),
 
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: FilterChip(
-                          label: Text((category), style: MyTextStyles.regular),
-                          selected: isSelected,
-                          onSelected: (selected) {
-                            setState(() {
-                              _selectedCategory = category;
-                            });
-                          },
-                          backgroundColor: Colors.white,
-                          selectedColor: Colors.grey[300],
-                          checkmarkColor: const Color(0xFF4169E1),
-                          side: BorderSide(
-                            color:
-                                isSelected
-                                    ? Colors.grey[300]!
-                                    : const Color.fromARGB(255, 219, 225, 244),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // list
+          /**LIST OF ITEMS*/
           Expanded(
             child: StreamBuilder<List<Item>>(
               stream: _getFilteredItems(),
@@ -205,7 +242,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
 
                 final allItems = snapshot.data ?? [];
                 final filteredItems = _filterBySearch(allItems);
-
+                /**IF NO MATCHING RESULTS FOR CATEGORY */
                 if (filteredItems.isEmpty) {
                   return Center(
                     child: Column(
@@ -236,9 +273,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
                 }
 
                 return RefreshIndicator(
-                  onRefresh: () async {
-                    setState(() {});
-                  },
+                  onRefresh: () async => setState(() {}),
                   child: ListView.builder(
                     padding: const EdgeInsets.all(16.0),
                     itemCount: filteredItems.length,
@@ -252,8 +287,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder:
-                                    (context) => ItemDetailScreen(item: item),
+                                builder: (_) => ItemDetailScreen(item: item),
                               ),
                             );
                           },
@@ -266,16 +300,6 @@ class _ItemListScreenState extends State<ItemListScreen> {
             ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const ItemCreateScreen()),
-          );
-        },
-        backgroundColor: const Color.fromARGB(255, 233, 238, 249),
-        child: const Icon(Icons.add),
       ),
     );
   }

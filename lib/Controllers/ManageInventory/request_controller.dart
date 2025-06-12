@@ -76,7 +76,7 @@ class RequestController {
   }
 
   // approve request
-  Future<Request?> approveRequest(String requestId, String? notes) async {
+  Future<Request?> acceptRequest(String requestId, String? notes) async {
     final String? uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) throw Exception('User not authenticated');
     final docRef = _firestore.collection('InventoryRequest').doc(requestId);
@@ -86,11 +86,11 @@ class RequestController {
 
       final request = Request.fromFirestore(doc);
       if (request.requestedBy == uid) {
-        throw Exception('You cannot approve your own request');
+        throw Exception('You cannot accept your own request');
       }
 
       await docRef.update({
-        'status': 'approved',
+        'status': 'accepted',
         'approvedBy': uid,
         'approvedDate': FieldValue.serverTimestamp(),
 
@@ -155,7 +155,7 @@ class RequestController {
       if (request.requestedBy != uid ||
           !(request.status == 'pending' ||
               request.status == 'rejected' ||
-              request.status == 'approved')) {
+              request.status == 'accepted')) {
         return false;
       }
       await docRef.delete();

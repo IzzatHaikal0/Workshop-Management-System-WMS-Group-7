@@ -71,9 +71,11 @@ class _RequestCreateScreenState extends State<RequestCreateScreen> {
       ),
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       body:
+      /**BODY SECTION */
           _isLoading
               ? const Center(child: CircularProgressIndicator())
               : RequestForm(
+                /**SUBMIT BUTTON, USE REQUEST FORM WIDGET */
                 onSubmit: _createRequest,
                 submitButtonText: 'Create Request',
               ),

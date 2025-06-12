@@ -17,48 +17,16 @@ class RequestCard extends StatelessWidget {
     this.onApprove,
     this.onReject,
   });
-
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return Colors.orange;
-      case 'approved':
-        return Colors.blue;
-      case 'rejected':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  IconData _getStatusIcon(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return Icons.hourglass_empty;
-      case 'approved':
-        return Icons.check_circle;
-      case 'rejected':
-        return Icons.cancel_outlined;
-      default:
-        return Icons.help_outline;
-    }
-  }
-
+  /* RETURN DATE FORMAT (dd,mm,yyyy) */
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _getStatusColor(request.status);
-    final statusIcon = _getStatusIcon(request.status);
-
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: statusColor.withOpacity(0.3), width: 1),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -70,23 +38,9 @@ class RequestCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // icon
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      Icons.inventory_2_outlined,
-                      color: statusColor,
-                      size: 24,
-                    ),
-                  ),
                   const SizedBox(width: 12),
 
-                  // request details
+                  /* REQUEST DETAILS */
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,38 +67,12 @@ class RequestCard extends StatelessWidget {
                       ],
                     ),
                   ),
-
-                  // status
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(statusIcon, size: 14, color: statusColor),
-                        const SizedBox(width: 4),
-                        Text(
-                          request.status.toUpperCase(),
-                          style: MyTextStyles.semiBold.copyWith(
-                            fontSize: 11,
-                            color: statusColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
               ),
 
               const SizedBox(height: 12),
 
-              // date and notes
+              /* REQUESTED DATE, APPROVED DATE */
               Row(
                 children: [
                   Icon(Icons.calendar_today, size: 14, color: Colors.grey[600]),
@@ -175,14 +103,14 @@ class RequestCard extends StatelessWidget {
                 ],
               ),
 
-              // notes
+              /* NOTES */
               if (request.notes != null && request.notes!.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 248, 248, 248),
+                    color: const Color(0xFF4169E1).withAlpha(25),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
@@ -194,7 +122,7 @@ class RequestCard extends StatelessWidget {
                 ),
               ],
 
-              // approval action
+              /* ACCEPT/APPROVE ACTION */
               if (showApprovalActions && request.status == 'pending') ...[
                 const SizedBox(height: 12),
                 const Divider(height: 1),
@@ -203,35 +131,22 @@ class RequestCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Expanded(
-                      child: TextButton.icon(
-                        onPressed: onReject,
-                        icon: const Icon(Icons.close, size: 18),
-                        label: const Text(
-                          'Reject',
-                          style: MyTextStyles.semiBold,
-                        ),
+                      child: TextButton(
+                        onPressed: onApprove,
                         style: TextButton.styleFrom(
-                          foregroundColor: Colors.red,
-                          backgroundColor: Colors.red.withOpacity(0.1),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                          foregroundColor: Color(0xFF006FFD),
                         ),
+                        child: const Text(('Accept'), style: MyTextStyles.bold),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: TextButton.icon(
-                        onPressed: onApprove,
-                        icon: const Icon(Icons.check, size: 18),
-                        label: const Text('Approve', style: MyTextStyles.bold),
+                      child: TextButton(
+                        onPressed: onReject,
                         style: TextButton.styleFrom(
-                          foregroundColor: Colors.green,
-                          backgroundColor: Colors.green.withOpacity(0.1),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                          foregroundColor: Color(0xFF006FFD),
                         ),
+                        child: const Text(('Reject'), style: MyTextStyles.bold),
                       ),
                     ),
                   ],

@@ -24,30 +24,40 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     _currentItem = widget.item;
   }
 
+  //BUTTON FOR DELETION
   Future<void> _deleteItem() async {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text(('Delete Item'), style: MyTextStyles.medium),
+            actionsAlignment: MainAxisAlignment.center,
+            title: const Text(('Delete'), style: MyTextStyles.medium, textAlign: TextAlign.center,
+            ),
             content: Text(
               ('Are you sure you want to delete "${_currentItem.itemName}"?'),
-              style: MyTextStyles.regular,
+              style: MyTextStyles.regular, textAlign: TextAlign.center,
             ),
+            //DIALOG
             actions: [
+              //CANCEL ACTION BUTTON
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
+                style: TextButton.styleFrom(
+                  foregroundColor:  Color(0xFF006FFD),
+                ),
                 child: const Text(('Cancel'), style: MyTextStyles.regular),
               ),
+              //DELETE ACTION BUTTON
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-                child: const Text(('Delete'), style: MyTextStyles.regular),
+                style: TextButton.styleFrom(foregroundColor:  Colors.white,backgroundColor: Color(0xFF006FFD),
+                ),
+                child: const Text('Delete', style: MyTextStyles.regular),
               ),
             ],
           ),
     );
-
+    // HANDLE DELETE FUNCTION
     if (shouldDelete == true && _currentItem.id != null) {
       setState(() => _isLoading = true);
 
@@ -65,6 +75,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           Navigator.pop(context, true);
         }
       } catch (e) {
+        //ERROR MESSAGE
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -81,17 +92,20 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     }
   }
 
+  //DATETIME FORMAT 
   String _formatDateTime(DateTime? dateTime) {
     if (dateTime == null) return 'Not available';
     return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
+  //STOCK STATUS COLOR
   Color _getStockStatusColor() {
     if (_currentItem.quantity == 0) return Colors.red;
     if (_currentItem.quantity <= 5) return Colors.orange;
     return Colors.green;
   }
 
+  //STOCK STATUS TEXT
   String _getStockStatus() {
     if (_currentItem.quantity == 0) return 'Out of Stock';
     if (_currentItem.quantity <= 5) return 'Low Stock';
@@ -109,8 +123,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         centerTitle: true,
         backgroundColor: Colors.white,
         actions: [
+          //EDIT ICON BUTTON
           IconButton(
-            icon: const Icon(Icons.edit),
+            icon: const Icon(Icons.edit,  color: Color(0xFF4169E1)),
             onPressed:
                 _isLoading
                     ? null
@@ -127,13 +142,15 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                       }
                     },
           ),
+          //DELETE ICON BUTTON
           IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
+            icon: const Icon(Icons.delete, color: Color(0xFF4169E1)),
             onPressed: _isLoading ? null : _deleteItem,
           ),
         ],
       ),
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      //BODY
       body:
           _isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -150,7 +167,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                       children: [
                         _buildHeaderCard(context),
                         const SizedBox(height: 24),
-                        _buildSectionTitle(context, 'Item Details'),
+                        _buildSectionTitle(context, 'Details'),
                         const SizedBox(height: 16),
                         _buildDetailRow('Category', _currentItem.itemCategory),
                         _buildDetailRow(
@@ -158,16 +175,13 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                           _currentItem.quantity.toString(),
                         ),
                         _buildDetailRow(
-                          'Unit Price',
+                          'Price Per Unit',
                           'RM ${_currentItem.unitPrice.toStringAsFixed(2)}',
                         ),
                         _buildDetailRow(
                           'Total Value',
                           'RM ${(_currentItem.quantity * _currentItem.unitPrice).toStringAsFixed(2)}',
                         ),
-                        const SizedBox(height: 24),
-                        _buildSectionTitle(context, 'Timestamps'),
-                        const SizedBox(height: 16),
                         _buildDetailRow(
                           'Created At',
                           _formatDateTime(_currentItem.createdAt),
@@ -184,7 +198,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               ),
     );
   }
-
+  //HEADER WIDGET
   Widget _buildHeaderCard(BuildContext context) {
     return Row(
       children: [
@@ -226,11 +240,11 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       ],
     );
   }
-
+  //SECTION TITLE
   Widget _buildSectionTitle(BuildContext context, String title) {
     return Text(title, style: MyTextStyles.bold.copyWith());
   }
-
+  //DETAIL ROW WIDGET
   Widget _buildDetailRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),

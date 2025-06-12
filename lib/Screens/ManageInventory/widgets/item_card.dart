@@ -7,19 +7,21 @@ class ItemCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const ItemCard({super.key, required this.item, required this.onTap});
-
+  /*  RETURN STOCK COLOR BASED ON QUANTITY LEVEL*/
   Color _getStockStatusColor() {
     if (item.quantity == 0) return Colors.red;
     if (item.quantity <= 5) return Colors.orange;
     return Colors.green;
   }
 
+  /* RETURN TEXT LABEL BASED ON STOCK LEVEL */
   String _getStockStatus() {
     if (item.quantity == 0) return 'Out of Stock';
     if (item.quantity <= 5) return 'Low Stock';
     return 'In Stock';
   }
 
+  /*  RETURN ICON BASED ON ITEM CATEGORY*/
   IconData _getCategoryIcon() {
     switch (item.itemCategory.toLowerCase()) {
       case 'tools':
@@ -52,7 +54,7 @@ class ItemCard extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
-              // icon
+              /* CATEGORY ICON */
               Container(
                 width: 48,
                 height: 48,
@@ -68,12 +70,13 @@ class ItemCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
 
-              // item details
+              /* ITEM DETAILS */
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
+                      /* ITEM NAME */
                       item.itemName,
                       style: MyTextStyles.bold.copyWith(),
                       maxLines: 1,
@@ -81,7 +84,7 @@ class ItemCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
 
-                    // Category
+                    /* ITEM CATEGORY */
                     Text(
                       item.itemCategory,
                       style: MyTextStyles.regular.copyWith(
@@ -91,9 +94,10 @@ class ItemCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
 
-                    // stock and quantity status
+                    /* STOCK STATUS AND QTY */
                     Row(
                       children: [
+                        /* BADGE CONTAINER */
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -113,6 +117,7 @@ class ItemCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
+                          /* QUANTITY */
                           'Qty: ${item.quantity}',
                           style: MyTextStyles.medium.copyWith(
                             fontSize: 10,
@@ -125,11 +130,12 @@ class ItemCard extends StatelessWidget {
                 ),
               ),
 
-              // price
+              /* PRICE AND TOTAL */
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
+                    /* PRICE PER UNIT */
                     'RM ${item.unitPrice.toStringAsFixed(2)}',
                     style: MyTextStyles.semiBold.copyWith(
                       color: Theme.of(context).primaryColor,
@@ -137,11 +143,13 @@ class ItemCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
+                    /* TOTAL = PRICE * QTY */
                     'Total: RM ${(item.quantity * item.unitPrice).toStringAsFixed(2)}',
                     style: MyTextStyles.regular.copyWith(
                       color: Colors.grey[600],
                     ),
                   ),
+                  /* ICON TO VIEW ITEM DETAILS */
                   const SizedBox(height: 8),
                   Icon(
                     Icons.arrow_forward_ios,
