@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// REPRESENTS AN ITEM IN THE INVENTORY SYSTEM
 class Item {
   final String? id;
   final String itemName;
@@ -21,6 +22,7 @@ class Item {
     this.updatedAt,
   });
 
+  /// CONVERTS THIS ITEM OBJECT TO A MAP FOR STORING IN FIRESTORE
   Map<String, dynamic> toJson() {
     return {
       'itemName': itemName,
@@ -33,6 +35,7 @@ class Item {
     };
   }
 
+  /// CREATES AN ITEM OBJECT FROM A FIRESTORE DOCUMENT SNAPSHOT
   factory Item.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return Item(
@@ -47,6 +50,7 @@ class Item {
     );
   }
 
+  /// CREATES AN ITEM OBJECT FROM A RAW MAP AND EXPLICIT DOCUMENT ID
   factory Item.fromMap(Map<String, dynamic> data, String id) {
     return Item(
       id: id,
@@ -60,6 +64,7 @@ class Item {
     );
   }
 
+  /// RETURNS A NEW ITEM OBJECT WITH UPDATED VALUES
   Item copyWith({
     String? id,
     String? itemName,

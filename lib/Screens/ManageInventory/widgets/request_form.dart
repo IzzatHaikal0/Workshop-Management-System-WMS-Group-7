@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:workshop_management_system/Screens/ManageInventory/widgets/custom_text.dart';
 
+/// A reusable form widget for submitting item requests
 class RequestForm extends StatefulWidget {
   final Function(String itemName, int quantity, String? notes) onSubmit;
   final String submitButtonText;
@@ -24,12 +25,14 @@ class _RequestFormState extends State<RequestForm> {
 
   @override
   void dispose() {
+    ///Clean up controllers when widget is disposed
     _itemNameController.dispose();
     _quantityController.dispose();
     _notesController.dispose();
     super.dispose();
   }
 
+  ///Validates and submits the form data to the parent widget
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       final itemName = _itemNameController.text.trim();
@@ -43,6 +46,7 @@ class _RequestFormState extends State<RequestForm> {
     }
   }
 
+  /// Builds the form section header
   Widget _buildHeader() {
     return Container(
       alignment: Alignment.centerLeft,
@@ -74,6 +78,7 @@ class _RequestFormState extends State<RequestForm> {
                   children: [
                     _buildHeader(),
                     const SizedBox(height: 16),
+                    /** Item Name Input Field */
                     TextFormField(
                       controller: _itemNameController,
                       decoration: InputDecoration(
@@ -101,6 +106,7 @@ class _RequestFormState extends State<RequestForm> {
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
+                      /** Quantity Input Field */
                       controller: _quantityController,
                       decoration: InputDecoration(
                         labelText: 'Quantity',
@@ -135,6 +141,7 @@ class _RequestFormState extends State<RequestForm> {
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
+                      /** Notes Input Field (Optional) */
                       controller: _notesController,
                       decoration: InputDecoration(
                         labelText: 'Notes (Optional)',
@@ -154,6 +161,7 @@ class _RequestFormState extends State<RequestForm> {
                     ),
 
                     const SizedBox(height: 24),
+                    /** Submit Button */
                     ElevatedButton(
                       onPressed: _submitForm,
                       style: ElevatedButton.styleFrom(
@@ -174,6 +182,7 @@ class _RequestFormState extends State<RequestForm> {
               ),
             ),
             const SizedBox(height: 16),
+            /** Info Card */
             Card(
               color: Colors.blue[50],
               shape: RoundedRectangleBorder(

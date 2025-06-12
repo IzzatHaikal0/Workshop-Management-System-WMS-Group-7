@@ -4,14 +4,14 @@ import 'package:workshop_management_system/Models/ManageInventory/request_model.
 import 'package:workshop_management_system/Screens/ManageInventory/widgets/custom_text.dart';
 import 'package:workshop_management_system/Screens/ManageInventory/widgets/request_card.dart';
 
-class RequestIncomingScreen extends StatefulWidget {
-  const RequestIncomingScreen({super.key});
+class IncomingRequestPage extends StatefulWidget {
+  const IncomingRequestPage({super.key});
 
   @override
-  State<RequestIncomingScreen> createState() => _RequestIncomingScreenState();
+  State<IncomingRequestPage> createState() => _IncomingRequestPageState();
 }
 
-class _RequestIncomingScreenState extends State<RequestIncomingScreen> {
+class _IncomingRequestPageState extends State<IncomingRequestPage> {
   final RequestController _requestController = RequestController();
   final TextEditingController _searchController = TextEditingController();
   String _searchText = '';
