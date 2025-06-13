@@ -83,91 +83,97 @@ class _WorkshopHomePageState extends State<WorkshopHomePage> {
                   itemBuilder: (context, index) {
                     final data = filteredOwners[index];
 
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => WorkshopDetailPage(data: data),
-                          ),
-                        );
-                      },
-                      child: Card(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        elevation: 3,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Row(
-                            children: [
-                              // 🖼️ Profile Image
-                              CircleAvatar(
-                                radius: 30,
-                                backgroundImage:
-                                    data['workshopProfilePicture'] != null
-                                        ? NetworkImage(
-                                          data['workshopProfilePicture'],
-                                        )
-                                        : null,
-                                child:
-                                    data['workshopProfilePicture'] == null
-                                        ? const Icon(Icons.store)
-                                        : null,
-                              ),
-                              const SizedBox(width: 16),
+                    return Card(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      elevation: 3,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 🖼️ Profile Image
+                            CircleAvatar(
+                              radius: 30,
+                              backgroundImage:
+                                  data['workshopProfilePicture'] != null
+                                      ? NetworkImage(
+                                        data['workshopProfilePicture'],
+                                      )
+                                      : null,
+                              child:
+                                  data['workshopProfilePicture'] == null
+                                      ? const Icon(Icons.store)
+                                      : null,
+                            ),
+                            const SizedBox(width: 16),
 
-                              // 📝 Info
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      data['workshopName'] ??
-                                          'Unnamed Workshop',
-                                      style: Theme.of(
+                            // 📝 Info
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    data['workshopName'] ?? 'Unnamed Workshop',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(data['workshopAddress'] ?? 'No address'),
+                                  Text(
+                                    'Phone: ${data['workshopPhone'] ?? 'N/A'}',
+                                  ),
+                                  const SizedBox(height: 4),
+                                  if (data['rating'] != null)
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.star,
+                                          color: Colors.amber,
+                                          size: 16,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          '${data['rating']}/5',
+                                          style: const TextStyle(fontSize: 12),
+                                        ),
+                                      ],
+                                    ),
+                                  const SizedBox(height: 8),
+
+                                  // 🔗 See More Link
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
                                         context,
-                                      ).textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
+                                        MaterialPageRoute(
+                                          builder:
+                                              (_) => WorkshopDetailPage(
+                                                data: data,
+                                              ),
+                                        ),
+                                      );
+                                    },
+                                    child: const Text(
+                                      'See More',
+                                      style: TextStyle(
+                                        color: Color(0xFF4169E1),
+                                        decoration: TextDecoration.underline,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      data['workshopAddress'] ?? 'No address',
-                                    ),
-                                    Text(
-                                      'Phone: ${data['workshopPhone'] ?? 'N/A'}',
-                                    ),
-                                    const SizedBox(height: 4),
-
-                                    // ⭐ Rating
-                                    if (data['rating'] != null)
-                                      Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.star,
-                                            color: Colors.amber,
-                                            size: 16,
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            '${data['rating']}/5',
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                              const Icon(Icons.arrow_forward_ios, size: 16),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     );

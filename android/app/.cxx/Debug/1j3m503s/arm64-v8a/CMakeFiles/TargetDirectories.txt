@@ -1,2 +1,0 @@
-C:/Users/wanh5/workshop_management_system/android/app/.cxx/Debug/1j3m503s/arm64-v8a/CMakeFiles/edit_cache.dir
-C:/Users/wanh5/workshop_management_system/android/app/.cxx/Debug/1j3m503s/arm64-v8a/CMakeFiles/rebuild_cache.dir

@@ -99,21 +99,28 @@ class ListSchedulePage extends StatelessWidget {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  OutlinedButton.icon(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              EditSchedulePage(
-                                                  docId: schedule.docId!),
-                                        ), // Navigate to edit page
-                                      );
-                                    },
-                                    label: Text('Edit',
-                                        style: TextStyle(color: Colors.blue)),
+                                  
+                                  FilledButton.icon(
+                                    onPressed: schedule.status != 'accepted'
+                                        ? () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => EditSchedulePage(docId: schedule.docId!),
+                                              ),
+                                            );
+                                          }
+                                        : null, // disables the button
+                                    style: FilledButton.styleFrom(
+                                      padding: EdgeInsets.all(1),
+                                      foregroundColor: Colors.blue,
+                                      disabledBackgroundColor: Colors.grey.shade400,
+                                    ),
+                                    label: Text('Edit', style: TextStyle(color: Colors.white)),
                                   ),
-                                  OutlinedButton.icon(
+
+                                  SizedBox(width: 8),
+                                  FilledButton.icon(
                                     onPressed: () {
                                       showDialog(
                                         context: context,
@@ -148,7 +155,12 @@ class ListSchedulePage extends StatelessWidget {
                                       );
                                     },
                                     label: Text('Delete',
-                                        style: TextStyle(color: Colors.red)),
+                                        style: TextStyle(color: Colors.white)),
+                                    
+                                    style: FilledButton.styleFrom(
+                                      padding: EdgeInsets.all(1),
+                                      backgroundColor: Colors.red,
+                                    ),
                                   ),
                                 ],
                               )

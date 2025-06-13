@@ -1,23 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:workshop_management_system/Screens/ManageReport/GenerateReportPage.dart';
-//import '../Screens/firebase_options.dart';
 import 'Screens/ManagePayment/ListOfPayment.dart';
 import 'package:workshop_management_system/services/stripe_service.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 
 
 // Registration and profile barrel imports
-import 'Screens/Registration/manage_registration_barrel.dart';
+import 'Screens/ManageRegistration/manage_registration_barrel.dart';
 import 'Screens/welcome_screen.dart';
-import 'Screens/Profile/manage_profile_barrel.dart';
+import 'Screens/ManageProfile/manage_profile_barrel.dart';
 import 'Screens/workshop_homepage.dart'; // <-- NEW IMPORT
-
 import 'Screens/ManageForemanSchedule/manage_foreman_schedule_barrel.dart';
+import 'Screens/ManageInventory/inventory_barrel.dart';
 import 'Screens/ManageRating/manage_rating_barrel.dart';
 
 void main() async {
@@ -67,11 +65,6 @@ class AppRoutes {
   static const String profileAddWorkshopOwner = '/profile/add/workshop_owner';
   static const String profileEditForeman = '/profile/edit/foreman';
   static const String profileEditWorkshopOwner = '/profile/edit/workshop_owner';
-
-  static const String scheduleList = '/schedule/list';
-  static const String scheduleSelect = '/schedule/select';
-  static const String scheduleAdd = '/schedule/add';
-  static const String scheduleEdit = '/schedule/edit';
 }
 
 class MyApp extends StatelessWidget {
@@ -136,7 +129,7 @@ class MyApp extends StatelessWidget {
           case AppRoutes.profileEditForeman:
             return MaterialPageRoute(
               builder:
-                  (_) => AddProfilePageForeman(
+                  (_) => EditProfilePageForeman(
                     existingProfile: args['existingProfile'] ?? {},
                     foremanId: args['foremanId'] ?? '',
                   ),
@@ -145,33 +138,11 @@ class MyApp extends StatelessWidget {
           case AppRoutes.profileEditWorkshopOwner:
             return MaterialPageRoute(
               builder:
-                  (_) => AddProfilePageWorkshopOwner(
+                  (_) => EditProfilePageWorkshopOwner(
                     existingProfile: args['existingProfile'] ?? {},
                     workshopOwnerId: args['workshopOwnerId'] ?? '',
                   ),
             );
-          /*
-          case AppRoutes.scheduleList:
-            return MaterialPageRoute(
-              builder: (_) => ListSchedulePage(),
-            );
-
-          case AppRoutes.scheduleSelect:
-            return MaterialPageRoute(
-              builder: (_) => SelectSchedulePage(),
-            );
-
-          case AppRoutes.scheduleAdd:
-            return MaterialPageRoute(
-              builder: (_) => AddSchedulePage(),
-            );
-
-          case AppRoutes.scheduleEdit:
-            final scheduleId = args['scheduleId'] as String? ?? '';
-            return MaterialPageRoute(
-              builder: (_) => EditSchedulePage(docId: scheduleId),
-            );
-            */
           default:
             return MaterialPageRoute(
               builder:
@@ -187,6 +158,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// AuthGate
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
@@ -210,9 +182,12 @@ class AuthGate extends StatelessWidget {
   }
 }
 
+// MyHomePage
+// MyHomePage
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
   final String title;
+  //final Icon icon;
   //final Icon icon;
 
   @override
@@ -246,7 +221,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (foremanDoc.exists) {
       setState(() {
         currentUserRole = 'foreman';
-        userName = foremanDoc.data()?['first_name'] ?? 'Foreman';
+        userName = foremanDoc.data()?['firstName'] ?? 'Foreman';
       });
     } else if (workshopOwnerDoc.exists) {
       setState(() {
@@ -273,12 +248,12 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  // Pages
   List<Widget> get _pages {
     if (currentUserRole == null) {
       return [const Center(child: CircularProgressIndicator())];
     }
-
-    return [
+    List<Widget> pages = [
       const WorkshopHomePage(),
       currentUserRole == 'foreman'
           ? SelectSchedulePage(foremenId: currentUserId)
@@ -286,16 +261,13 @@ class _MyHomePageState extends State<MyHomePage> {
       currentUserRole == 'foreman'
           ? ViewProfilePageForeman(foremanId: currentUserId)
           : ViewProfilePageWorkshopOwner(workshopOwnerId: currentUserId),
-   
-      currentUserRole == 'workshop_owner'
-          ? ListOfPayment(workshopOwnerId: currentUserId)
-          : ListSchedulePage(workshopOwnerId: currentUserId),
-
-            currentUserRole == 'workshop_owner'
-          ? GenerateReportPage(workshopOwnerId: currentUserId)
-          : ListSchedulePage(workshopOwnerId: currentUserId),
-      
     ];
+
+    /// Manage Inventory only accessible for workshop owner
+    if (currentUserRole != null && currentUserRole == 'workshop_owner') {
+      pages.add(ListInventoryPage(currentUserRole: currentUserRole!));
+    }
+    return pages;
   }
 
   Future<void> _confirmLogout() async {
@@ -345,7 +317,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       (context) =>
                           currentUserRole == 'workshop_owner'
                               ? RatingPage()
-                              : ForemanPage(),
+                              : ForemanPage(foremanId: currentUserId),
                 ),
               );
             },
@@ -365,12 +337,23 @@ class _MyHomePageState extends State<MyHomePage> {
         unselectedItemColor: Colors.grey,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.schedule),label: 'Schedule'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-          BottomNavigationBarItem(icon: Icon(Icons.inventory),label: 'Inventory'),
-          BottomNavigationBarItem(icon: Icon(Icons.wallet), label: 'payment'),
+        items: [
+          const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.schedule),
+            label: 'Schedule',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+
+          /// MANAGE INVENTORY ONLY WORKSHOP OWNER CAN ACCESS
+          if (currentUserRole == 'workshop_owner')
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.inventory),
+              label: 'Inventory',
+            ),
         ],
       ),
     );

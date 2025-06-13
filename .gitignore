@@ -61,3 +61,5 @@ android/app/**/metadata_generation_command.json
 android/app/**/prefab_config.json
 android/app/**/index-*.json
 android/app/**/hash_key.txt
+android/app/.cxx/
+

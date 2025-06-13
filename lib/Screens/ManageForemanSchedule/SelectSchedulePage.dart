@@ -121,20 +121,18 @@ class SelectSchedulePage extends StatelessWidget {
                   List<Schedule> schedules = snapshot.data!;
 
                   return Column(
-                    children:
-                        schedules.map((schedule) {
-                          final duration = schedule.endTime.difference(
-                            schedule.startTime,
-                          );
-                          final totalHours =
-                              duration.isNegative
-                                  ? ((schedule.endTime
-                                          .add(Duration(days: 1))
-                                          .difference(
-                                            schedule.startTime,
-                                          )).inMinutes /
-                                      60)
-                                  : (duration.inMinutes / 60);
+                    children: schedules.map((schedule) {
+                      final duration = schedule.endTime.difference(
+                        schedule.startTime,
+                      );
+                      final totalHours = duration.isNegative
+                          ? ((schedule.endTime
+                                  .add(Duration(days: 1))
+                                  .difference(
+                                    schedule.startTime,
+                                  )).inMinutes /
+                              60)
+                          : (duration.inMinutes / 60);
 
                           return Card(
                             child: Padding(

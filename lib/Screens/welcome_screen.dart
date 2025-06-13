@@ -46,7 +46,7 @@ class WelcomeScreen extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black54,
+                    color: Colors.black87,
                   ),
                 ),
 
@@ -66,35 +66,38 @@ class WelcomeScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text("Login", style: TextStyle(fontSize: 16)),
+                  child: const Text(
+                    "Explore Workshop!",
+                    style: TextStyle(fontSize: 16, color: Colors.black87),
+                  ),
                 ),
 
                 const SizedBox(height: 20),
 
                 const Text(
                   "Don't have an account?",
-                  style: TextStyle(fontSize: 16, color: Colors.black54),
+                  style: TextStyle(fontSize: 16, color: Colors.black87),
                 ),
 
                 const SizedBox(height: 10),
 
-                OutlinedButton(
+                ElevatedButton(
                   onPressed: () {
                     Navigator.pushNamed(context, AppRoutes.registerType);
                   },
-                  style: OutlinedButton.styleFrom(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
                     padding: const EdgeInsets.symmetric(
                       vertical: 12,
                       horizontal: 24,
                     ),
-                    side: const BorderSide(color: Colors.blue),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                   child: const Text(
                     "Create an account",
-                    style: TextStyle(fontSize: 16, color: Colors.blue),
+                    style: TextStyle(fontSize: 16, color: Colors.black87),
                   ),
                 ),
 

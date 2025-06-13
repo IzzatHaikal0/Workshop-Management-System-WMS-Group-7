@@ -179,7 +179,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
     );
   }
 
-  //I DONT THINK THIS IS MVC
+
   //CALCULATE TOTAL HOURS AND RETURN
   double _calculateTotalHours(TimeOfDay start, TimeOfDay end) {
     final now = DateTime.now();

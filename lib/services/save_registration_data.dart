@@ -28,10 +28,10 @@ class SaveRegistrationData {
       // Save profile data to correct collection based on role
       if (role == 'foreman') {
         await _firestore.collection('foremen').doc(uid).set({
-          'first_name': user.firstName,
-          'last_name': user.lastName,
+          'firstName': user.firstName,
+          'lastName': user.lastName,
           'email': user.email,
-          'phone_number': user.phoneNumber,
+          'phoneNumber': user.phoneNumber,
           'foremanAddress': '',
           'foremanProfilePicture': '',
           'foremanSkills': '',
