@@ -20,6 +20,7 @@ class Rating {
     required this.docId,
   });
 
+  // Factory constructor that creates a `Rating` object from a Firestore document.
   factory Rating.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data()!;
     return Rating(
