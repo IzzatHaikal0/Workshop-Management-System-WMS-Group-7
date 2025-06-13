@@ -9,13 +9,14 @@ class ScheduleController {
   //final _auth = FirebaseAuth.instance;
   //final _db = FirebaseFirestore.instance;
 
-  // Function to fetch schedules from Firestore
+  // Function to fetch all schedules from Firestore (nak display in SelectSchedulePage)
   Stream<List<Schedule>> getSchedules() async* {
     await for (final snapshot
         in _firestore
             .collection('WorkshopSchedule')
             .where('status', isNotEqualTo: 'accepted')
             .snapshots()) {
+
       final schedules = await Future.wait(
         snapshot.docs.map((doc) async {
           final data = doc.data();
@@ -152,6 +153,7 @@ class ScheduleController {
     }
   }
 
+  //fetch all schedules created by workshop owner (Display in ListSchedulePage)
   Stream<List<Schedule>> getSchedulesByOwnerId() {
     final String uid = FirebaseAuth.instance.currentUser!.uid;
 

@@ -18,7 +18,7 @@ class Ratingcontroller {
 
     final workshopOwnerId = currentUser.uid;
 
-    // Step 1: Get accepted & unrated schedules
+    //Get accepted & unrated schedules
     QuerySnapshot scheduleSnapshot =
         await _firestore
             .collection('WorkshopSchedule')
@@ -29,7 +29,7 @@ class Ratingcontroller {
 
     if (scheduleSnapshot.docs.isEmpty) return [];
 
-    // Collect foremanIds from these schedules
+    //Collect foremanIds from these schedules
     final foremanIds =
         scheduleSnapshot.docs
             .map(
@@ -39,20 +39,20 @@ class Ratingcontroller {
             .toSet()
             .toList();
 
-    // Step 2: Get foreman details
+    //Get foreman details
     QuerySnapshot foremenSnapshot =
         await _firestore
             .collection('foremen')
             .where(FieldPath.documentId, whereIn: foremanIds)
             .get();
 
-    // Map foremanId to foreman data
+    //Map foremanId to foreman data
     final Map<String, Map<String, dynamic>> foremanDataMap = {
       for (var doc in foremenSnapshot.docs)
         doc.id: doc.data() as Map<String, dynamic>,
     };
 
-    // Step 3: Build a list where each schedule includes foreman info
+    //Build a list where each schedule includes foreman info
     final List<Map<String, dynamic>> result = [];
 
     for (var scheduleDoc in scheduleSnapshot.docs) {
@@ -166,7 +166,7 @@ class Ratingcontroller {
       };
     }).toList();
 
-    // Step 2: Get detailed info from foremen collection
+   //Get detailed info from foremen collection
     List<Map<String, dynamic>> ratedForemen = [];
 
     for (var entry in ratedForemanEntries) {
@@ -249,7 +249,7 @@ class Ratingcontroller {
   }
 
 
-
+  //RETRIEVE BACK THE RATING GIVEN TO FOREMEN
   Future<List<Rating>> getRatingsForForeman(String foremanId) async {
     final snapshot = await FirebaseFirestore.instance
         .collection('Rating')
@@ -261,25 +261,25 @@ class Ratingcontroller {
 
   //METHOD NAK KIRA AVERAAGE RATING DAN HIGHEST RATING
   Future<Map<String, dynamic>> loadRatingsForForeman(String foremanId) async {
-  final ratings = await getRatingsForForeman(foremanId);
-  if (ratings.isEmpty) {
+    final ratings = await getRatingsForForeman(foremanId);
+    if (ratings.isEmpty) {
+      return {
+        'ratings': [],
+        'average': 0.0,
+        'highest': 0.0,
+      };
+    }
+
+    final scores = ratings.map((r) => r.ratingScore.toDouble()).toList();
+    final averageRating = scores.reduce((a, b) => a + b) / scores.length;
+    final highestRating = scores.reduce((a, b) => a > b ? a : b);
+
     return {
-      'ratings': [],
-      'average': 0.0,
-      'highest': 0.0,
+      'ratings': ratings,
+      'average': averageRating,
+      'highest': highestRating,
     };
   }
-
-  final scores = ratings.map((r) => r.ratingScore.toDouble()).toList();
-  final averageRating = scores.reduce((a, b) => a + b) / scores.length;
-  final highestRating = scores.reduce((a, b) => a > b ? a : b);
-
-  return {
-    'ratings': ratings,
-    'average': averageRating,
-    'highest': highestRating,
-  };
-}
 
 
 }

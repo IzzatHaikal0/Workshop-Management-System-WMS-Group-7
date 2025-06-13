@@ -1,4 +1,5 @@
-import '../models/user_model.dart';
+//import '../models/user_model.dart';
+import 'package:workshop_management_system/Models/user_model.dart';
 import '../services/save_registration_data.dart';
 
 class RegistrationController {
