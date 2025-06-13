@@ -261,11 +261,19 @@ class _MyHomePageState extends State<MyHomePage> {
       currentUserRole == 'foreman'
           ? ViewProfilePageForeman(foremanId: currentUserId)
           : ViewProfilePageWorkshopOwner(workshopOwnerId: currentUserId),
+  
+        
     ];
 
     /// Manage Inventory only accessible for workshop owner
     if (currentUserRole != null && currentUserRole == 'workshop_owner') {
       pages.add(ListInventoryPage(currentUserRole: currentUserRole!));
+    }
+    if (currentUserRole != null && currentUserRole == 'workshop_owner') {
+      pages.add(ListOfPayment(workshopOwnerId: currentUserId));
+    }
+    if (currentUserRole != null && currentUserRole == 'workshop_owner') {
+      pages.add(GenerateReportPage(workshopOwnerId: currentUserId));
     }
     return pages;
   }
@@ -348,10 +356,21 @@ class _MyHomePageState extends State<MyHomePage> {
             label: 'Profile',
           ),
 
-          /// MANAGE INVENTORY ONLY WORKSHOP OWNER CAN ACCESS
+
           if (currentUserRole == 'workshop_owner')
             const BottomNavigationBarItem(
               icon: Icon(Icons.inventory),
+              label: 'Inventory',
+            ),
+          /// MANAGE INVENTORY ONLY WORKSHOP OWNER CAN ACCESS
+          if (currentUserRole == 'workshop_owner')
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.card_giftcard),
+              label: 'Inventory',
+            ),
+                      if (currentUserRole == 'workshop_owner')
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.report),
               label: 'Inventory',
             ),
         ],
